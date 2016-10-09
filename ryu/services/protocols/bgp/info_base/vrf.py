@@ -30,7 +30,6 @@ from ryu.lib.packet.bgp import BGPPathAttributeAsPath
 from ryu.lib.packet.bgp import BGPPathAttributeExtendedCommunities
 from ryu.lib.packet.bgp import BGPTwoOctetAsSpecificExtendedCommunity
 from ryu.lib.packet.bgp import BGPPathAttributeMultiExitDisc
-from ryu.lib.packet.bgp import BGPEncapsulationExtendedCommunity
 from ryu.lib.packet.bgp import RF_L2_EVPN
 from ryu.lib.packet.bgp import EvpnMacIPAdvertisementNLRI
 
@@ -157,9 +156,10 @@ class VrfTable(Table):
             source = VRF_TABLE
 
         if self.VPN_ROUTE_FAMILY == RF_L2_EVPN:
-            # Because NLRI class is the same if the route family is EVPN,
-            # we re-use the NLRI instance.
-            vrf_nlri = vpn_path.nlri
+            nlri_cls = self.NLRI_CLASS._lookup_type(vpn_path.nlri.type)
+            kwargs = dict(vpn_path.nlri.__dict__)
+            kwargs.pop('type', None)
+            vrf_nlri = nlri_cls(**kwargs)
         else:  # self.VPN_ROUTE_FAMILY in [RF_IPv4_VPN, RF_IPv6_VPN]
             # Copy NLRI instance
             ip, masklen = vpn_path.nlri.prefix.split('/')
@@ -175,7 +175,7 @@ class VrfTable(Table):
             pattrs=vpn_path.pathattr_map,
             nexthop=vpn_path.nexthop,
             is_withdraw=vpn_path.is_withdraw,
-            label_list=getattr(vpn_path.nlri, 'label_list', None),
+            label_list=vpn_path.nlri.label_list
         )
         if self._is_vrf_path_already_in_table(vrf_path):
             return None
@@ -211,7 +211,7 @@ class VrfTable(Table):
         return changed_dests
 
     def insert_vrf_path(self, nlri, next_hop=None,
-                        gen_lbl=False, is_withdraw=False, **kwargs):
+                        gen_lbl=False, is_withdraw=False):
         assert nlri
         pattrs = None
         label_list = []
@@ -243,12 +243,6 @@ class VrfTable(Table):
                                    local_administrator=int(local_admin),
                                    subtype=subtype))
 
-            # Set Tunnel Encapsulation Attribute
-            tunnel_type = kwargs.get('tunnel_type', None)
-            if tunnel_type:
-                communities.append(
-                    BGPEncapsulationExtendedCommunity.from_str(tunnel_type))
-
             pattrs[BGP_ATTR_TYPE_EXTENDED_COMMUNITIES] = \
                 BGPPathAttributeExtendedCommunities(communities=communities)
             if vrf_conf.multi_exit_disc:
@@ -272,7 +266,7 @@ class VrfTable(Table):
                 label_list.append(table_manager.get_next_vpnv4_label())
 
             # Set MPLS labels with the generated labels
-            if gen_lbl and isinstance(nlri, EvpnMacIPAdvertisementNLRI):
+            if isinstance(nlri, EvpnMacIPAdvertisementNLRI):
                 nlri.mpls_labels = label_list[:2]
 
         puid = self.VRF_PATH_CLASS.create_puid(
@@ -527,9 +521,10 @@ class VrfPath(Path):
 
     def clone_to_vpn(self, route_dist, for_withdrawal=False):
         if self.ROUTE_FAMILY == RF_L2_EVPN:
-            # Because NLRI class is the same if the route family is EVPN,
-            # we re-use the NLRI instance.
-            vpn_nlri = self._nlri
+            nlri_cls = self.VPN_NLRI_CLASS._lookup_type(self._nlri.type)
+            kwargs = dict(self._nlri.__dict__)
+            kwargs.pop('type', None)
+            vpn_nlri = nlri_cls(**kwargs)
         else:  # self.ROUTE_FAMILY in [RF_IPv4_UC, RF_IPv6_UC]
             ip, masklen = self._nlri.prefix.split('/')
             vpn_nlri = self.VPN_NLRI_CLASS(length=int(masklen),

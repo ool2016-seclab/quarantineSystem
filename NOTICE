@@ -1,7 +1,8 @@
 本プロジェクト内にRyu SDN Frameworkを使用しています。
 https://github.com/osrg/ryu
-8d93787a6c7785f96ef08dc80670a09b42fa735a
+
 
 本プロジェクト内にはMininetを使用しています
 https://github.com/mininet/mininet
-cc1cd9619f9007220d06ebc4e628bfbeb2324e86
+v2.21
+ab8c4e91984fd4881bb4fc80ef1b600de03dc55e

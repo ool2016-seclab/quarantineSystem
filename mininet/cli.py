@@ -77,15 +77,13 @@ class CLI( Cmd ):
             return
         cls.readlineInited = True
         try:
-            from readline import ( read_history_file, write_history_file,
-                                   set_history_length )
+            from readline import read_history_file, write_history_file
         except ImportError:
             pass
         else:
             history_path = os.path.expanduser( '~/.mininet_history' )
             if os.path.isfile( history_path ):
                 read_history_file( history_path )
-                set_history_length( 1000 )
             atexit.register( lambda: write_history_file( history_path ) )
 
     def run( self ):
@@ -178,7 +176,7 @@ class CLI( Cmd ):
                 output( result + '\n' )
             else:
                 output( repr( result ) + '\n' )
-        except Exception as e:
+        except Exception, e:
             output( str( e ) + '\n' )
 
     # We are in fact using the exec() pseudo-function
@@ -189,7 +187,7 @@ class CLI( Cmd ):
             Node names may be used, e.g.: px print h1.cmd('ls')"""
         try:
             exec( line, globals(), self.getLocals() )
-        except Exception as e:
+        except Exception, e:
             output( str( e ) + '\n' )
 
     # pylint: enable=broad-except,exec-used
@@ -373,7 +371,7 @@ class CLI( Cmd ):
     def do_links( self, _line ):
         "Report on links"
         for link in self.mn.links:
-            output( link, link.status(), '\n' )
+            print link, link.status()
 
     def do_switch( self, line ):
         "Starts or stops a switch"
@@ -407,7 +405,7 @@ class CLI( Cmd ):
 
         if first in self.mn:
             if not args:
-                error( "*** Enter a command for node: %s <cmd>" % first )
+                print "*** Enter a command for node: %s <cmd>" % first
                 return
             node = self.mn[ first ]
             rest = args.split( ' ' )

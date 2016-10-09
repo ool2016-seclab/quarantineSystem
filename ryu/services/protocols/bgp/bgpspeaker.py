@@ -31,12 +31,8 @@ from ryu.services.protocols.bgp.api.base import MAC_ADDR
 from ryu.services.protocols.bgp.api.base import NEXT_HOP
 from ryu.services.protocols.bgp.api.base import ROUTE_DISTINGUISHER
 from ryu.services.protocols.bgp.api.base import ROUTE_FAMILY
-from ryu.services.protocols.bgp.api.base import EVPN_VNI
-from ryu.services.protocols.bgp.api.base import TUNNEL_TYPE
 from ryu.services.protocols.bgp.api.prefix import EVPN_MAC_IP_ADV_ROUTE
 from ryu.services.protocols.bgp.api.prefix import EVPN_MULTICAST_ETAG_ROUTE
-from ryu.services.protocols.bgp.api.prefix import TUNNEL_TYPE_VXLAN
-from ryu.services.protocols.bgp.api.prefix import TUNNEL_TYPE_NVGRE
 from ryu.services.protocols.bgp.rtconf.common import LOCAL_AS
 from ryu.services.protocols.bgp.rtconf.common import ROUTER_ID
 from ryu.services.protocols.bgp.rtconf.common import BGP_SERVER_PORT
@@ -78,7 +74,6 @@ from ryu.services.protocols.bgp.info_base.ipv4 import Ipv4Path
 from ryu.services.protocols.bgp.info_base.ipv6 import Ipv6Path
 from ryu.services.protocols.bgp.info_base.vpnv4 import Vpnv4Path
 from ryu.services.protocols.bgp.info_base.vpnv6 import Vpnv6Path
-from ryu.services.protocols.bgp.info_base.evpn import EvpnPath
 
 
 NEIGHBOR_CONF_MED = MULTI_EXIT_DISC  # for backward compatibility
@@ -96,55 +91,22 @@ class EventPrefix(object):
     Attribute        Description
     ================ ======================================================
     remote_as        The AS number of a peer that caused this change
-    route_dist       None in the case of IPv4 or IPv6 family
+    route_dist       None in the case of ipv4 or ipv6 family
     prefix           A prefix was changed
     nexthop          The nexthop of the changed prefix
-    label            MPLS label for VPNv4, VPNv6 or EVPN prefix
-    path             An instance of ``info_base.base.Path`` subclass
+    label            mpls label for vpnv4 prefix
     is_withdraw      True if this prefix has gone otherwise False
     ================ ======================================================
     """
 
-    def __init__(self, path, is_withdraw):
-        self.path = path
+    def __init__(self, remote_as, route_dist, prefix, nexthop, label,
+                 is_withdraw):
+        self.remote_as = remote_as
+        self.route_dist = route_dist
+        self.prefix = prefix
+        self.nexthop = nexthop
+        self.label = label
         self.is_withdraw = is_withdraw
-
-    @property
-    def remote_as(self):
-        return self.path.source.remote_as
-
-    @property
-    def route_dist(self):
-        if (isinstance(self.path, Vpnv4Path)
-                or isinstance(self.path, Vpnv6Path)
-                or isinstance(self.path, EvpnPath)):
-            return self.path.nlri.route_dist
-        else:
-            return None
-
-    @property
-    def prefix(self):
-        if isinstance(self.path, Ipv4Path) or isinstance(self.path, Ipv6Path):
-            return self.path.nlri.addr + '/' + str(self.path.nlri.length)
-        elif (isinstance(self.path, Vpnv4Path)
-              or isinstance(self.path, Vpnv6Path)
-              or isinstance(self.path, EvpnPath)):
-            return self.path.nlri.prefix
-        else:
-            return None
-
-    @property
-    def nexthop(self):
-        return self.path.nexthop
-
-    @property
-    def label(self):
-        if (isinstance(self.path, Vpnv4Path)
-                or isinstance(self.path, Vpnv6Path)
-                or isinstance(self.path, EvpnPath)):
-            return getattr(self.path.nlri, 'label_list', None)
-        else:
-            return None
 
 
 class BGPSpeaker(object):
@@ -223,12 +185,26 @@ class BGPSpeaker(object):
             self._peer_up_handler(remote_ip, remote_as)
 
     def _notify_best_path_changed(self, path, is_withdraw):
-        if (not path.source
-                or not isinstance(path, (Ipv4Path, Ipv6Path,
-                                         Vpnv4Path, Vpnv6Path, EvpnPath))):
+        if path.source:
+            nexthop = path.nexthop
+            is_withdraw = is_withdraw
+            remote_as = path.source.remote_as
+        else:
             return
 
-        ev = EventPrefix(path, is_withdraw)
+        if isinstance(path, Ipv4Path) or isinstance(path, Ipv6Path):
+            prefix = path.nlri.addr + '/' + str(path.nlri.length)
+            route_dist = None
+            label = None
+        elif isinstance(path, Vpnv4Path) or isinstance(path, Vpnv6Path):
+            prefix = path.nlri.prefix
+            route_dist = path.nlri.route_dist
+            label = path.nlri.label_list
+        else:
+            return
+
+        ev = EventPrefix(remote_as, route_dist, prefix, nexthop, label,
+                         is_withdraw)
 
         if self._best_path_change_handler:
             self._best_path_change_handler(ev)
@@ -514,7 +490,7 @@ class BGPSpeaker(object):
 
     def evpn_prefix_add(self, route_type, route_dist, esi=0,
                         ethernet_tag_id=None, mac_addr=None, ip_addr=None,
-                        vni=None, next_hop=None, tunnel_type=None):
+                        next_hop=None):
         """ This method adds a new EVPN route to be advertised.
 
         ``route_type`` specifies one of the EVPN route type name. The
@@ -532,15 +508,7 @@ class BGPSpeaker(object):
 
         ``ip_addr`` specifies an IPv4 or IPv6 address to advertise.
 
-        ``vni`` specifies an Virtual Network Identifier for VXLAN
-        or Virtual Subnet Identifier for NVGRE.
-        If tunnel_type is not 'vxlan' or 'nvgre', this field is ignored.
-
         ``next_hop`` specifies the next hop address for this prefix.
-
-        ``tunnel_type`` specifies the data plane encapsulation type
-        to advertise. By the default, this encapsulation attribute is
-        not advertised.
         """
         func_name = 'evpn_prefix.add_local'
 
@@ -553,10 +521,6 @@ class BGPSpeaker(object):
                   ROUTE_DISTINGUISHER: route_dist,
                   NEXT_HOP: next_hop}
 
-        # Set optional arguments
-        if tunnel_type:
-            kwargs[TUNNEL_TYPE] = tunnel_type
-
         # Set route type specific arguments
         if route_type == EVPN_MAC_IP_ADV_ROUTE:
             kwargs.update({
@@ -565,9 +529,6 @@ class BGPSpeaker(object):
                 MAC_ADDR: mac_addr,
                 IP_ADDR: ip_addr,
             })
-            # Set tunnel type specific arguments
-            if tunnel_type in [TUNNEL_TYPE_VXLAN, TUNNEL_TYPE_NVGRE]:
-                kwargs[EVPN_VNI] = vni
         elif route_type == EVPN_MULTICAST_ETAG_ROUTE:
             kwargs.update({
                 EVPN_ETHERNET_TAG_ID: ethernet_tag_id,

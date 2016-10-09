@@ -470,7 +470,7 @@ class TableCoreManager(object):
             # of the given path and import this path into them.
             route_dist = vpn_path.nlri.route_dist
             for vrf_table in interested_tables:
-                if (vpn_path.source is not None or
+                if (vpn_path.source is not None and
                         route_dist != vrf_table.vrf_conf.route_dist):
                     update_vrf_dest = vrf_table.import_vpn_path(vpn_path)
                     # Queue the destination for further processing.
@@ -482,7 +482,7 @@ class TableCoreManager(object):
             LOG.debug('No VRF table found that imports RTs: %s', path_rts)
 
     def update_vrf_table(self, route_dist, prefix=None, next_hop=None,
-                         route_family=None, route_type=None, tunnel_type=None,
+                         route_family=None, route_type=None,
                          is_withdraw=False, **kwargs):
         """Update a BGP route in the VRF table identified by `route_dist`
         with the given `next_hop`.
@@ -538,13 +538,6 @@ class TableCoreManager(object):
             if esi is not None:
                 # Note: Currently, we support arbitrary 9-octet ESI value only.
                 kwargs['esi'] = EvpnArbitraryEsi(type_desc.Int9.from_user(esi))
-            if 'vni' in kwargs:
-                # Disable to generate MPLS labels, because encapsulation type
-                # is not MPLS.
-                from ryu.services.protocols.bgp.api.prefix import (
-                    TUNNEL_TYPE_VXLAN, TUNNEL_TYPE_NVGRE)
-                assert tunnel_type in [TUNNEL_TYPE_VXLAN, TUNNEL_TYPE_NVGRE]
-                gen_lbl = False
             prefix = subclass(**kwargs)
         else:
             raise BgpCoreError(
@@ -554,7 +547,7 @@ class TableCoreManager(object):
         # withdrawal. Hence multiple withdrawals have not side effect.
         return vrf_table.insert_vrf_path(
             nlri=prefix, next_hop=next_hop, gen_lbl=gen_lbl,
-            is_withdraw=is_withdraw, tunnel_type=tunnel_type)
+            is_withdraw=is_withdraw)
 
     def update_global_table(self, prefix, next_hop=None, is_withdraw=False):
         """Update a BGP route in the Global table for the given `prefix`
