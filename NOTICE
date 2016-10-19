@@ -7,3 +7,10 @@ c09cd3dc683715b53953ca1cbcd57ff91b971ffd
 https://github.com/mininet/mininet
 v2.21
 ab8c4e91984fd4881bb4fc80ef1b600de03dc55e
+
+本プロジェクト内には以下のソースコードを
+参考にしているものがあります。
+・Ryubook 1.0 ドキュメント
+https://osrg.github.io/ryu-book/ja/html/index.html
+・CUBE SUGAR STORAGE
+http://momijiame.tumblr.com/
