@@ -10,6 +10,7 @@ from qsysDataStructure import *
 from ryu.controller import dpset
 from builtins import print
 
+print "TEST"
 __DEBUG_MODE__ = 0#1:on,0:off
 class SystemActionMode(enum):
     """
