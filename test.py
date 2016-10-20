@@ -18,8 +18,13 @@ class SystemActionMode(enum):
     learn = 0
     quarantine = 1
 class Test(ryu.app.simple_switch_13):
+    
     #動作モード
     ACTION_MODE = SystemActionMode.quarantine
+
+    def __init__(self, *args, **kwargs):
+        super(SimpleSwitch13, self).__init__(*args, **kwargs)
+
     #packet_inハンドラ(override)
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
