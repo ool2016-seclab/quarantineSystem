@@ -32,6 +32,7 @@ class Test(ryu.app.simple_switch_13):
             print('Drop:{}⇢{}'.format(packet.ipv4['src']))
             return
         #Transport to dst
+        print('Transport:{}⇢{}'.format(packet.ipv4['src']))
         src = packet.mac_src
         dpid = packet.dpid
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
