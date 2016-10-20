@@ -10,7 +10,6 @@ from qsysDataStructure import *
 from ryu.controller import dpset
 from builtins import print
 
-print "TEST"
 __DEBUG_MODE__ = 0#1:on,0:off
 class SystemActionMode(enum):
     """
@@ -24,7 +23,7 @@ class Test(ryu.app.simple_switch_13):
     ACTION_MODE = SystemActionMode.quarantine
 
     def __init__(self, *args, **kwargs):
-        super(SimpleSwitch13, self).__init__(*args, **kwargs)
+        super(SimpleSwitch_13, self).__init__(*args, **kwargs)
 
     #packet_inハンドラ(override)
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
