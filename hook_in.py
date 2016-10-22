@@ -29,8 +29,6 @@ class QsysTest(SimpleSwitch13):
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         allowTransportFlag = False
-        packet = PacketDataStructure 
-        print ("ev:{}",format(ev))
 
         #packet.packet_parse(ev)
         msg = ev.msg
