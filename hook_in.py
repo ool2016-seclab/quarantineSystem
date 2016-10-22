@@ -43,13 +43,11 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("Not Ether type")
             return
         ipv4_addr = pkt.get_protocols(ipv4.ipv4)
-
-
-
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
         #MACアドレス
-        mac_src = eth.src
+        print("Eth:::::{}".format(eth)
+        mac_src = eth[0].src
         #IPv4アドレス
         ipv4_src = ipv4_addr.src
         allowTransportFlag = True
