@@ -30,9 +30,20 @@ class QsysTest(SimpleSwitch13):
         packet = PacketDataStructure 
         print ("ev:{}",format(ev))
 
-        packet.packet_parse(ev)
-     
-        allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
+        #packet.packet_parse(ev)
+        msg = ev.msg
+        datapath = msg.datapath
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        dpid = datapath.id
+        #スイッチの物理ポート
+        in_port = msg.match['in_port']  
+        #MACアドレス
+        mac_src = msg.match['eth_src']
+        #IPv4アドレス
+        ipv4_src = msg.match['ipv4_src']
+        allowTransportFlag = True
+        #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
             print('Drop:{}⇢{}'.format(packet.ipv4_src))
             return
