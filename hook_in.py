@@ -7,6 +7,8 @@ from ryu.ofproto.ofproto_v1_3 import *
 from ryu.ofproto.ofproto_v1_3_parser import OFPMatch
 from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import packet
+from ryu.lib.packet import ethernet
+from ryu.lib.packet import ipv4
 from qsysDataStructure import *
 from ryu.controller import dpset
 
@@ -36,12 +38,16 @@ class QsysTest(SimpleSwitch13):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         dpid = datapath.id
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocols(ethernet.ethernet)[0]
+        ipv4_addr = pkt.get_protocols(ipv4.ipv4)[0]
+
         #スイッチの物理ポート
-        in_port = msg.match['in_port']  
+        in_port = msg.match['in_port'] 
         #MACアドレス
-        mac_src = msg.match['eth_src']
+        mac_src = eth.src
         #IPv4アドレス
-        ipv4_src = msg.match['ipv4_src']
+        ipv4_src = ipv4_addr.src
         allowTransportFlag = True
         #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
