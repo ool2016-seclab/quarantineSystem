@@ -46,10 +46,10 @@ class QsysTest(SimpleSwitch13):
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
         #MACアドレス
-        print("Eth:::::{}".format(eth))
+        self.logger.info("Eth:::::{}".format(eth))
         mac_src = eth[0].src
         #IPv4アドレス
-        ipv4_src = ipv4_addr.src
+        ipv4_src = ipv4_addr[0].src
         allowTransportFlag = True
         #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
