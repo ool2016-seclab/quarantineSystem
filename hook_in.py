@@ -37,8 +37,14 @@ class QsysTest(SimpleSwitch13):
         parser = datapath.ofproto_parser
         dpid = datapath.id
         pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocols(ethernet.ethernet)[0]
-        ipv4_addr = pkt.get_protocols(ipv4.ipv4)[0]
+        self.logger.info("packet-in {}".format(pkt,))
+        eth = pkt.get_protocols(ethernet.ethernet)
+        if not eth:
+            self.logger.info("Not Ether type")
+            return
+        ipv4_addr = pkt.get_protocols(ipv4.ipv4)
+
+
 
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
