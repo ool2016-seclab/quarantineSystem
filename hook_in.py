@@ -69,6 +69,8 @@ class QsysTest(SimpleSwitch13):
         dst = mac_dst
         self.logger.info("in_port:{}".format(in_port))
         self.logger.info("dpid:{}".format(dpid))
+        self.logger.info("mac_arc:{}".format(src))
+        self.logger.info("mac_to_port:{}".format(mac_to_port))
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][mac_src] = in_port
         #該当するSWの中にMacAddrがあるか？
