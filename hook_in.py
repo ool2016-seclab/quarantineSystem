@@ -63,7 +63,7 @@ class QsysTest(SimpleSwitch13):
             print('Drop:{}⇢{}'.format(packet.ipv4_src))
             return
         #Transport to dst
-        print('Transport:{}⇢{}'.format(packet.ipv4_src))
+        #print('Transport:{}⇢{}'.format(packet.ipv4_src))
         src = packet.mac_src
         dpid = packet.dpid
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
