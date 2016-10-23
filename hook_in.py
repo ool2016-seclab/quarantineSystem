@@ -45,6 +45,7 @@ class QsysTest(SimpleSwitch13):
         _arp = pkt.get_protocol(arp.arp)
         if not _arp:
             self.logger.info("Not ARP type")
+        self.logger.info("Arp:{}".format(_arp))
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         if not _ipv4:
             self.logger.info("Not IPv4")
@@ -55,7 +56,7 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("Eth::{}".format(eth))
         mac_src = eth.src
         #IPv4アドレス
-        ipv4_src = ipv4_addr[0].src
+        #ipv4_src = ipv4_addr[0].src
         allowTransportFlag = True
         #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
