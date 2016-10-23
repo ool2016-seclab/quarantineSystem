@@ -43,7 +43,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("Not Ether type")
             return
         ipv4_addr = pkt.get_protocols(ipv4.ipv4)
-        self.logger.info(ipv4_addr)
+        self.logger.info("IPv4:{}".format(ipv4_addr))
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
         #MACアドレス
