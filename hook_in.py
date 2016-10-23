@@ -37,6 +37,7 @@ class QsysTest(SimpleSwitch13):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         dpid = datapath.id
+        self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
         self.logger.info("packet-in {}".format(pkt,))
         _eth = pkt.get_protocol(ethernet.ethernet)
