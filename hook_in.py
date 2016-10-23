@@ -53,7 +53,7 @@ class QsysTest(SimpleSwitch13):
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
         #MACアドレス
-        self.logger.info("Eth::{}".format(eth))
+        self.logger.info("Eth::{}".format(_eth))
         mac_src = _eth.src
         #IPv4アドレス
         #ipv4_src = ipv4_addr[0].src
