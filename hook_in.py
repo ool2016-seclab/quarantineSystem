@@ -67,12 +67,14 @@ class QsysTest(SimpleSwitch13):
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
         src = mac_src
         dst = mac_dst
+        self.logger.info("in_port:{}".format(in_port))
+        self.logger.info("dpid:{}".format(dpid))
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
-        self.mac_to_port[dpid][src] = in_port
+        self.mac_to_port[dpid][mac_src] = in_port
         #該当するSWの中にMacAddrがあるか？
-        if dst in self.mac_to_port[dpid]:
+        if mac_dst in self.mac_to_port[dpid]:
             #Switch output portをテーブルから指定
-            out_port = self.mac_to_port[dpid][dst]
+            out_port = self.mac_to_port[dpid][mac_dst]
         else:
             #フラッディング
             out_port = ofproto.OFPP_FLOOD
