@@ -68,7 +68,7 @@ class QsysTest(SimpleSwitch13):
         src = mac_src
         dst = mac_dst
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
-        self.mac_to_port[dpid][src] = packet.in_port
+        self.mac_to_port[dpid][src] = in_port
         #該当するSWの中にMacAddrがあるか？
         if dst in self.mac_to_port[dpid]:
             #Switch output portをテーブルから指定
