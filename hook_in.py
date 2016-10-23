@@ -54,7 +54,7 @@ class QsysTest(SimpleSwitch13):
         in_port = msg.match['in_port'] 
         #MACアドレス
         self.logger.info("Eth::{}".format(eth))
-        mac_src = eth.src
+        mac_src = _eth.src
         #IPv4アドレス
         #ipv4_src = ipv4_addr[0].src
         allowTransportFlag = True
@@ -76,6 +76,11 @@ class QsysTest(SimpleSwitch13):
             #フラッディング
             out_port = ofproto.OFPP_FLOOD
         actions = [parser.OFPActionOutput(out_port)]
+        out = datapath.ofproto_parser.OFPPacketOut(
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
+            actions=actions, data=data)
+        datapath.send_msg(out)
+
 
     def send_qsys(self, packet):
         return True#pktの到達許可
