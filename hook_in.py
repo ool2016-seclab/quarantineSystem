@@ -38,16 +38,17 @@ class QsysTest(SimpleSwitch13):
         dpid = datapath.id
         pkt = packet.Packet(msg.data)
         self.logger.info("packet-in {}".format(pkt,))
-        eth = pkt.get_protocols(ethernet.ethernet)
+        eth = pkt.get_protocols(ethernet.ethernet)['ethernet']
         if not eth:
             self.logger.info("Not Ether type")
             return
         ipv4_addr = pkt.get_protocols(ipv4.ipv4)
+        self.logger.info(ipv4_addr)
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
         #MACアドレス
-        self.logger.info("Eth:::::{}".format(eth))
-        mac_src = eth[0].src
+        self.logger.info("Eth::{}".format(eth))
+        mac_src = eth.src
         #IPv4アドレス
         ipv4_src = ipv4_addr[0].src
         allowTransportFlag = True
