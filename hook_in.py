@@ -24,6 +24,7 @@ class QsysTest(SimpleSwitch13):
 
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
+        self.mac_to_port = {}
 
     #packet_inハンドラ(override)
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
