@@ -60,7 +60,7 @@ class QsysTest(SimpleSwitch13):
         mac_dst = _eth.dst
         #IPv4アドレス
         #ipv4_src = ipv4_addr[0].src
-        allowTransportFlag = True
+        allowTransportFlag = False
         #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
             #print('Drop:{}⇢{}'.format(ipv4_src))
