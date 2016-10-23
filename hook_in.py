@@ -48,8 +48,7 @@ class QsysTest(SimpleSwitch13):
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         if not _ipv4:
             self.logger.info("Not IPv4")
-
-        self.logger.info("IPv4:{}".format(ipv4_addr))
+        self.logger.info("IPv4:{}".format(_ipv4))
         #スイッチの物理ポート
         in_port = msg.match['in_port'] 
         #MACアドレス
