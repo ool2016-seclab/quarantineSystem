@@ -38,7 +38,7 @@ class QsysTest(SimpleSwitch13):
         dpid = datapath.id
         pkt = packet.Packet(msg.data)
         self.logger.info("packet-in {}".format(pkt,))
-        eth = pkt.get_protocols(ethernet.ethernet)['ethernet']
+        eth = pkt.get_protocols(ethernet.ethernet)[0]
         if not eth:
             self.logger.info("Not Ether type")
             return
