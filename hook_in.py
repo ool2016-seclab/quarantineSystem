@@ -30,7 +30,6 @@ class QsysTest(SimpleSwitch13):
             actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                       ofproto.OFPCML_NO_BUFFER)]
             add_flow(datapath, 0, match, actions)
-    self.add_flow(datapath, 0, match, actions)
     #packet_inハンドラ(override)
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
