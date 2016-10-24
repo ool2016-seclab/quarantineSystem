@@ -99,8 +99,6 @@ class QsysTest(SimpleSwitch13):
             actions=actions, data=msg.data)
         datapath.send_msg(out)
 
-    def packet_parse(self, ev):
-
     def send_qsys(self, packet):
         return True#pktの到達許可
 
