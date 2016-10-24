@@ -24,7 +24,13 @@ class QsysTest(SimpleSwitch13):
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
-
+    #switchFeatursハンドラ(override)
+    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
+    def switch_features_handler(self, ev):
+            actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                      ofproto.OFPCML_NO_BUFFER)]
+            self.add_flow(datapath, 0, match, actions)
+    self.add_flow(datapath, 0, match, actions)
     #packet_inハンドラ(override)
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
