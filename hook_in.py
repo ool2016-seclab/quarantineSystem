@@ -19,16 +19,7 @@ class SystemActionModei(enum.Enum):
 learn = 0
 quarantine = 1
 """
-class QsysPacket:
 
-    def __init__(ev):
-            self.msg = ev.msg
-            self.datapath = msg.datapath
-            self.ofproto = datapath.ofproto
-            self.parser = datapath.ofproto_parser
-            seld.dpid = datapath.id
-
-    _
 class QsysTest(SimpleSwitch13):
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
