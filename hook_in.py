@@ -18,6 +18,16 @@ class SystemActionModei(enum.Enum):
 learn = 0
 quarantine = 1
 """
+class QsysPacket:
+
+    def __init__(ev):
+            self.msg = ev.msg
+            self.datapath = msg.datapath
+            self.ofproto = datapath.ofproto
+            self.parser = datapath.ofproto_parser
+            seld.dpid = datapath.id
+
+    _
 class QsysTest(SimpleSwitch13):
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
@@ -30,8 +40,6 @@ class QsysTest(SimpleSwitch13):
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         allowTransportFlag = False
-
-        #packet.packet_parse(ev)
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto
@@ -47,17 +55,17 @@ class QsysTest(SimpleSwitch13):
         _arp = pkt.get_protocol(arp.arp)
         if not _arp:
             self.logger.info("Not ARP type")
-        self.logger.info("Arp:{}".format(_arp))
+        else:
+            self.logger.info("Arp:{}".format(_arp))
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         if not _ipv4:
             self.logger.info("Not IPv4")
-        self.logger.info("IPv4:{}".format(_ipv4))
-        #スイッチの物理ポート
+        else:
+            self.logger.info("IPv4:{}".format(_ipv4))
+        #スイッチのポート
         in_port = msg.match['in_port'] 
         #MACアドレス
-        self.logger.info("Eth::{}".format(_eth))
-        mac_src = _eth.src
-        mac_dst = _eth.dst
+        self.logger.info("Eth:{}".format(_eth))
         #IPv4アドレス
         #ipv4_src = ipv4_addr[0].src
         allowTransportFlag = False
@@ -73,6 +81,8 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("dpid:{}".format(dpid))
         self.logger.info("mac_arc:{}".format(src))
         self.logger.info("ac_to_port:{}".format(self.mac_to_port))
+        self.logger.info('%s', json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
+                                  indent=3, sort_keys=True))
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][mac_src] = in_port
         #該当するSWの中にMacAddrがあるか？
@@ -88,6 +98,7 @@ class QsysTest(SimpleSwitch13):
             actions=actions, data=msg.data)
         datapath.send_msg(out)
 
+    def packet_parse(self, ev):
 
     def send_qsys(self, packet):
         return True#pktの到達許可
