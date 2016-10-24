@@ -39,7 +39,7 @@ class QsysTest(SimpleSwitch13):
         dpid = datapath.id
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
-        self.logger.info("packet-in {}".format(pkt,))
+        self.logger.info("packet-in {}".format(pkt))
         _eth = pkt.get_protocol(ethernet.ethernet)
         if not _eth:
             self.logger.info("Not Ether type")
@@ -76,11 +76,11 @@ class QsysTest(SimpleSwitch13):
         self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True)))
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
-        self.mac_to_port[dpid][mac_src] = in_port
+        self.mac_to_port[dpid][_eth.src] = in_port
         #該当するSWの中にMacAddrがあるか？
-        if mac_dst in self.mac_to_port[dpid]:
+        if _eth.src in self.mac_to_port[dpid]:
             #Switch output portをテーブルから指定
-            out_port = self.mac_to_port[dpid][mac_dst]
+            out_port = self.mac_to_port[dpid][_eth.dst]
         else:
             #フラッディング
             out_port = ofproto.OFPP_FLOOD
