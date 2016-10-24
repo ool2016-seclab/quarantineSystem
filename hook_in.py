@@ -73,7 +73,7 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("dpid:{}".format(dpid))
         self.logger.info("mac_arc:{}".format(src))
         self.logger.info("ac_to_port:{}".format(self.mac_to_port))
-        self.logger.info('%s', json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
+        self.logger.info('json:%s', json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True))
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][mac_src] = in_port
