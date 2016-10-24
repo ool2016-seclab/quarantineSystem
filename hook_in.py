@@ -8,10 +8,8 @@ from ryu.ofproto.ofproto_v1_3 import *
 from ryu.ofproto.ofproto_v1_3_parser import OFPMatch
 from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import packet
-from ryu.lib.packet import ethernet
-from ryu.lib.packet import ipv4
+from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
-
 """__DEBUG_MODE__ = 0#1:on,0:off
 class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
