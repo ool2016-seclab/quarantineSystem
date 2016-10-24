@@ -10,7 +10,6 @@ from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ipv4
-from qsysDataStructure import *
 from ryu.controller import dpset
 
 """__DEBUG_MODE__ = 0#1:on,0:off
