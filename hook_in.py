@@ -60,15 +60,15 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("Eth:{}".format(_eth))
         #IPv4アドレス
         #ipv4_src = ipv4_addr[0].src
-        allowTransportFlag = False
+        allowTransportFlag = True
         #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
             #print('Drop:{}⇢{}'.format(ipv4_src))
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
-        src = mac_src
-        dst = mac_dst
+        src = _eth.src
+        dst = _eth.dst
         self.logger.info("in_port:{}".format(in_port))
         self.logger.info("dpid:{}".format(dpid))
         self.logger.info("mac_arc:{}".format(src))
