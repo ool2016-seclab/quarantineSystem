@@ -24,24 +24,22 @@ class QsysTest(SimpleSwitch13):
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
-    #switchFeatursハンドラ(override)
-    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def switch_features_handler(self, ev):
-            actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
-                                      ofproto.OFPCML_NO_BUFFER)]
-            add_flow(datapath, 0, match, actions)
-    #packet_inハンドラ(override)
+
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         allowTransportFlag = False
         msg = ev.msg
         datapath = msg.datapath
+        dpid = datapath.id
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        dpid = datapath.id
+        
         self.mac_to_port.setdefault(dpid, {})
+        
         pkt = packet.Packet(msg.data)
+        
         self.logger.info("packet-in {}".format(pkt))
+        
         _eth = pkt.get_protocol(ethernet.ethernet)
         if not _eth:
             self.logger.info("Not Ether type")
@@ -63,9 +61,11 @@ class QsysTest(SimpleSwitch13):
         #IPv4アドレス
         #ipv4_src = ipv4_addr[0].src
         allowTransportFlag = True
-        #allowTransportFlag = send_qsys(packet);#通信許可T/Fを返す
+        pkt_json = json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
+                                  indent=3, sort_keys=True)
+        allowTransportFlag = send_qsys(pkt_json);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
-            #print('Drop:{}⇢{}'.format(ipv4_src))
+            logger,info('Drop:{}'.format(pkt_json)
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
@@ -74,7 +74,7 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("in_port:{}".format(in_port))
         self.logger.info("dpid:{}".format(dpid))
         self.logger.info("mac_arc:{}".format(src))
-        self.logger.info("ac_to_port:{}".format(self.mac_to_port))
+        self.logger.info("mac_to_port:{}".format(self.mac_to_port))
         self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True)))
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
@@ -92,7 +92,8 @@ class QsysTest(SimpleSwitch13):
             actions=actions, data=msg.data)
         datapath.send_msg(out)
 
-    def send_qsys(self, packet):
+    def send_qsys(self, pkt_json):
+        self.logger.info("Qsys_in{}".format(json))
         return True#pktの到達許可
 
 
