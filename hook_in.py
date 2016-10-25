@@ -65,7 +65,7 @@ class QsysTest(SimpleSwitch13):
                                   indent=3, sort_keys=True)
         allowTransportFlag = send_qsys(pkt_json);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
-            logger,info('Drop:{}'.format(pkt_json)
+            logger,info('Drop:{}'.format(pkt_json))
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
