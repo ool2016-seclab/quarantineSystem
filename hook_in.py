@@ -63,7 +63,7 @@ class QsysTest(SimpleSwitch13):
         allowTransportFlag = True
         pkt_json = json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True)
-        allowTransportFlag = send_qsys(pkt_json);#通信許可T/Fを返す
+        allowTransportFlag = self.send_qsys(pkt_json);#通信許可T/Fを返す
         if not(allowTransportFlag):#False
             logger,info('Drop:{}'.format(pkt_json))
             return
