@@ -13,17 +13,18 @@ from ryu.controller import dpset
 
 
 class QsysTest(SimpleSwitch13):
-     def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
-
+        
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto
+         #スイッチのポート
         in_port = msg.match['in_port']
-
+        self.logger.info("msg:{}".format(msg))
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
 
