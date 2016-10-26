@@ -57,7 +57,7 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
         self.logger.info("packet-in {}".format(pkt))
-        _eth = pkt.get_protocol(ethernet.ethernet)[0]
+        _eth = pkt.get_protocol(ethernet.ethernet)
         if not _eth:
             self.logger.info("Not Ether type")
             return
