@@ -80,7 +80,7 @@ class QsysTest(SimpleSwitch13):
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
-        if __DEBUG_MODE__:
+        if self.__DEBUG_MODE__:
             self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True)))
         #該当するSWの中にMacAddrがあるか？
