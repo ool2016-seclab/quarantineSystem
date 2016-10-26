@@ -70,11 +70,11 @@ class QsysTest(SimpleSwitch13):
         pkt_dict = {
             'src':_eth.src,
             'dst':_eth.dst,
-            'data':msg.data
+            'data':msg.data,
             }
-        pkt_json = json.dumps(pkt_dict, sort_keys=True)
+        #pkt_json = json.dumps(pkt_dict, sort_keys=True)
         
-        if not self.send_qsys(pkt_json):#通信許可T/Fを返す
+        if not self.send_qsys(pkt_dict):#通信許可T/Fを返す
             logger,info('Drop:{}'.format(pkt_json))
             return
         #Transport to dst
