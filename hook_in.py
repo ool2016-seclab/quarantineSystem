@@ -31,7 +31,7 @@ class QsysTest(SimpleSwitch13):
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        logger.info("Simple_Switch13_features")
+        self.logger.info("Simple_Switch13_features")
         # install table-miss flow entry
         #
         # We specify NO BUFFER to max_len of the output action due to
