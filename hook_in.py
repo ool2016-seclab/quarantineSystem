@@ -55,6 +55,8 @@ class QsysTest(SimpleSwitch13):
         parser = datapath.ofproto_parser
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
+        pkt = packet.Packet(msg.data)
+        self.logger.info("packet-in {}".format(pkt))
         _eth = pkt.get_protocol(ethernet.ethernet)[0]
         if not _eth:
             self.logger.info("Not Ether type")
@@ -64,8 +66,6 @@ class QsysTest(SimpleSwitch13):
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][_eth.src] = in_port
 
-        pkt = packet.Packet(msg.data)
-        self.logger.info("packet-in {}".format(pkt))
         
         pkt_dict = {
             'src':_eth.src,
