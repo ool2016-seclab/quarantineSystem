@@ -96,6 +96,6 @@ class QsysTest(SimpleSwitch13):
             actions=actions, data=msg.data)
         datapath.send_msg(out)
 
-    def send_qsys(self, pkt_dict:
+    def send_qsys(self, pkt_dict):
         self.logger.info("Qsys_in{}".format(pkt_dict))
         return True#pktの到達許可
