@@ -82,7 +82,7 @@ class QsysTest(SimpleSwitch13):
         self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True)))
         #該当するSWの中にMacAddrがあるか？
-        if _eth.src in self.mac_to_port[dpid]:
+        if _eth.dst in self.mac_to_port[dpid]:
             #Switch output portをテーブルから指定
             out_port = self.mac_to_port[dpid][_eth.dst]
         else:
