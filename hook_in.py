@@ -10,14 +10,14 @@ from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
-"""__DEBUG_MODE__ = 0#1:on,0:off
+
 class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
-learn = 0
-quarantine = 1
-"""
+    learn = 0
+    quarantine = 1
 
 class QsysTest(SimpleSwitch13):
+    __DEBUG_MODE__ = False#T:on,F:off
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
 
@@ -56,7 +56,8 @@ class QsysTest(SimpleSwitch13):
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
-        self.logger.info("packet-in {}".format(pkt))
+        if self.__DEBUG_MODE__:
+            self.logger.info("packet-in {}".format(pkt))
         _eth = pkt.get_protocol(ethernet.ethernet)
         if not _eth:
             self.logger.info("Not Ether type")
@@ -75,11 +76,12 @@ class QsysTest(SimpleSwitch13):
         #pkt_json = json.dumps(pkt_dict, sort_keys=True)
         
         if not self.send_qsys(pkt_dict):#通信許可T/Fを返す
-            logger,info('Drop:{}'.format(pkt_json))
+            logger,info('Drop:{}'.format(pkt_dict))
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
-        self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
+        if __DEBUG_MODE__:
+            self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
                                   indent=3, sort_keys=True)))
         #該当するSWの中にMacAddrがあるか？
         if _eth.dst in self.mac_to_port[dpid]:
@@ -94,6 +96,6 @@ class QsysTest(SimpleSwitch13):
             actions=actions, data=msg.data)
         datapath.send_msg(out)
 
-    def send_qsys(self, pkt_json):
-        self.logger.info("Qsys_in{}".format(json))
+    def send_qsys(self, pkt_dict:
+        self.logger.info("Qsys_in{}".format(pkt_dict))
         return True#pktの到達許可
