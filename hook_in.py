@@ -10,7 +10,7 @@ from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
-
+import qsys
 class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
     learn = 0
@@ -23,7 +23,7 @@ class QsysTest(SimpleSwitch13):
 
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
-        self.mac_to_port = {}
+        self.mac_to_port = {}#{[dpid][addr] = in_port}
 
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
@@ -66,7 +66,11 @@ class QsysTest(SimpleSwitch13):
         in_port = msg.match['in_port'] 
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][_eth.src] = in_port
-
+        pkt_head = packet.packet_base.PacketBase(msg.data)
+        pkt_head.get_packet_type()
+        _ipv4 = pkt.get_protocol(ipv4.ipv4)
+        if not _ipv4:
+            _arp = pkt.get_l(arp.arp)
         
         pkt_dict = {
             'src':_eth.src,
@@ -98,4 +102,8 @@ class QsysTest(SimpleSwitch13):
 
     def send_qsys(self, pkt_dict):
         self.logger.info("Qsys_in{}".format(pkt_dict))
-        return True#pktの到達許可
+        res = Qsys(pkt_dict)
+        if res == True:
+            return True
+        else:
+            return False
