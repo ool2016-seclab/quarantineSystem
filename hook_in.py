@@ -10,7 +10,7 @@ from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
-import qsys
+from qsys import Qsys
 class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
     learn = 0
