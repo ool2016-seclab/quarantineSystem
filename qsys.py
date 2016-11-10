@@ -24,6 +24,5 @@ from ryu.topology import switches
 
 class Qsys:
      def __init__(self, *args, **kwargs):
-        super(QsysTest, self).__init__(*args, **kwargs)
         return True
 
