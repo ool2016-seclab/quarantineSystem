@@ -66,8 +66,8 @@ class QsysTest(SimpleSwitch13):
         in_port = msg.match['in_port'] 
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][_eth.src] = in_port
-        pkt_head = packet.packet_base.PacketBase(msg.data)
-        pkt_head.get_packet_type()
+#        pkt_head = packet.packet_base.PacketBase(msg.data)
+#       pkt_head.get_packet_type()
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         if not _ipv4:
             _arp = pkt.get_l(arp.arp)
