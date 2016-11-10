@@ -70,7 +70,7 @@ class QsysTest(SimpleSwitch13):
 #       pkt_head.get_packet_type()
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         if not _ipv4:
-            _arp = pkt.get_l(arp.arp)
+            _arp = pkt.get_protocol(arp.arp)
         
         pkt_dict = {
             'src':_eth.src,
