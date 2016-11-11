@@ -103,7 +103,7 @@ class QsysTest(SimpleSwitch13):
 
     def send_qsys(self, pkt_dict):
         self.logger.info("Qsys_in{}".format(pkt_dict))
-        res = Qsys(pkt_dict).send()
+        res = Qsys().send(pkt_dict)
         if res == True:
             return True
         else:
