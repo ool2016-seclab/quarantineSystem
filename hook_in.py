@@ -69,15 +69,35 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_port[dpid][_eth.src] = in_port
 #        pkt_head = packet.packet_base.PacketBase(msg.data)
 #       pkt_head.get_packet_type()
+# Analyze event type.
+        header_list = dict((p.protocol_name, p)for p in pkt.protocols if type(p) != str)
+        self.logger.info("HEADER:{}".format(header_list))
+        
+"""        if ARP in header_list:
+            self._packetin_arp(msg, header_list)
+            return
+        if IPV4 in header_list:
+            rt_ports = self.address_data.get_default_gw()
+            if header_list[IPV4].dst in rt_ports:
+                # Packet to router's port.
+                if ICMP in header_list:
+                    if header_list[ICMP].type == icmp.ICMP_ECHO_REQUEST:
+                        self._packetin_icmp_req(msg, header_list)
+                        return
+                elif TCP in header_list or UDP in header_list:
+                    self._packetin_tcp_udp(msg, header_list)
+                    return
+            else:
+                # Packet to internal host or gateway router.
+                self._packetin_to_node(msg, header_list)
+                return
+"""
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         _arp = pkt.get_protocol(arp.arp)
         if _arp:
             _ipv4.src = _arp.src
             _ipv4.dst = _arp.dst
-
-            self.logger.info("arp {}".format(pkt))
-        
-
+            self.logger.info("arp {}".format(_arp))
         
         pkt_dict = {
             'eth':{
