@@ -79,7 +79,8 @@ class QsysTest(SimpleSwitch13):
             }
         #pkt_json = json.dumps(pkt_dict, sort_keys=True)
         
-        if not self.send_qsys(pkt_dict):#通信許可T/Fを返す
+        result = self.send_qsys(pkt_dict)#通信許可T/Fを返す
+        if result == False:
             self.logger.info('Drop:{}'.format(pkt_dict))
             return
         #Transport to dst
@@ -102,7 +103,7 @@ class QsysTest(SimpleSwitch13):
 
     def send_qsys(self, pkt_dict):
         self.logger.info("Qsys_in{}".format(pkt_dict))
-        res = Qsys(pkt_dict)
+        res = Qsys(pkt_dict).send()
         if res == True:
             return True
         else:
