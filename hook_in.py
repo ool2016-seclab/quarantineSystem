@@ -80,7 +80,7 @@ class QsysTest(SimpleSwitch13):
         #pkt_json = json.dumps(pkt_dict, sort_keys=True)
         
         if not self.send_qsys(pkt_dict):#通信許可T/Fを返す
-            logger.info('Drop:{}'.format(pkt_dict))
+            self.logger.info('Drop:{}'.format(pkt_dict))
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
