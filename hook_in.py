@@ -60,7 +60,8 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("packet-in {}".format(pkt))
         _eth = pkt.get_protocol(ethernet.ethernet)
         if not _eth:
-            self.logger.info("Not Ether type")
+            if self.__DEBUG_MODE__:
+                self.logger.info("Not Ether type")
             return
         #スイッチのポート
         in_port = msg.match['in_port'] 
@@ -81,7 +82,8 @@ class QsysTest(SimpleSwitch13):
         
         result = self.send_qsys(pkt_dict)#通信許可T/Fを返す
         if result == False:
-            self.logger.info('Drop:{}'.format(pkt_dict))
+            if self.__DEBUG_MODE__:
+                self.logger.info('Drop:{}'.format(pkt_dict))
             return
         #Transport to dst
         #print('Transport:{}⇢{}'.format(packet.ipv4_src))
@@ -102,7 +104,8 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
 
     def send_qsys(self, pkt_dict):
-        self.logger.info("Qsys_in{}".format(pkt_dict))
+        if self.__DEBUG_MODE__:
+            self.logger.info("Qsys_in{}".format(pkt_dict))
         qsys = Qsys()
         res = qsys.send(pkt_dict)
         if res == True:
