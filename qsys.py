@@ -25,5 +25,5 @@ from ryu.topology import switches
 class Qsys:
     def __init__(self, *args, **kwargs):
         True
-    def send(pkt_dict):
+    def send(self, pkt_dict):
         return True
