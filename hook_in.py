@@ -72,8 +72,7 @@ class QsysTest(SimpleSwitch13):
 # Analyze event type.
         header_list = dict((p.protocol_name, p)for p in pkt.protocols if type(p) != str)
         self.logger.info("HEADER:{}".format(header_list))
-        
-"""        if ARP in header_list:
+        """        if ARP in header_list:
             self._packetin_arp(msg, header_list)
             return
         if IPV4 in header_list:
@@ -91,7 +90,7 @@ class QsysTest(SimpleSwitch13):
                 # Packet to internal host or gateway router.
                 self._packetin_to_node(msg, header_list)
                 return
-"""
+        """
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
         _arp = pkt.get_protocol(arp.arp)
         if _arp:
