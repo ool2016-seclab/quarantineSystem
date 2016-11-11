@@ -23,6 +23,7 @@ from ryu.controller import dpset
 from ryu.topology import switches
 
 class Qsys:
-     def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        True
+    def send():
         return True
-
