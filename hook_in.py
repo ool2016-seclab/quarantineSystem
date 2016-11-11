@@ -70,12 +70,24 @@ class QsysTest(SimpleSwitch13):
 #        pkt_head = packet.packet_base.PacketBase(msg.data)
 #       pkt_head.get_packet_type()
         _ipv4 = pkt.get_protocol(ipv4.ipv4)
-        if not _ipv4:
-            _arp = pkt.get_protocol(arp.arp)
+        _arp = pkt.get_protocol(arp.arp)
+        if _arp:
+            _ipv4.src = _arp.src
+            _ipv4.dst = _arp.dst
+
+            self.logger.info("arp {}".format(pkt))
+        
+
         
         pkt_dict = {
-            'src':_eth.src,
-            'dst':_eth.dst,
+            'eth':{
+                'src':_eth.src,
+                'dst':_eth.dst,
+                },
+            'ip':{
+                'src':_ipv4.src,
+                'dst':_ipv4.dst,
+                },
             'data':msg.data,
             }
         #pkt_json = json.dumps(pkt_dict, sort_keys=True)
