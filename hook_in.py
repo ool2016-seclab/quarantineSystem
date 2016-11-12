@@ -11,6 +11,17 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
 from qsys import Qsys
+from builtins import dict
+import netaddr
+
+ETHERNET = ethernet.ethernet.__name__
+VLAN = vlan.vlan.__name__
+IPV4 = ipv4.ipv4.__name__
+ARP = arp.arp.__name__
+ICMP = icmp.icmp.__name__
+TCP = tcp.tcp.__name__
+UDP = udp.udp.__name__
+
 class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
     learn = 0
@@ -58,8 +69,12 @@ class QsysTest(SimpleSwitch13):
         pkt = packet.Packet(msg.data)
         if self.__DEBUG_MODE__:
             self.logger.info("packet-in {}".format(pkt))
-        _eth = pkt.get_protocol(ethernet.ethernet)
-        if not _eth:
+        #パケットのヘッダ情報を取得
+        header_list = dict((p.protocol_name, p)for p in pkt.protocols if type(p) != str)
+        if __DEBUG_MODE__:
+            self.logger.info("HEADER:{}".format(header_list))
+        _eth = header_list[ETHERNET]
+        if not ETHERNET in header_list:
             if self.__DEBUG_MODE__:
                 self.logger.info("Not Ether type")
             return
@@ -67,50 +82,25 @@ class QsysTest(SimpleSwitch13):
         in_port = msg.match['in_port'] 
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][_eth.src] = in_port
-#        pkt_head = packet.packet_base.PacketBase(msg.data)
-#       pkt_head.get_packet_type()
-# Analyze event type.
-        header_list = dict((p.protocol_name, p)for p in pkt.protocols if type(p) != str)
-        self.logger.info("HEADER:{}".format(header_list))
-        """        if ARP in header_list:
+        pkt_dict = dict()
+        #arpパケット
+        if ARP in header_list:
             self._packetin_arp(msg, header_list)
             return
         if IPV4 in header_list:
-            rt_ports = self.address_data.get_default_gw()
-            if header_list[IPV4].dst in rt_ports:
-                # Packet to router's port.
-                if ICMP in header_list:
-                    if header_list[ICMP].type == icmp.ICMP_ECHO_REQUEST:
-                        self._packetin_icmp_req(msg, header_list)
-                        return
-                elif TCP in header_list or UDP in header_list:
-                    self._packetin_tcp_udp(msg, header_list)
-                    return
-            else:
-                # Packet to internal host or gateway router.
-                self._packetin_to_node(msg, header_list)
-                return
-        """
-        _ipv4 = pkt.get_protocol(ipv4.ipv4)
-        _arp = pkt.get_protocol(arp.arp)
-        if _arp:
-            _ipv4.src = _arp.src
-            _ipv4.dst = _arp.dst
-            self.logger.info("arp {}".format(_arp))
-        
-        pkt_dict = {
-            'eth':{
+            pkt_dict["ipv4"] = {
+                "src": int(netaddr.IPAddress(header_list[IPV4]['src'])),
+                "dst": int(netaddr.IPAddress(header_list[IPV4]['dst'])),
+                }
+        else:
+            # Packet to internal host or gateway router.
+            #self._packetin_to_node(msg, header_list)
+            return
+        pkt_dict["eth"] = {
                 'src':_eth.src,
                 'dst':_eth.dst,
-                },
-            'ip':{
-                'src':_ipv4.src,
-                'dst':_ipv4.dst,
-                },
-            'data':msg.data,
-            }
-        #pkt_json = json.dumps(pkt_dict, sort_keys=True)
-        
+                }
+        pkt_dict["data"] = msg.data
         result = self.send_qsys(pkt_dict)#通信許可T/Fを返す
         if result == False:
             if self.__DEBUG_MODE__:
@@ -135,11 +125,82 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
 
     def send_qsys(self, pkt_dict):
-        if self.__DEBUG_MODE__:
-            self.logger.info("Qsys_in{}".format(pkt_dict))
+        #if self.__DEBUG_MODE__:
+        self.logger.info("Qsys_in{}".format(pkt_dict))
         qsys = Qsys()
         res = qsys.send(pkt_dict)
         if res == True:
             return True
         else:
             return False
+
+    def _packet_in_arp(msg, header_list=dict()):
+        src_addr = self.address_data.get_data(ip=header_list[ARP].src_ip)
+        if src_addr is None:
+            return
+
+        # ARP packet handling.
+        in_port = self.ofctl.get_packetin_inport(msg)
+        src_ip = header_list[ARP].src_ip
+        dst_ip = header_list[ARP].dst_ip
+        srcip = ip_addr_ntoa(src_ip)
+        dstip = ip_addr_ntoa(dst_ip)
+        rt_ports = self.address_data.get_default_gw()
+
+        if src_ip == dst_ip:
+            # GARP -> packet forward (normal)
+            output = self.ofctl.dp.ofproto.OFPP_NORMAL
+            self.ofctl.send_packet_out(in_port, output, msg.data)
+
+            self.logger.info('Receive GARP from [%s].', srcip,
+                             extra=self.sw_id)
+            self.logger.info('Send GARP (normal).', extra=self.sw_id)
+
+        elif dst_ip not in rt_ports:
+            dst_addr = self.address_data.get_data(ip=dst_ip)
+            if (dst_addr is not None and
+                    src_addr.address_id == dst_addr.address_id):
+                # ARP from internal host -> packet forward (normal)
+                output = self.ofctl.dp.ofproto.OFPP_NORMAL
+                self.ofctl.send_packet_out(in_port, output, msg.data)
+
+                self.logger.info('Receive ARP from an internal host [%s].',
+                                 srcip, extra=self.sw_id)
+                self.logger.info('Send ARP (normal)', extra=self.sw_id)
+        else:
+            if header_list[ARP].opcode == arp.ARP_REQUEST:
+                # ARP request to router port -> send ARP reply
+                src_mac = header_list[ARP].src_mac
+                dst_mac = self.port_data[in_port].mac
+                arp_target_mac = dst_mac
+                output = in_port
+                in_port = self.ofctl.dp.ofproto.OFPP_CONTROLLER
+
+                self.ofctl.send_arp(arp.ARP_REPLY, self.vlan_id,
+                                    dst_mac, src_mac, dst_ip, src_ip,
+                                    arp_target_mac, in_port, output)
+
+                log_msg = 'Receive ARP request from [%s] to router port [%s].'
+                self.logger.info(log_msg, srcip, dstip, extra=self.sw_id)
+                self.logger.info('Send ARP reply to [%s]', srcip,
+                                 extra=self.sw_id)
+
+            elif header_list[ARP].opcode == arp.ARP_REPLY:
+                #  ARP reply to router port -> suspend packets forward
+                log_msg = 'Receive ARP reply from [%s] to router port [%s].'
+                self.logger.info(log_msg, srcip, dstip, extra=self.sw_id)
+
+                packet_list = self.packet_buffer.get_data(src_ip)
+                if packet_list:
+                    # stop ARP reply wait thread.
+                    for suspend_packet in packet_list:
+                        self.packet_buffer.delete(pkt=suspend_packet)
+
+                    # send suspend packet.
+                    output = self.ofctl.dp.ofproto.OFPP_TABLE
+                    for suspend_packet in packet_list:
+                        self.ofctl.send_packet_out(suspend_packet.in_port,
+                                                   output,
+                                                   suspend_packet.data)
+                        self.logger.info('Send suspend packet to [%s].',
+                                         srcip, extra=self.sw_id)
