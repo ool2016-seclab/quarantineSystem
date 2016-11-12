@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+#-*- co ding: utf-8 -*-
 import json
 import enum 
 from ryu.app.simple_switch_13 import SimpleSwitch13
@@ -11,8 +11,8 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
 from qsys import Qsys
-import dict
 import netaddr
+from builtins import dict
 
 ETHERNET = ethernet.ethernet.__name__
 VLAN = vlan.vlan.__name__
