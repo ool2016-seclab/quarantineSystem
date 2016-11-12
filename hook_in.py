@@ -85,7 +85,7 @@ class QsysTest(SimpleSwitch13):
         pkt_dict = dict()
         #arpパケット
         if ARP in header_list:
-            self._packetin_arp(msg, header_list)
+            self._packet_in_arp(msg, header_list)
             return
         if IPV4 in header_list:
             pkt_dict["ipv4"] = {
