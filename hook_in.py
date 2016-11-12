@@ -11,7 +11,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4,arp
 from ryu.controller import dpset
 from qsys import Qsys
-from builtins import dict
+import dict
 import netaddr
 
 ETHERNET = ethernet.ethernet.__name__
