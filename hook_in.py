@@ -55,9 +55,9 @@ class QsysTest(SimpleSwitch13):
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
-    def test(dp_dict):
+    def test(self, dp_dict):
         return
-    def test2(msg):
+    def test2(self, msg):
         datapath = msg.datapath
         dpid = datapath.id
         ofproto = datapath.ofproto
