@@ -54,6 +54,16 @@ class QsysTest(SimpleSwitch13):
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
+    def test(dp_dict):
+        return
+    def test2(msg):
+        datapath = msg.datapath
+        dpid = datapath.id
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        #スイッチのポート
+        in_port = msg.match['in_port']
+        return
     #Packet_inのハンドラが呼ばれる
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
@@ -64,77 +74,56 @@ class QsysTest(SimpleSwitch13):
         dpid = datapath.id
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
+        #スイッチのポート
+        in_port = msg.match['in_port']
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
+
         if self.__DEBUG_MODE__:
             self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
         header_list = dict((p.protocol_name, p)for p in pkt.protocols if type(p) != str)
         if self.__DEBUG_MODE__:
             self.logger.info("HEADER:{}".format(header_list))
-        _eth = header_list[ETHERNET]
         if not ETHERNET in header_list:
             if self.__DEBUG_MODE__:
                 self.logger.info("Not Ether type")
             return
-        #スイッチのポート
-        in_port = msg.match['in_port'] 
+ 
         #[swのid][MACAddr]のテーブルにSwitch input portを登録
-        self.mac_to_port[dpid][_eth.src] = in_port
-        pkt_dict = dict()
+        self.mac_to_port[dpid][header_list[ETHERNET].src] = in_port
+        
+        start = time.time()
+        for i in range(0,100):
+            dp_dict = {
+                'dp':datapath,
+                'ofproto':ofproto,
+                'parser':parser,
+                'dpid':dpid,
+                'in_port':in_port
+                }
+            self.test(dp_dict)
+        elapsed_time = time.time() - start
+        print ("elapsed_time:{0}".format(elapsed_time)) + "[sec]"
+        start = time.time()
+        for i in range(0,100):
+            self.test2(msg)
+        elapsed_time = time.time() - start
+        print ("elapsed_time:{0}".format(elapsed_time)) + "[sec]"
+        return
         #arpパケット
         if ARP in header_list:
             self._packet_in_arp(msg, header_list)
             return
         if IPV4 in header_list:
-            pkt_dict["ipv4"] = {
-                "src": int(netaddr.IPAddress(header_list[IPV4]['src'])),
-                "dst": int(netaddr.IPAddress(header_list[IPV4]['dst'])),
-                }
+            self._packet_in_ipv4(msg, header_list, pkt_dict)
         else:
             # Packet to internal host or gateway router.
             #self._packetin_to_node(msg, header_list)
             return
-        pkt_dict["eth"] = {
-                'src':_eth.src,
-                'dst':_eth.dst,
-                }
-        pkt_dict["data"] = msg.data
-        result = self.send_qsys(pkt_dict)#通信許可T/Fを返す
-        if result == False:
-            if self.__DEBUG_MODE__:
-                self.logger.info('Drop:{}'.format(pkt_dict))
-            return
-        #Transport to dst
-        #print('Transport:{}⇢{}'.format(packet.ipv4_src))
-        if self.__DEBUG_MODE__:
-            self.logger.info('json:{}'.format(json.dumps(ev.msg.to_jsondict(), ensure_ascii=True,
-                                  indent=3, sort_keys=True)))
-        #該当するSWの中にMacAddrがあるか？
-        if _eth.dst in self.mac_to_port[dpid]:
-            #Switch output portをテーブルから指定
-            out_port = self.mac_to_port[dpid][_eth.dst]
-        else:
-            #フラッディング
-            out_port = ofproto.OFPP_FLOOD
-        actions = [parser.OFPActionOutput(out_port)]
-        out = datapath.ofproto_parser.OFPPacketOut(
-            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
-            actions=actions, data=msg.data)
-        datapath.send_msg(out)
 
-    def send_qsys(self, pkt_dict):
-        #if self.__DEBUG_MODE__:
-        self.logger.info("Qsys_in{}".format(pkt_dict))
-        qsys = Qsys()
-        res = qsys.send(pkt_dict)
-        if res == True:
-            return True
-        else:
-            return False
-
-    def _packet_in_arp(msg, header_list=dict()):
+    def _packet_in_arp(self, msg, header_list=dict()):
         src_addr = self.address_data.get_data(ip=header_list[ARP].src_ip)
         if src_addr is None:
             return
@@ -145,19 +134,15 @@ class QsysTest(SimpleSwitch13):
         dst_ip = header_list[ARP].dst_ip
         srcip = ip_addr_ntoa(src_ip)
         dstip = ip_addr_ntoa(dst_ip)
-        rt_ports = self.address_data.get_default_gw()
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
             output = self.ofctl.dp.ofproto.OFPP_NORMAL
-            self.ofctl.send_packet_out(in_port, output, msg.data)
-
+         
             self.logger.info('Receive GARP from [%s].', srcip,
                              extra=self.sw_id)
             self.logger.info('Send GARP (normal).', extra=self.sw_id)
 
-        elif dst_ip not in rt_ports:
-            dst_addr = self.address_data.get_data(ip=dst_ip)
             if (dst_addr is not None and
                     src_addr.address_id == dst_addr.address_id):
                 # ARP from internal host -> packet forward (normal)
@@ -204,3 +189,54 @@ class QsysTest(SimpleSwitch13):
                                                    suspend_packet.data)
                         self.logger.info('Send suspend packet to [%s].',
                                          srcip, extra=self.sw_id)
+
+    def _packet_in_ipv4(self, msg, header_list=dict()):
+        pkt_dict = dict()
+        pkt_dict["ipv4"] = {
+            "src": int(netaddr.IPAddress(header_list[IPV4].src)),
+            "dst": int(netaddr.IPAddress(header_list[IPV4].dst)),
+            }
+        pkt_dict["eth"] = {
+                'src':_eth.src,
+                'dst':_eth.dst,
+                }
+        pkt_dict["data"] = msg.data
+        self.send_qsys(msg, pkt_dict)
+        
+    def send_qsys(self, msg, pkt_dict=dict()):
+        if self.__DEBUG_MODE__:
+            self.logger.info("Qsys_in{}".format(pkt_dict))
+        result = Qsys().send(pkt_dict)
+        if result == True:
+            self._packet_out(msg,pkt_dict)
+            return
+        #Drop Packet
+        self.logger.info('Drop:{}'.format(pkt_dict))
+        return 
+
+    def _packet_out(self, msg, header_list=dict()):
+        #Transport to dst
+        src_ip = ip_addr_ntoa(header_list[IPV4].src)
+        dst_ip = ip_addr_ntoa(header_list[IPV4].dst)
+        src_eth = header_list[ETHERNET].src
+        dst_eth = header_list[ETHERNET].dst
+        #該当するSWの中にMacAddrがあるか？
+        if dst_eth in self.mac_to_port[dpid]:
+            #Switch output portをテーブルから指定
+            out_port = self.mac_to_port[dpid][dst_eth]
+        else:
+            #フラッディング
+            out_port = ofproto.OFPP_FLOOD
+        actions = [parser.OFPActionOutput(out_port)]
+        out = datapath.ofproto_parser.OFPPacketOut(
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
+            actions=actions, data=msg.data)
+        datapath.send_msg(out)
+    def _packet_out_flood(self, msg, header_list=dict()):
+        #フラッディング
+        out_port = ofproto.OFPP_FLOOD
+        actions = [parser.OFPActionOutput(out_port)]
+        out = datapath.ofproto_parser.OFPPacketOut(
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
+            actions=actions, data=msg.data)
+        datapath.send_msg(out)
