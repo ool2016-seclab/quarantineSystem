@@ -106,12 +106,12 @@ class QsysTest(SimpleSwitch13):
                 }
             self.test(dp_dict)
         elapsed_time = time.time() - start
-        print ("elapsed_time:{0}".format(elapsed_time)) + "[sec]"
+        self.logger.info("dict:elapsed_time:{0}".format(elapsed_time))
         start = time.time()
         for i in range(0,100):
             self.test2(msg)
         elapsed_time = time.time() - start
-        print ("elapsed_time:{0}".format(elapsed_time)) + "[sec]"
+        self.logger.info("call:elapsed_time:{0}".format(elapsed_time))
         return
         #arpパケット
         if ARP in header_list:
