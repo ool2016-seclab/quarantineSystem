@@ -75,10 +75,9 @@ class QsysTest(SimpleSwitch13):
         if self.__DEBUG_MODE__:
             self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
-        header_list = []
         for p in pkt.protocols:
             if type(p) != str:
-                header_list.append(dict(protocol_name=p))
+                header_list.append(dict(protocol_name, p))
                            
         if self.__DEBUG_MODE__:
             self.logger.info("HEADER:{}".format(header_list))
