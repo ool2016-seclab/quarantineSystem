@@ -29,7 +29,7 @@ class DbAccess:
         conn = sqlite3.connect(dbname)
         self.c = conn.cursor()
     def get_list(self):
-        return self.c.execute("SELECT * FROM \'access_block_ip\';")
+        return self.c.execute("SELECT * FROM \'access_refused_ip\';")
 class Qsys:
     def __init__(self, *args, **kwargs):
         print(DbAccess().get_list())
