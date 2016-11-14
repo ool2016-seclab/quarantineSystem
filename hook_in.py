@@ -13,6 +13,7 @@ from qsys import Qsys
 import netaddr
 from builtins import dict
 #import time
+from ryu.app.rest_router import OfCtl
 
 ETHERNET = ethernet.ethernet.__name__
 VLAN = vlan.vlan.__name__
@@ -61,6 +62,7 @@ class QsysTest(SimpleSwitch13):
         #パケットから送信元のIP・MAC・宛先のIP・MAC・dataを取得
         msg = ev.msg
         datapath = msg.datapath
+        #ofctl = OfCtl.factory(dp=datapath, logger=self.logger)
         dpid = datapath.id
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -102,7 +104,11 @@ class QsysTest(SimpleSwitch13):
 
     def _packet_in_arp(self, msg, header_list=dict(), dp_dict=dict()):
         # ARP packet handling.
-
+        dp = dp_dict['dp']
+        ofproto = dp_dict['ofproto']
+        parser = dp_dict['parser']
+        dpid = dp_dict['dpid']
+        in_port = dp_dict['in_port']
         src_ip = header_list[ARP].src_ip
         dst_ip = header_list[ARP].dst_ip
         srcip = ip_addr_ntoa(src_ip)
@@ -110,14 +116,15 @@ class QsysTest(SimpleSwitch13):
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
-            output = dp_dict['ofproto'].OFPP_NORMAL
+            output = ofproto.OFPP_NORMAL
          
             self.logger.info('Receive GARP from [%s].', srcip,
                              extra=self.sw_id)
-            self.logger.info('Send GARP (normal).', dp_dict['dpid'])
+            self.logger.info('Send GARP (normal).', dpid)
         self._packet_out(msg, header_list)
 
     def _packet_in_ipv4(self, msg, header_list=dict(), dp_dict=dict()):
+
         pkt_dict = dict()
         pkt_dict["ipv4"] = {
             "src": int(netaddr.IPAddress(header_list[IPV4].src)),
@@ -142,18 +149,23 @@ class QsysTest(SimpleSwitch13):
         return 
 
     def _packet_out(self, msg, header_list=dict(), dp_dict=dict()):
+        dp = dp_dict['dp']
+        ofproto = dp_dict['ofproto']
+        parser = dp_dict['parser']
+        dpid = dp_dict['dpid']
+        in_port = dp_dict['in_port']
         #Transport to dst
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
         #該当するSWの中にMacAddrがあるか？
-        if dst_eth in self.mac_to_port[dp_dict['dpid']]:
+        if dst_eth in self.mac_to_port[dpid]:
             #Switch output portをテーブルから指定
-            out_port = self.mac_to_port[dp_dict['dpid']][dst_eth]
+            out_port = self.mac_to_port[dpid][dst_eth]
         else:
             #フラッディング
-            out_port = dp_dict['ofproto'].OFPP_FLOOD
-        actions = [dp_dict['parser'].OFPActionOutput(out_port)]
-        out = dp_dict['parser'].OFPPacketOut(
-            datapath=dp_dict['datapath'], buffer_id=msg.buffer_id, in_port=dp_dict['in_port'],
+            out_port = ofproto.OFPP_FLOOD
+        actions = [parser.OFPActionOutput(out_port)]
+        out = parser.OFPPacketOut(
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
             actions=actions, data=msg.data)
-        dp_dict['datapath'].send_msg(out)
+        datapath.send_msg(out)
