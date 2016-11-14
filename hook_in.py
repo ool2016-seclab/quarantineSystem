@@ -125,7 +125,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Receive GARP from [%s].', src_ip,
                              extra=dpid)
             self.logger.info('Send GARP (normal).', dpid)
-        self._packet_out(msg, pkt, dp)
+        self._packet_out(msg, pkt_dict, dp)
 
     def _packet_in_ipv4(self, msg, pkt, pkt_dict, dp):
         pkt_dict.update({'data':msg.data})
