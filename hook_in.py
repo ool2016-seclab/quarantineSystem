@@ -131,7 +131,6 @@ class QsysTest(SimpleSwitch13):
         self.send_qsys(msg, pkt_dict, header_list, dp_dict)
         
     def send_qsys(self, msg, pkt_dict, header_list, dp_dict):
-        self.logger.info("Qsys:{}".format(header_list))
         if self.__DEBUG_MODE__:
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
