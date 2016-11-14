@@ -26,4 +26,4 @@ class Qsys:
     def __init__(self, *args, **kwargs):
         True
     def send(self, pkt_dict):
-        return True
+        return False
