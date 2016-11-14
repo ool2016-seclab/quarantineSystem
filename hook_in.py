@@ -96,7 +96,7 @@ class QsysTest(SimpleSwitch13):
             self._packet_in_arp(msg, header_list, dp_dict)
             return
         elif IPV4 in header_list:
-            self._packet_in_ipv4(msg, header_list, pkt_dict, dp_dict)
+            self._packet_in_ipv4(msg, header_list, dp_dict)
         else:
             #IPV6 or others?
             return
