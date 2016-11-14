@@ -11,7 +11,6 @@ from ryu.lib.packet import *
 from ryu.controller import dpset
 from qsys import Qsys
 import netaddr
-import hasattr
 from builtins import dict, hasattr
 
 ETHERNET = ethernet.ethernet.__name__

@@ -78,11 +78,14 @@ class QsysTest(SimpleSwitch13):
         in_port = dp.in_port
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
-        pkt = packet.Packet(msg.data)
-
-        #if self.__DEBUG_MODE__:
-        self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
+        try:
+            pkt = packet.Packet(msg.data)
+            #if self.__DEBUG_MODE__:
+            self.logger.info("packet-in {}".format(pkt))
+        except:
+            self.logger.debug("malformed packet")
+            return
         header_list = dict((p.protocol_name, p)
                            for p in pkt.protocols if type(p) != str)
         self._packet_out(msg, header_list, dp)
