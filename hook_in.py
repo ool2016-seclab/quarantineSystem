@@ -23,6 +23,15 @@ ICMP = icmp.icmp.__name__
 TCP = tcp.tcp.__name__
 UDP = udp.udp.__name__
 
+class dp_obj:
+    def __init__(self, msg):
+        self.datapath = msg.datapath
+        self.dpid = datapath.id
+        self.ofproto = datapath.ofproto
+        self.parser = datapath.ofproto_parser
+        #スイッチのポート
+        self.in_port = msg.match['in_port']
+
 class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
     learn = 0
@@ -61,13 +70,20 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_handler(self, ev):
         #パケットから送信元のIP・MAC・宛先のIP・MAC・dataを取得
         msg = ev.msg
-        datapath = msg.datapath
+        dp = dp_obj(msg)
+        datapath = dp.datapath
+        dpid = dp.dpid
+        ofproto = dp.ofproto
+        parser = dp.parser
+        in_port = dp.in_port
+        #msg = ev.msg
+        #datapath = msg.datapath
         #ofctl = OfCtl.factory(dp=datapath, logger=self.logger)
-        dpid = datapath.id
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
+        #dpid = datapath.id
+        #ofproto = datapath.ofproto
+        #parser = datapath.ofproto_parser
         #スイッチのポート
-        in_port = msg.match['in_port']
+        #in_port = msg.match['in_port']
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
@@ -94,22 +110,22 @@ class QsysTest(SimpleSwitch13):
             }
         #arpパケット
         if ARP in header_list:
-            self._packet_in_arp(msg, header_list, dp_dict)
+            self._packet_in_arp(msg, header_list, dp)
             return
         elif IPV4 in header_list:
-            self._packet_in_ipv4(msg, header_list, dp_dict)
+            self._packet_in_ipv4(msg, header_list, dp)
         else:
             #IPV6 or others?
             return
 
 
-    def _packet_in_arp(self, msg, header_list, dp_dict):
+    def _packet_in_arp(self, msg, header_list, dp):
         # ARP packet handling.
-        dp = dp_dict["dp"]
-        ofproto = dp_dict["ofproto"]
-        parser = dp_dict["parser"]
-        dpid = dp_dict["dpid"]
-        in_port = dp_dict["in_port"]
+        datapath = dp.datapath
+        dpid = dp.dpid
+        ofproto = dp.ofproto
+        parser = dp.parser
+        in_port = dp.in_port
         src_ip = header_list[ARP].src_ip
         dst_ip = header_list[ARP].dst_ip
 
@@ -120,34 +136,34 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Receive GARP from [%s].', src_ip,
                              extra=dpid)
             self.logger.info('Send GARP (normal).', dpid)
-        self._packet_out(msg, header_list, dp_dict)
+        self._packet_out(msg, header_list, dp)
 
-    def _packet_in_ipv4(self, msg, header_list, dp_dict):
+    def _packet_in_ipv4(self, msg, header_list, dp):
         pkt_dict = dict()
         pkt_dict["ipv4"] = {
             "src": int(netaddr.IPAddress(header_list[IPV4].src)),
             "dst": int(netaddr.IPAddress(header_list[IPV4].dst)),
             }
         pkt_dict["data"] = msg.data
-        self.send_qsys(msg, pkt_dict, header_list, dp_dict)
+        self.send_qsys(msg, pkt_dict, header_list, dp)
         
-    def send_qsys(self, msg, pkt_dict, header_list, dp_dict):
+    def send_qsys(self, msg, pkt_dict, header_list, dp):
         if self.__DEBUG_MODE__:
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
         if result == True:
-            self._packet_out(msg,header_list, dp_dict)
+            self._packet_out(msg,header_list, dp)
             return
         #Drop Packet
         self.logger.info('Drop:{}'.format(pkt_dict))
         return 
 
-    def _packet_out(self, msg, header_list, dp_dict):
-        dp = dp_dict["dp"]
-        ofproto = dp_dict["ofproto"]
-        parser = dp_dict["parser"]
-        dpid = dp_dict["dpid"]
-        in_port = dp_dict["in_port"]
+    def _packet_out(self, msg, header_list, dp):
+        datapath = dp.datapath
+        dpid = dp.dpid
+        ofproto = dp.ofproto
+        parser = dp.parser
+        in_port = dp.in_port
         #Transport to dst
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
@@ -160,6 +176,6 @@ class QsysTest(SimpleSwitch13):
             out_port = ofproto.OFPP_FLOOD
         actions = [parser.OFPActionOutput(out_port)]
         out = parser.OFPPacketOut(
-            datapath=dp, buffer_id=msg.buffer_id, in_port=in_port,
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
             actions=actions, data=msg.data)
         dp.send_msg(out)
