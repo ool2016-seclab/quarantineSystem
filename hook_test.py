@@ -80,7 +80,8 @@ class QsysTest(SimpleSwitch13):
         pkt = packet.Packet(msg.data)
         if not pkt:
             self.logger.info("ERROR::{}".format(pkt))
-            return
+            while 1:
+                True
         #if self.__DEBUG_MODE__:
         self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
