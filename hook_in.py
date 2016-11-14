@@ -16,9 +16,9 @@ from builtins import dict
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
-IPV4 = "ipv4.ipv4"
-ARP = "arp.arp"
-ICMP = "icmp.icmp"
+IPV4 = ipv4.ipv4
+ARP = arp.arp
+ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
 
@@ -92,7 +92,7 @@ class QsysTest(SimpleSwitch13):
            # if self.__DEBUG_MODE__:
             self.logger.info("Not Ether type")
             return
-        pkt_dict.update(ETH,eth)
+        pkt_dict.update(ETHERNET,eth)
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][eth.src] = in_port
         #arpパケット
