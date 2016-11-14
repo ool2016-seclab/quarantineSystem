@@ -26,9 +26,9 @@ UDP = udp.udp.__name__
 class dp_obj:
     def __init__(self, msg):
         self.datapath = msg.datapath
-        self.dpid = datapath.id
-        self.ofproto = datapath.ofproto
-        self.parser = datapath.ofproto_parser
+        self.dpid = self.datapath.id
+        self.ofproto = self.datapath.ofproto
+        self.parser = self.datapath.ofproto_parser
         #スイッチのポート
         self.in_port = msg.match['in_port']
 
