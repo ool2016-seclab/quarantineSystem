@@ -15,6 +15,9 @@ from builtins import dict
 #import time
 from ryu.app.rest_router import OfCtl
 
+
+MAX_SUSPENDPACKETS = 50  # Threshold of the packet suspends thread count.
+
 ETHERNET = ethernet.ethernet.__name__
 VLAN = vlan.vlan.__name__
 IPV4 = ipv4.ipv4.__name__
@@ -75,15 +78,8 @@ class QsysTest(SimpleSwitch13):
         dpid = dp.dpid
         ofproto = dp.ofproto
         parser = dp.parser
-        in_port = dp.in_port
-        #msg = ev.msg
-        #datapath = msg.datapath
-        #ofctl = OfCtl.factory(dp=datapath, logger=self.logger)
-        #dpid = datapath.id
-        #ofproto = datapath.ofproto
-        #parser = datapath.ofproto_parser
         #スイッチのポート
-        #in_port = msg.match['in_port']
+        in_port = dp.in_port
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
@@ -101,13 +97,6 @@ class QsysTest(SimpleSwitch13):
             return
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][header_list[ETHERNET].src] = in_port
-        dp_dict = {
-            'dp':datapath,
-            'ofproto':ofproto,
-            'parser':parser,
-            'dpid':dpid,
-            'in_port':in_port
-            }
         #arpパケット
         if ARP in header_list:
             self._packet_in_arp(msg, header_list, dp)
@@ -117,8 +106,6 @@ class QsysTest(SimpleSwitch13):
         else:
             #IPV6 or others?
             return
-
-
     def _packet_in_arp(self, msg, header_list, dp):
         # ARP packet handling.
         datapath = dp.datapath
