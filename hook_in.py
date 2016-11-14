@@ -86,7 +86,13 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-        header_list = dict((p.protocol_name, p) for p in pkt.protocols if type(p) != str)
+        header_list = dict()
+        for p in pkt.protocols:
+            if type(p) != str:
+                try:
+                    header_list.update(dict(p.protocol_name, p)) 
+                except:
+                    self.logger.info(2EXCEPT::{}".format(p))
 
 
 
