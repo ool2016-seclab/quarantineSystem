@@ -121,7 +121,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Send GARP (normal).', dpid)
         self._packet_out(msg, header_list)
 
-    def _packet_in_ipv4(self, msg, header_list=dict(), dp_dict=dict()):
+    def _packet_in_ipv4(self, msg, header_list=dict(), dp_dict=):
 
         pkt_dict = dict()
         pkt_dict["ipv4"] = {
@@ -133,20 +133,20 @@ class QsysTest(SimpleSwitch13):
                 'dst':_eth.dst,
                 }
         pkt_dict["data"] = msg.data
-        self.send_qsys(msg, pkt_dict)
+        self.send_qsys(msg, pkt_dict, dp_dict)
         
-    def send_qsys(self, msg, pkt_dict=dict()):
+    def send_qsys(self, msg, pkt_dict, dp_dict):
         if self.__DEBUG_MODE__:
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
         if result == True:
-            self._packet_out(msg,pkt_dict)
+            self._packet_out(msg,pkt_dict, dp_dict)
             return
         #Drop Packet
         self.logger.info('Drop:{}'.format(pkt_dict))
         return 
 
-    def _packet_out(self, msg, header_list=dict(), dp_dict=dict()):
+    def _packet_out(self, msg, header_list, dp_dict):
         dp = dp_dict["dp"]
         ofproto = dp_dict["ofproto"]
         parser = dp_dict["parser"]
