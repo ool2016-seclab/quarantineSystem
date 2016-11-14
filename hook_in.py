@@ -136,6 +136,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
         if result == True:
+            self.logger.info("Qsys:{}".format(header_list))
             self._packet_out(msg,header_list, dp_dict)
             return
         #Drop Packet
@@ -149,7 +150,6 @@ class QsysTest(SimpleSwitch13):
         dpid = dp_dict["dpid"]
         in_port = dp_dict["in_port"]
         #Transport to dst
-        self.logger.info(header_list)
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
         #該当するSWの中にMacAddrがあるか？
