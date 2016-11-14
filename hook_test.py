@@ -84,9 +84,7 @@ class QsysTest(SimpleSwitch13):
         #if self.__DEBUG_MODE__:
         self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
-        (self.logger.info("protocol:{}".format(p))
-                for p in pkt.protocols if type(p) != str)
-        header_list = self.logger.info(dict((p.protocol_name, p)
+        header_list = dict((str(p.protocol_name), str(p))
                            for p in pkt.protocols if type(p) != str))
         #Transport to dst
         src_eth = header_list[ETHERNET].src
