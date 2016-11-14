@@ -128,10 +128,6 @@ class QsysTest(SimpleSwitch13):
             "src": int(netaddr.IPAddress(header_list[IPV4].src)),
             "dst": int(netaddr.IPAddress(header_list[IPV4].dst)),
             }
-        pkt_dict["eth"] = {
-                'src':_eth.src,
-                'dst':_eth.dst,
-                }
         pkt_dict["data"] = msg.data
         self.send_qsys(msg, pkt_dict, dp_dict)
         
