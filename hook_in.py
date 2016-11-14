@@ -120,7 +120,8 @@ class QsysTest(SimpleSwitch13):
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
-            output = ofproto.OFPP_NORMAL
+            #TODO
+            #output = ofproto.OFPP_NORMAL
          
             self.logger.info('Receive GARP from [%s].', src_ip,
                              extra=dpid)
