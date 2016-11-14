@@ -11,7 +11,8 @@ from ryu.lib.packet import *
 from ryu.controller import dpset
 from qsys import Qsys
 import netaddr
-from builtins import dict
+import hasattr
+from builtins import dict, hasattr
 
 ETHERNET = ethernet.ethernet.__name__
 VLAN = vlan.vlan.__name__
@@ -84,7 +85,7 @@ class QsysTest(SimpleSwitch13):
         #if self.__DEBUG_MODE__:
         self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
-        header_list = dict((p.key, p)
+        header_list = dict((hasattr(p.protocol_name), p)
                            for p in pkt.protocols if type(p) != str)
         #Transport to dst
         self.logger.info("Header::{}".format(header_list))
