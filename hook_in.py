@@ -164,6 +164,6 @@ class QsysTest(SimpleSwitch13):
             out_port = ofproto.OFPP_FLOOD
         actions = [parser.OFPActionOutput(out_port)]
         out = parser.OFPPacketOut(
-            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
+            datapath=dp, buffer_id=msg.buffer_id, in_port=in_port,
             actions=actions, data=msg.data)
         datapath.send_msg(out)
