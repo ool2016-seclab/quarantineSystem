@@ -122,7 +122,7 @@ class QsysTest(SimpleSwitch13):
         self._packet_out(msg, header_list, dp_dict)
 
     def _packet_in_ipv4(self, msg, header_list, dp_dict):
-
+        self.logger.info("Qsys:{}".format(header_list))
         pkt_dict = dict()
         pkt_dict["ipv4"] = {
             "src": int(netaddr.IPAddress(header_list[IPV4].src)),
@@ -136,7 +136,6 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
         if result == True:
-            self.logger.info("Qsys:{}".format(header_list))
             self._packet_out(msg,header_list, dp_dict)
             return
         #Drop Packet
