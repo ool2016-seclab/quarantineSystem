@@ -14,11 +14,11 @@ import netaddr
 from builtins import dict
 #import time
 
-ETHERNET = ethernet.ethernet
+ETHERNET = "ethernet.ethernet"
 VLAN = vlan.vlan
-IPV4 = ipv4.ipv4
-ARP = arp.arp
-ICMP = icmp.icmp
+IPV4 = "ipv4.ipv4"
+ARP = "arp.arp"
+ICMP = "icmp.icmp"
 TCP = tcp.tcp
 UDP = udp.udp
 
