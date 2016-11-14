@@ -104,11 +104,11 @@ class QsysTest(SimpleSwitch13):
 
     def _packet_in_arp(self, msg, header_list=dict(), dp_dict=dict()):
         # ARP packet handling.
-        dp = dp_dict['dp']
-        ofproto = dp_dict['ofproto']
-        parser = dp_dict['parser']
-        dpid = dp_dict['dpid']
-        in_port = dp_dict['in_port']
+        dp = dp_dict["dp"]
+        ofproto = dp_dict["ofproto"]
+        parser = dp_dict["parser"]
+        dpid = dp_dict["dpid"]
+        in_port = dp_dict["in_port"]
         src_ip = header_list[ARP].src_ip
         dst_ip = header_list[ARP].dst_ip
 
@@ -147,11 +147,11 @@ class QsysTest(SimpleSwitch13):
         return 
 
     def _packet_out(self, msg, header_list=dict(), dp_dict=dict()):
-        dp = dp_dict['dp']
-        ofproto = dp_dict['ofproto']
-        parser = dp_dict['parser']
-        dpid = dp_dict['dpid']
-        in_port = dp_dict['in_port']
+        dp = dp_dict["dp"]
+        ofproto = dp_dict["ofproto"]
+        parser = dp_dict["parser"]
+        dpid = dp_dict["dpid"]
+        in_port = dp_dict["in_port"]
         #Transport to dst
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
