@@ -111,15 +111,13 @@ class QsysTest(SimpleSwitch13):
         in_port = dp_dict['in_port']
         src_ip = header_list[ARP].src_ip
         dst_ip = header_list[ARP].dst_ip
-        srcip = ip_addr_ntoa(src_ip)
-        dstip = ip_addr_ntoa(dst_ip)
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
             output = ofproto.OFPP_NORMAL
          
-            self.logger.info('Receive GARP from [%s].', srcip,
-                             extra=self.sw_id)
+            self.logger.info('Receive GARP from [%s].', src_ip,
+                             extra=dpid)
             self.logger.info('Send GARP (normal).', dpid)
         self._packet_out(msg, header_list)
 
