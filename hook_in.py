@@ -15,9 +15,6 @@ from builtins import dict
 #import time
 from ryu.app.rest_router import OfCtl
 
-
-MAX_SUSPENDPACKETS = 50  # Threshold of the packet suspends thread count.
-
 ETHERNET = ethernet.ethernet.__name__
 VLAN = vlan.vlan.__name__
 IPV4 = ipv4.ipv4.__name__
@@ -26,7 +23,7 @@ ICMP = icmp.icmp.__name__
 TCP = tcp.tcp.__name__
 UDP = udp.udp.__name__
 
-class dp_obj:
+class Dp_obj:
     def __init__(self, msg):
         self.datapath = msg.datapath
         self.dpid = self.datapath.id
@@ -73,7 +70,7 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_handler(self, ev):
         #パケットから送信元のIP・MAC・宛先のIP・MAC・dataを取得
         msg = ev.msg
-        dp = dp_obj(msg)
+        dp = Dp_obj(msg)
         datapath = dp.datapath
         dpid = dp.dpid
         ofproto = dp.ofproto
