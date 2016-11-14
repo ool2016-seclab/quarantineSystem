@@ -24,12 +24,12 @@ from ryu.topology import switches
 import sqlite3
 
 class DbAccess:
-    def __init(self):
+    def __init__(self):
         dbname = 'black_client.sqlite3'
         conn = sqlite3.connect(dbname)
         self.c = conn.cursor()
     def get_list(self):
-        self.c.execute("SELECT * FROM \'access_block_ip\';")
+        return self.c.execute("SELECT * FROM \'access_block_ip\';")
 class Qsys:
     def __init__(self, *args, **kwargs):
         print(DbAccess().get_list())
