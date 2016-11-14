@@ -81,8 +81,8 @@ class QsysTest(SimpleSwitch13):
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
-            if self.__DEBUG_MODE__:
-                self.logger.info("packet-in {}".format(pkt))
+            #if self.__DEBUG_MODE__:
+            self.logger.info("packet-in {}".format(pkt))
         except:
             self.logger.debug("malformed packet")
             return
