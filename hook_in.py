@@ -78,7 +78,7 @@ class QsysTest(SimpleSwitch13):
         for p in pkt.protocols:
             if type(p) != str:
                 self.logger.info(":::aaa:::{}".format(type(p)))
-                header_list = dict(p.protocol_name)
+                header_list[p.protocol_name] = p
                 self.logger.info(":::bbb:::")
                            
         if self.__DEBUG_MODE__:
