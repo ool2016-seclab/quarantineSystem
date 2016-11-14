@@ -102,7 +102,7 @@ class QsysTest(SimpleSwitch13):
             return
 
 
-    def _packet_in_arp(self, msg, header_list=dict(), dp_dict=dict()):
+    def _packet_in_arp(self, msg, header_list, dp_dict):
         # ARP packet handling.
         dp = dp_dict["dp"]
         ofproto = dp_dict["ofproto"]
@@ -129,14 +129,14 @@ class QsysTest(SimpleSwitch13):
             "dst": int(netaddr.IPAddress(header_list[IPV4].dst)),
             }
         pkt_dict["data"] = msg.data
-        self.send_qsys(msg, pkt_dict, dp_dict)
+        self.send_qsys(msg, header_list, pkt_dict, dp_dict)
         
-    def send_qsys(self, msg, pkt_dict, dp_dict):
+    def send_qsys(self, msg, pkt_dict, header_list, dp_dict):
         if self.__DEBUG_MODE__:
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
         if result == True:
-            self._packet_out(msg,pkt_dict, dp_dict)
+            self._packet_out(msg,header_list, dp_dict)
             return
         #Drop Packet
         self.logger.info('Drop:{}'.format(pkt_dict))
