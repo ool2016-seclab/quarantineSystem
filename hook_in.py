@@ -92,18 +92,18 @@ class QsysTest(SimpleSwitch13):
            # if self.__DEBUG_MODE__:
             self.logger.info("Not Ether type")
             return
-        pkt_dict.update(ETHERNET,eth)
+        pkt_dict.update({ETHERNET:eth})
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][eth.src] = in_port
         #arpパケット
         arp = pkt.get_protocol(ARP)
         ipv4 = pkt.get_protocol(IPV4)
         if arp:
-            pkt_dict.update(ARP,arp)
+            pkt_dict.update({ARP:arp})
             self._packet_in_arp(msg, pkt, pkt_dict, dp)
             return
         elif ipv4:
-            pkt_dict.update(IPV4,ipv4)
+            pkt_dict.update({IPV4:ipv4})
             self._packet_in_ipv4(msg, pkt, pkt_dict, dp)
         else:
             #IPV6 or others?
@@ -128,7 +128,7 @@ class QsysTest(SimpleSwitch13):
         self._packet_out(msg, pkt, dp)
 
     def _packet_in_ipv4(self, msg, pkt, pkt_dict, dp):
-        pkt_dict.update(["data"],msg.data)
+        pkt_dict.update({'data':msg.data})
         self.send_qsys(msg, pkt_dict, dp)
         
     def send_qsys(self, msg, pkt_dict,  dp):
