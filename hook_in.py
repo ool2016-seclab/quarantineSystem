@@ -14,13 +14,13 @@ import netaddr
 from builtins import dict
 #import time
 
-ETHERNET = ethernet.ethernet.__name__
-VLAN = vlan.vlan.__name__
-IPV4 = ipv4.ipv4.__name__
-ARP = arp.arp.__name__
-ICMP = icmp.icmp.__name__
-TCP = tcp.tcp.__name__
-UDP = udp.udp.__name__
+ETHERNET = ethernet.ethernet
+VLAN = vlan.vlan
+IPV4 = ipv4.ipv4
+ARP = arp.arp
+ICMP = icmp.icmp
+TCP = tcp.tcp
+UDP = udp.udp
 
 class Dp_obj:
     def __init__(self, msg):
