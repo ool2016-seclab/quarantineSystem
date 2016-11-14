@@ -32,7 +32,7 @@ class DbAccess:
         return self.c.execute("SELECT * FROM \'access_block_ip\';")
 class Qsys:
     def __init__(self, *args, **kwargs):
-        self.logger.info(DbAccess.get_list())
+        print(DbAccess.get_list())
         True
     def send(self, pkt_dict):
         return True
