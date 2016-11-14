@@ -80,13 +80,12 @@ class QsysTest(SimpleSwitch13):
         pkt = packet.Packet(msg.data)
         if not pkt:
             self.logger.info("ERROR::{}".format(pkt))
-            while 1:
-                True
+
         #if self.__DEBUG_MODE__:
         self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
         header_list = dict((p.protocol_name, p)
-                           for p in pkt.protocols if type(p) != str)
+                           for p in pkt.protocols if type(p) == str)
         #Transport to dst
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
