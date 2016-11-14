@@ -38,7 +38,7 @@ class SystemActionModei(enum.Enum):
     quarantine = 1
 
 class QsysTest(SimpleSwitch13):
-    __DEBUG_MODE__ = True #:on,F:off
+    __DEBUG_MODE__ = False #:on,F:off
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
 
