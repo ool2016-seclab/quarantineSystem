@@ -81,16 +81,16 @@ class QsysTest(SimpleSwitch13):
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
-            #if self.__DEBUG_MODE__:
-            self.logger.info("packet-in {}".format(pkt))
+            if self.__DEBUG_MODE__:
+                self.logger.info("packet-in {}".format(pkt))
         except:
             self.logger.debug("malformed packet")
             return
         pkt_dict = dict()
         eth = pkt.get_protocol(ETHERNET)
         if not eth:
-           # if self.__DEBUG_MODE__:
-            self.logger.info("Not Ether type")
+            if self.__DEBUG_MODE__:
+                self.logger.info("Not Ether type")
             return
         pkt_dict.update({ETHERNET:eth})
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
