@@ -86,23 +86,8 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-        header_list = dict()
-        for p in pkt.protocols:
-            if type(p) != str:
-                try:
-                    header_list.update(dict(p)) 
-                    self.logger.info("HEADER:{}".format(p))
-                except:
-                    self.logger.info("EXCEPT::{}".format(p))
 
-
-
-
-        self._packet_out(msg, header_list, dp)
-        return
-        if self.__DEBUG_MODE__:
-            self.logger.info("HEADER:{}".format(header_list))
-        if not ETHERNET in header_list:
+        if not ETHERNET in pkt:
             if self.__DEBUG_MODE__:
                 self.logger.info("Not Ether type")
             return
