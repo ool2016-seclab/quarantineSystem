@@ -21,9 +21,18 @@ from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from ryu.lib import dpid as dpid_lib
 from ryu.controller import dpset
 from ryu.topology import switches
+import sqlite3
 
+class DbAccess:
+    def __init(self):
+        dbname = 'black_client.sqlite3'
+        conn = sqlite3.connect(dbname)
+        self.c = conn.cursor()
+    def get_list(self):
+        return self.c.execute("SELECT * FROM \'access_block_ip\';")
 class Qsys:
     def __init__(self, *args, **kwargs):
+        self.logger.info(DbAccess.get_list())
         True
     def send(self, pkt_dict):
-        return False
+        return True
