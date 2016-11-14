@@ -28,11 +28,11 @@ class DbAccess:
         dbname = 'black_client.sqlite3'
         conn = sqlite3.connect(dbname)
         self.c = conn.cursor()
-    def get_list():
-        return self.c.execute("SELECT * FROM \'access_block_ip\';")
+    def get_list(self):
+        self.c.execute("SELECT * FROM \'access_block_ip\';")
 class Qsys:
     def __init__(self, *args, **kwargs):
-        print(DbAccess.get_list())
+        print(DbAccess().get_list())
         True
     def send(self, pkt_dict):
         return True
