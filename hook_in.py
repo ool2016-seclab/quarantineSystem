@@ -128,7 +128,7 @@ class QsysTest(SimpleSwitch13):
             "dst": int(netaddr.IPAddress(header_list[IPV4].dst)),
             }
         pkt_dict["data"] = msg.data
-        self.send_qsys(msg, header_list, pkt_dict, dp_dict)
+        self.send_qsys(msg, pkt_dict, header_list, dp_dict)
         
     def send_qsys(self, msg, pkt_dict, header_list, dp_dict):
         self.logger.info("Qsys:{}".format(header_list))
