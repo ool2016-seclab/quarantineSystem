@@ -86,6 +86,8 @@ class QsysTest(SimpleSwitch13):
         #パケットのヘッダ情報を取得
         header_list = dict((p.protocol_name, p)
             for p in pkt.protocols if type(p) != str)
+        self._packet_out(msg, header_list, dp)
+        return
         if self.__DEBUG_MODE__:
             self.logger.info("HEADER:{}".format(header_list))
         if not ETHERNET in header_list:
