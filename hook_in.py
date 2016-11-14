@@ -88,8 +88,8 @@ class QsysTest(SimpleSwitch13):
             return
 
         if not ETHERNET in pkt:
-            if self.__DEBUG_MODE__:
-                self.logger.info("Not Ether type")
+           # if self.__DEBUG_MODE__:
+            self.logger.info("Not Ether type")
             return
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][header_list[ETHERNET].src] = in_port
