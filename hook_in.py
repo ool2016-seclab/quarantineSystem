@@ -121,7 +121,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Send GARP (normal).', dpid)
         self._packet_out(msg, header_list)
 
-    def _packet_in_ipv4(self, msg, header_list=dict(), dp_dict=):
+    def _packet_in_ipv4(self, msg, header_list=dict(), dp_dict):
 
         pkt_dict = dict()
         pkt_dict["ipv4"] = {
