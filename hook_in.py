@@ -80,8 +80,8 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
 
-        if self.__DEBUG_MODE__:
-            self.logger.info("packet-in {}".format(pkt))
+        #if self.__DEBUG_MODE__:
+        self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
         header_list = dict((p.protocol_name, p)
                            for p in pkt.protocols if type(p) != str)
