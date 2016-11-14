@@ -86,31 +86,37 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-
-        if not ETHERNET in pkt:
+        pkt_dict = dict()
+        eth = pkt.get_protocol(ETHERNET)
+        if not eth:
            # if self.__DEBUG_MODE__:
             self.logger.info("Not Ether type")
             return
+        pkt_dict.update(ETH,eth)
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
-        self.mac_to_port[dpid][header_list[ETHERNET].src] = in_port
+        self.mac_to_port[dpid][eth.src] = in_port
         #arpパケット
-        if ARP in pkt:
-            self._packet_in_arp(msg, pkt, dp)
+        arp = pkt.get_protocol(ARP)
+        ipv4 = pkt.get_protocol(IPV4)
+        if arp:
+            pkt_dict.update(ARP,arp)
+            self._packet_in_arp(msg, pkt, pkt_dict, dp)
             return
-        elif IPV4 in pkt:
-            self._packet_in_ipv4(msg, header_list, dp)
+        elif ipv4:
+            pkt_dict.update(IPV4,ipv4)
+            self._packet_in_ipv4(msg, pkt, pkt_dict, dp)
         else:
             #IPV6 or others?
             return
-    def _packet_in_arp(self, msg, pkt, dp):
+    def _packet_in_arp(self, msg, pkt, pkt_dict, dp):
         # ARP packet handling.
         datapath = dp.datapath
         dpid = dp.dpid
         ofproto = dp.ofproto
         parser = dp.parser
         in_port = dp.in_port
-        src_ip = pkt[ARP].src_ip
-        dst_ip = pkt[ARP].dst_ip
+        src_ip = pkt_dict[ARP].src_ip
+        dst_ip = pkt_dict[ARP].dst_ip
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
@@ -121,35 +127,30 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Send GARP (normal).', dpid)
         self._packet_out(msg, pkt, dp)
 
-    def _packet_in_ipv4(self, msg, pkt, dp):
-        pkt_dict = dict()
-        pkt_dict["ipv4"] = {
-            "src": int(netaddr.IPAddress(pkt[IPV4].src)),
-            "dst": int(netaddr.IPAddress(pkt[IPV4].dst)),
-            }
-        pkt_dict["data"] = msg.data
-        self.send_qsys(msg, pkt_dict, header_list, dp)
+    def _packet_in_ipv4(self, msg, pkt, pkt_dict, dp):
+        pkt_dict.update(["data"],msg.data)
+        self.send_qsys(msg, pkt_dict, dp)
         
-    def send_qsys(self, msg, pkt_dict, header_list, dp):
+    def send_qsys(self, msg, pkt_dict,  dp):
         if self.__DEBUG_MODE__:
             self.logger.info("Qsys_in{}".format(pkt_dict))
         result = Qsys().send(pkt_dict)
         if result == True:
-            self._packet_out(msg,header_list, dp)
+            self._packet_out(msg, pkt_dict, dp)
             return
         #Drop Packet
         self.logger.info('Drop:{}'.format(pkt_dict))
         return 
 
-    def _packet_out(self, msg, pkt, dp):
+    def _packet_out(self, msg, pkt_dict, dp):
         datapath = dp.datapath
         dpid = dp.dpid
         ofproto = dp.ofproto
         parser = dp.parser
         in_port = dp.in_port
         #Transport to dst
-        src_eth = pkt[ETHERNET].src
-        dst_eth = pkt[ETHERNET].dst
+        src_eth = pkt_dict[ETHERNET].src
+        dst_eth = pkt_dict[ETHERNET].dst
         #該当するSWの中にMacAddrがあるか？
         if dst_eth in self.mac_to_port[dpid]:
             #Switch output portをテーブルから指定
