@@ -92,7 +92,7 @@ class QsysTest(SimpleSwitch13):
                 try:
                     header_list.update(dict(p.protocol_name, p)) 
                 except:
-                    self.logger.info(2EXCEPT::{}".format(p))
+                    self.logger.info("EXCEPT::{}".format(p))
 
 
 
