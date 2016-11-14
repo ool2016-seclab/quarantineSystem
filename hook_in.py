@@ -149,6 +149,7 @@ class QsysTest(SimpleSwitch13):
         dpid = dp_dict["dpid"]
         in_port = dp_dict["in_port"]
         #Transport to dst
+        self.logger.info(header_list)
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
         #該当するSWの中にMacAddrがあるか？
