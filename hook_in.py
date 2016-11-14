@@ -29,7 +29,7 @@ class SystemActionModei(enum.Enum):
     quarantine = 1
 
 class QsysTest(SimpleSwitch13):
-    __DEBUG_MODE__ = False#T:on,F:off
+    __DEBUG_MODE__ = True:on,F:off
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
 
@@ -78,9 +78,7 @@ class QsysTest(SimpleSwitch13):
         header_list = []
         for p in pkt.protocols:
             if type(p) != str:
-                self.logger.info(":::aaa:::{}".format(type(p)))
                 header_list.append(dict(protocol_name=p))
-                self.logger.info(":::bbb:::")
                            
         if self.__DEBUG_MODE__:
             self.logger.info("HEADER:{}".format(header_list))
