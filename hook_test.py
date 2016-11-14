@@ -78,6 +78,9 @@ class QsysTest(SimpleSwitch13):
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
         pkt = packet.Packet(msg.data)
+        if not pkt:
+            self.logger.info("ERROR::{}".format(pkt))
+            return
         #if self.__DEBUG_MODE__:
         self.logger.info("packet-in {}".format(pkt))
         #パケットのヘッダ情報を取得
