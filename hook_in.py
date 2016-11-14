@@ -90,7 +90,8 @@ class QsysTest(SimpleSwitch13):
         for p in pkt.protocols:
             if type(p) != str:
                 try:
-                    header_list.update(dict(p.protocol_name, p)) 
+                    header_list.update(dict(p)) 
+                    self.logger.info("HEADER:{}".format(p))
                 except:
                     self.logger.info("EXCEPT::{}".format(p))
 
