@@ -87,6 +87,7 @@ class QsysTest(SimpleSwitch13):
         header_list = dict((p.protocol_name, p)
                            for p in pkt.protocols if type(p) == str)
         #Transport to dst
+        self.logger.info("Header::{}".format(header_list))
         src_eth = header_list[ETHERNET].src
         dst_eth = header_list[ETHERNET].dst
         #該当するSWの中にMacAddrがあるか？
