@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 
+import six
 from mininet.net import Mininet
 from mininet.cli import CLI
 from mininet.node import RemoteController
