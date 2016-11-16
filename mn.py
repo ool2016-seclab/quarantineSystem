@@ -3,7 +3,7 @@
 import six
 from mininet.net import Mininet
 from mininet.cli import CLI
-from mininet.node import RemoteController
+from mininet.node import RemoteController, OVSSwitch
 
 if __name__ == '__main__':
 
