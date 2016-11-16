@@ -7,15 +7,18 @@ from mininet.node import RemoteController
 
 if __name__ == '__main__':
 
-    net = Mininet()
-
+    net = Mininet(switch=OVSSwitch)
     net.addController('c0',controller=RemoteController)
+
     s1 = net.addSwitch('s1')
     host = {'h1':'10.0.0.1',
             'h2':'10.0.0.2',
             'h3':'10.0.0.3',
             }
     for h, ip in host:
-        net.addLink(net.addHost(h, ip), s1)
+        net.addLink(s1,net.addHost(h, ip))
+
+    net.build()
     net.start()
-    ofp_version(s1, ['OpenFlow13'])
+    command = 'ovs-vsctl set Bridge %s protocols=%s' % (s1, ['OpenFlow13'])
+    switch.cmd(command.split(' '))
