@@ -16,6 +16,6 @@ if __name__ == '__main__':
             'h3':'10.0.0.3',
             }
     for h, ip in host:
-        addlink(net.addHost(h, ip), s1)
+        net.addLink(net.addHost(h, ip), s1)
     net.start()
     ofp_version(s1, ['OpenFlow13'])
