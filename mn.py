@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 from mininet.net import Mininet
 from mininet.cli import CLI
@@ -17,3 +17,4 @@ if __name__ == '__main__':
     for h, ip in host:
         addlink(net.addHost(h, ip), s1)
     net.start()
+    ofp_version(s1, ['OpenFlow13'])
