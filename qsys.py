@@ -24,6 +24,7 @@ import sqlite3
 import netaddr
 from ryu.lib.packet import *
 import types
+from builtins import hasattr
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
@@ -58,9 +59,9 @@ class QsysPkt:
             return self.eth
         return None
     def get_ipv4_src(self):
-        if self.arp:
+        if hasattr(self,"arp"):
             return self.arp.src_ip
-        elif self.ipv4:
+        elif hasattr(self, "ipv4"):
             return self.ipv4.src
         else:
             return None
