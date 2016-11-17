@@ -184,7 +184,7 @@ class QsysTest(SimpleSwitch13):
     def update_mac_deny_list(self):
         while True:
             ip_to_mac = dict({val:key for key,val in self.mac_to_ipv4.items()})
-            self.logger(ip_to_mac)
+            self.logger.info(ip_to_mac)
             for dpid, dict in ip_to_mac:
                 for ip, mac in dict:
                     if QsysRelEval.LOW == self.qsys.get_reliability_eval(ip):
