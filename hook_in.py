@@ -9,10 +9,11 @@ from ryu.ofproto.ofproto_v1_3_parser import OFPMatch
 from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import *
 from ryu.controller import dpset
-from qsys import Qsys
 import netaddr
 from builtins import dict
+from ryu.lib import hub
 #import time
+from qsys import Qsys, QsysPkt, QsysRelEval
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
@@ -43,7 +44,11 @@ class QsysTest(SimpleSwitch13):
 
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
+        self.qsys = Qsys()
         self.mac_to_port = {}#{[dpid][addr] = in_port}
+        self.mac_to_ipv4 = {}#[dpid][addr] = ipv4
+        self.mac_deny_list = {}#List deny arrival
+        self.monitor_thread = hub.spawn(self.update_mac_deny_list)
 
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
@@ -86,28 +91,54 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-        pkt_dict = dict()
+        #pkt_dict = dict()
+        qsys_pkt = QsysPkt()
         eth = pkt.get_protocol(ETHERNET)
         if not eth:
             if self.__DEBUG_MODE__:
                 self.logger.info("Not Ether type")
             return
-        pkt_dict.update({ETHERNET:eth})
+        #pkt_dict.update({ETHERNET:eth})
+        qsys_pkt.set_eth(eth)
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][eth.src] = in_port
         #arpパケット
         arp = pkt.get_protocol(ARP)
         ipv4 = pkt.get_protocol(IPV4)
         if arp:
-            pkt_dict.update({ARP:arp})
-            self._packet_in_arp(msg, pkt, pkt_dict, dp)
+            #pkt_dict.update({ARP:arp})
+            qsys_pkt.set_arp(arp)
+            #self._packet_in_arp(msg, pkt, pkt_dict, dp)
+            self._packet_in_arp(msg, pkt, qsys_pkt, dp)
             return
         elif ipv4:
-            pkt_dict.update({IPV4:ipv4})
-            self._packet_in_ipv4(msg, pkt, pkt_dict, dp)
+            #pkt_dict.update({IPV4:ipv4})
+            qsys_pkt.set_ipv4(ipv4)
+            #self._packet_in_ipv4(msg, pkt, pkt_dict, dp)
+            self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
         else:
             #IPV6 or others?
             return
+    def _packet_in_arp(self, msg, pkt, qsys_pkt, dp):
+        # ARP packet handling.
+        datapath = dp.datapath
+        dpid = dp.dpid
+        ofproto = dp.ofproto
+        parser = dp.parser
+        in_port = dp.in_port
+        src_ip = qsys_pkt.arp.src_ip
+        dst_ip = qsys_pkt.arp.dst_ip
+
+        if src_ip == dst_ip:
+            # GARP -> packet forward (normal)
+            #TODO
+            #output = ofproto.OFPP_NORMAL
+         
+            self.logger.info('Receive GARP from [%s].', src_ip,
+                             extra=dpid)
+            self.logger.info('Send GARP (normal).', dpid)
+        self._packet_out(msg, qsys_pkt, dp)
+    """
     def _packet_in_arp(self, msg, pkt, pkt_dict, dp):
         # ARP packet handling.
         datapath = dp.datapath
@@ -127,23 +158,57 @@ class QsysTest(SimpleSwitch13):
                              extra=dpid)
             self.logger.info('Send GARP (normal).', dpid)
         self._packet_out(msg, pkt_dict, dp)
-
-    def _packet_in_ipv4(self, msg, pkt, pkt_dict, dp):
+"""
+    def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
+        qsys_pkt.data =msg.data
+        self.send_qsys(msg, qsys_pkt, dp)
+    """ def _packet_in_ipv4(self, msg, pkt, pkt_dict, dp):
         pkt_dict.update({'data':msg.data})
         self.send_qsys(msg, pkt_dict, dp)
-        
-    def send_qsys(self, msg, pkt_dict,  dp):
+   """     
+    def send_qsys(self, msg, qsys_pkt,  dp):
         if self.__DEBUG_MODE__:
             self.logger.info("Qsys_in{}".format(pkt_dict))
-        result = Qsys().send(pkt_dict)
+        result = self.qsys.send(qsys_pkt)
+        if True == result:
+            self._packet_out(msg, pkt_dict, dp)
+            return
+        else:#Drop Packet
+            self.logger.info('Drop:{}'.format(pkt_dict))
+            return 
+    """def send_qsys(self, msg, pkt_dict,  dp):
+        if self.__DEBUG_MODE__:
+            self.logger.info("Qsys_in{}".format(pkt_dict))
+        result = self.qsys.send(pkt_dict)
         if result == True:
             self._packet_out(msg, pkt_dict, dp)
             return
         #Drop Packet
         self.logger.info('Drop:{}'.format(pkt_dict))
         return 
-
-    def _packet_out(self, msg, pkt_dict, dp):
+    """
+    def _packet_out(self, msg, qsys_pkt, dp):
+        datapath = dp.datapath
+        dpid = dp.dpid
+        ofproto = dp.ofproto
+        parser = dp.parser
+        in_port = dp.in_port
+        #Transport to dst
+        src_eth = qsys_pkt.eth.src
+        dst_eth = qsys_pkt.eth.dst
+        #該当するSWの中にMacAddrがあるか？
+        if dst_eth in self.mac_to_port[dpid]:
+            #Switch output portをテーブルから指定
+            out_port = self.mac_to_port[dpid][dst_eth]
+        else:
+            #フラッディング
+            out_port = ofproto.OFPP_FLOOD
+        actions = [parser.OFPActionOutput(out_port)]
+        out = parser.OFPPacketOut(
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
+            actions=actions, data=msg.data)
+        datapath.send_msg(out)
+    """def _packet_out(self, msg, pkt_dict, dp):
         datapath = dp.datapath
         dpid = dp.dpid
         ofproto = dp.ofproto
@@ -164,3 +229,11 @@ class QsysTest(SimpleSwitch13):
             datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
             actions=actions, data=msg.data)
         datapath.send_msg(out)
+    """
+    def update_mac_deny_list(self):
+        while True:
+           # self.qsys.get_reliability_eval(
+           #    self.mac_deny_list.update()
+            hub.sleep(10)
+
+
