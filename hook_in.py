@@ -111,13 +111,13 @@ class QsysTest(SimpleSwitch13):
         if arp:
             qsys_pkt.set_arp(arp)
             self.mac_to_ipv4[dpid][eth.src] = arp.src_ip
-            self.qsys.regist_client(qsys_pkt.get_ipv4_src())
+            self.qsys.regist_client(qsys_pkt)
             self._packet_in_arp(msg, pkt, qsys_pkt, dp)
             return
         elif ipv4:
             qsys_pkt.set_ipv4(ipv4)
             self.mac_to_ipv4[dpid][eth.src] = ipv4.src
-            self.qsys.regist_client(qsys_pkt.get_ipv4_src())
+            self.qsys.regist_client(qsys_pkt)
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
         else:
             #IPV6 or others?
