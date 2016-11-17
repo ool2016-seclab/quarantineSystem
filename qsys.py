@@ -101,7 +101,7 @@ class Qsys:
     def send(self, qsys_pkt):
         return True
     def update_reliability_level(self, ipv4, num):
-        if self.is_ramde_of_reliability(num):
+        if self.is_range_of_reliability(num):
             self.reliability_level[ipv4] = num
     def regist_client(self,qsys_pkt):
         """Clientの登録
