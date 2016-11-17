@@ -8,8 +8,7 @@ import ryu.controller.dpset
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
-from ryu.lib.packet import packet
-from ryu.lib.packet import ethernet
+from ryu.lib.packet import *
 from ryu.lib import hub
 from webob import Response
 from ryu.controller import ofp_event
