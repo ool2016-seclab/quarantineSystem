@@ -135,7 +135,7 @@ class Qsys:
             elif level <= QsysRelLevel.LOW:
                 return QsysRelEval.LOW
             return QsysRelEval.MID
-    def is_range_of_reliability(level):
+    def is_range_of_reliability(self, level):
         if level <= QsysRelLevel.L_MAX and\
            level >= QsysRelLevel.MIN:
             return True
