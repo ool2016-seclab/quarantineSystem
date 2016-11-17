@@ -45,11 +45,26 @@ class QsysPkt:
         self.arp = arp
     def set_ipv4(self,ipv4):
         assert isinstance(ipv4, IPV4)
+        self.ipv4 = ipv4
+    def set_data(self,data):
+        assert isinstance(data, str)
+        self.data = data
     def ready(self):
         if self.eth and (self.arp or self.ipv4):
             return True
         else:
             return False
+    def get_eth(self):
+        if self.eth:
+            return self.eth
+        return None
+    def get_ipv4_src(self):
+        if self.arp:
+            return self.arp.src_ip
+        elif self.ipv4:
+            return self.ipv4.src
+        else:
+            return None
 
 class DbAccess:
     def __init__(self):
@@ -81,7 +96,7 @@ class QsysRelEval:
     
 class Qsys:
     def __init__(self, *args, **kwargs):
-        print(DbAccess().get_list())
+        #print(DbAccess().get_list())
         self.reliability_level = {}#信頼度レベル{ip:level}
     def send(self, qsys_pkt):
         return True
@@ -89,7 +104,11 @@ class Qsys:
         """Clientの登録
         はじめて通信を行ったClientを登録する。
         """
-        #TODO:Clientの登録処理
+        srcip = qsys_pkt.get_ipv4_src()
+        if srcip:
+            if self.reliability_level[srcip] is None:#Not exist
+                self.reliability_level.update({srcip:QsysRelLevel.MIN})#regist client
+            #TODO:Clientの登録処理
     def get_reliability_level(self,ipv4):
         """Clientの信頼度レベルを返す。"""
         level = self.reliability_level[ipv4]

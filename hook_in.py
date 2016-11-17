@@ -44,10 +44,11 @@ class QsysTest(SimpleSwitch13):
 
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
+        self.datapathes = []#[[dp,parser],]
         self.qsys = Qsys()
-        self.mac_to_port = {}#{[dpid][addr] = in_port}
+        self.mac_to_port = {}#{[dpid][addr] = in_port
         self.mac_to_ipv4 = {}#[dpid][addr] = ipv4
-        self.mac_deny_list = {}#List deny arrival
+        self.mac_deny_list = {}#List deny arrival(qsys eval is low)
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)
 
     #コントローラにSWが接続される
@@ -56,6 +57,7 @@ class QsysTest(SimpleSwitch13):
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
+        self.datapathes.append([datapath,parser])
         self.logger.info("Simple_Switch13_features")
         # install table-miss flow entry
         #
@@ -83,6 +85,7 @@ class QsysTest(SimpleSwitch13):
         in_port = dp.in_port
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
+        self.mac_to_ipv4.setdefault(dpid, {})
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
@@ -100,15 +103,21 @@ class QsysTest(SimpleSwitch13):
         qsys_pkt.set_eth(eth)
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][eth.src] = in_port
+            
+        
         #arpパケット
         arp = pkt.get_protocol(ARP)
         ipv4 = pkt.get_protocol(IPV4)
         if arp:
             qsys_pkt.set_arp(arp)
+            self.mac_to_ipv4[dpid][eth.src] = arp.src_ip
+            self.qsys.regist_client(qsys_pkt.get_ipv4_src())
             self._packet_in_arp(msg, pkt, qsys_pkt, dp)
             return
         elif ipv4:
             qsys_pkt.set_ipv4(ipv4)
+            self.mac_to_ipv4[dpid][eth.src] = ipv4.src
+            self.qsys.regist_client(qsys_pkt.get_ipv4_src())
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
         else:
             #IPV6 or others?
@@ -122,6 +131,8 @@ class QsysTest(SimpleSwitch13):
         in_port = dp.in_port
         src_ip = qsys_pkt.arp.src_ip
         dst_ip = qsys_pkt.arp.dst_ip
+
+
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
@@ -172,7 +183,16 @@ class QsysTest(SimpleSwitch13):
 
     def update_mac_deny_list(self):
         while True:
-           # self.qsys.get_reliability_eval(
+            ip_to_mac = {val:key for key,val in self.mac_to_ipv4.items()}
+            for dpid, dict in ip_to_mac:
+                for ip, mac in dict:
+                    if QsysRelEval.LOW == self.qsys.get_reliability_eval(ip):
+                        if not self.mac_deny_list[mac]:
+                            for dp in self.datapathes:#dp[0]:dp,dp[1]:parser
+                                match = dp[1].OFPMatch(eth_arc=eth)
+                                actions = []#Drop
+                                self.add_flow(dp, 0,match, actions)
+                            self.mac_deny_list.update(mac,ip)
            #    self.mac_deny_list.update()
             hub.sleep(10)
 
