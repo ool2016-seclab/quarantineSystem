@@ -185,9 +185,7 @@ class QsysTest(SimpleSwitch13):
         while True:
             ip_to_mac = {v:k for k, v in self.mac_to_ipv4.items()}
             self.logger.info("ip_to_mac{}".format(ip_to_mac))
-            for t,s in ip_to_mac.items():
-                self.logger.info("test{}".format(s))
-            for ip, mac in ip_to_mac:
+            for ip, mac in ip_to_mac.items():
                 if QsysRelEval.LOW == self.qsys.get_reliability_eval(ip):
                     if not self.mac_deny_list[mac]:
                         for dp in self.datapathes:#dp[0]:dp,dp[1]:parser
