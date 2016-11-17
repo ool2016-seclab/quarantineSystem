@@ -49,7 +49,8 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_port = {}#{[dpid][addr] = in_port
         self.mac_to_ipv4 = {}#[dpid][addr] = ipv4
         self.mac_deny_list = {}#List deny arrival(qsys eval is low)
-        hub.spawn(self.update_mac_deny_list)
+        self.monitor_thread = hub.spawn(self.update_mac_deny_list)
+        self.update_mac_deny_list()
 
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
