@@ -193,7 +193,7 @@ class QsysTest(SimpleSwitch13):
                         for dp in self.datapathes:#dp[0]:dp,dp[1]:parser
                             match = dp[1].OFPMatch(eth_src=eth)
                             actions = []#Drop
-                            self.add_flow(dp, 0,match, actions)
+                            self.add_flow(dp[0], 0,match, actions)
                         self.mac_deny_list.update(eth,ip)
            #    self.mac_deny_list.update()
             self.qsys.update_reliability_level('10.0.0.1', 1)
