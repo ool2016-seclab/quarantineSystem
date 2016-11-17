@@ -100,6 +100,9 @@ class Qsys:
         self.reliability_level = {}#信頼度レベル{ip:level}
     def send(self, qsys_pkt):
         return True
+    def update_reliability_level(self, ipv4, num):
+        if self.is_ramde_of_reliability(num):
+            self.reliability_level[ipv4] = num
     def regist_client(self,qsys_pkt):
         """Clientの登録
         はじめて通信を行ったClientを登録する。
@@ -132,3 +135,9 @@ class Qsys:
             elif level <= QsysRelLevel.LOW:
                 return QsysRelEval.LOW
             return QsysRelEval.MID
+    def is_range_of_reliability(level):
+        if level <= QsysRelLevel.L_MAX and\
+           level >= QsysRelLevel.MIN:
+            return True
+        else:
+            return False
