@@ -168,13 +168,13 @@ class QsysTest(SimpleSwitch13):
    """     
     def send_qsys(self, msg, qsys_pkt,  dp):
         if self.__DEBUG_MODE__:
-            self.logger.info("Qsys_in{}".format(pkt_dict))
+            self.logger.info("Qsys_in{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
         if True == result:
-            self._packet_out(msg, pkt_dict, dp)
+            self._packet_out(msg, qsys_pkt, dp)
             return
         else:#Drop Packet
-            self.logger.info('Drop:{}'.format(pkt_dict))
+            self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
     """def send_qsys(self, msg, pkt_dict,  dp):
         if self.__DEBUG_MODE__:

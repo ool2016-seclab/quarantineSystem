@@ -83,9 +83,9 @@ class Qsys:
     def __init__(self, *args, **kwargs):
         print(DbAccess().get_list())
         self.reliability_level = {}#信頼度レベル{ip:level}
-    def send(self, pkt_dict):
+    def send(self, qsys_pkt):
         return True
-    def regist_client(self,pkt_dict):
+    def regist_client(self,qsys_pkt):
         """Clientの登録
         はじめて通信を行ったClientを登録する。
         """
