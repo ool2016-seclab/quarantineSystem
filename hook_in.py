@@ -47,7 +47,7 @@ class QsysTest(SimpleSwitch13):
         self.datapathes = []#[[dp,parser],]
         self.qsys = Qsys()
         self.mac_to_port = {}#{[dpid][addr] = in_port
-        self.mac_to_ipv4 = {}#[dpid][addr] = ipv4
+        self.mac_to_ipv4 = {}#[addr] = ipv4
         self.mac_deny_list = {}#List deny arrival(qsys eval is low)
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)
         self.update_mac_deny_list()
@@ -86,7 +86,6 @@ class QsysTest(SimpleSwitch13):
         in_port = dp.in_port
         #送信元MACと送信元SWのポートの対応関係を記録
         self.mac_to_port.setdefault(dpid, {})
-        self.mac_to_ipv4.setdefault(dpid, {})
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
@@ -111,13 +110,13 @@ class QsysTest(SimpleSwitch13):
         ipv4 = pkt.get_protocol(IPV4)
         if arp:
             qsys_pkt.set_arp(arp)
-            self.mac_to_ipv4[dpid][eth.src] = arp.src_ip
+            self.mac_to_ipv4[eth.src] = arp.src_ip
             self.qsys.regist_client(qsys_pkt)
             self._packet_in_arp(msg, pkt, qsys_pkt, dp)
             return
         elif ipv4:
             qsys_pkt.set_ipv4(ipv4)
-            self.mac_to_ipv4[dpid][eth.src] = ipv4.src
+            self.mac_to_ipv4[eth.src] = ipv4.src
             self.qsys.regist_client(qsys_pkt)
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
         else:
@@ -184,7 +183,7 @@ class QsysTest(SimpleSwitch13):
 
     def update_mac_deny_list(self):
         while True:
-            ip_to_mac = dict({val:key for key,val in self.mac_to_ipv4.items()})
+            ip_to_mac = {v:k for k, v in self.mac_to_ipv4.items()}
             self.logger.info("ip_to_mac{}".format(ip_to_mac))
             for dpid, dict in ip_to_mac:
                 for ip, mac in dict:
