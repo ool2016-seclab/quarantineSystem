@@ -195,6 +195,6 @@ class QsysTest(SimpleSwitch13):
                             self.mac_deny_list.update(mac,ip)
            #    self.mac_deny_list.update()
             self.qsys.update_reliability_level("10.0.0.1", 0)
-            #hub.sleep(10)
+            hub.sleep(10)
 
 
