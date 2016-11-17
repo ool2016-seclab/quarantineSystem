@@ -194,7 +194,7 @@ class QsysTest(SimpleSwitch13):
                             match = dp[1].OFPMatch(eth_src=eth)
                             actions = []#Drop
                             self.add_flow(dp[0], 0,match, actions)
-                        self.mac_deny_list.update(ip)
+                        self.mac_deny_list.update({eth:ip})
            #    self.mac_deny_list.update()
             self.qsys.update_reliability_level('10.0.0.1', 1)
             hub.sleep(1)
