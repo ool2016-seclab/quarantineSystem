@@ -106,7 +106,7 @@ class Qsys:
         """
         srcip = qsys_pkt.get_ipv4_src()
         if srcip:
-            if self.reliability_level[srcip] is None:#Not exist
+            if not self.reliability_level[srcip] :#Not exist
                 self.reliability_level.update({srcip:QsysRelLevel.MIN})#regist client
             #TODO:Clientの登録処理
     def get_reliability_level(self,ipv4):
