@@ -5,7 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9340862b-4210-476a-a133-aa5e0c183d4c}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>api.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,7 +22,6 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="api.py" />
     <Compile Include="hook_in.py" />
     <Compile Include="mininet\clean.py" />
     <Compile Include="mininet\cli.py" />
@@ -42,10 +42,7 @@
     <Compile Include="mininet\util.py" />
     <Compile Include="mininet\__init__.py" />
     <Compile Include="mn.py" />
-    <Compile Include="monitor.py" />
     <Compile Include="qsys.py" />
-    <Compile Include="qsysDataStructure.py" />
-    <Compile Include="ryutest.py" />
     <Compile Include="ryu\app\bmpstation.py" />
     <Compile Include="ryu\app\cbench.py" />
     <Compile Include="ryu\app\conf_switch_key.py" />
@@ -468,9 +465,6 @@
     <Compile Include="ryu\topology\__init__.py" />
     <Compile Include="ryu\utils.py" />
     <Compile Include="ryu\__init__.py" />
-    <Compile Include="sano.py">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="ryu\app\gui_topology\html\index.html" />
