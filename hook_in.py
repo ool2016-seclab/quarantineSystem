@@ -198,9 +198,8 @@ class QsysTest(SimpleSwitch13):
                             match = dp[1].OFPMatch(eth_src=eth)
                             actions = []#Drop
                             self.add_flow(dp[0], 10,match, actions)
-                        self.mac_deny_list.update({eth:ip})
-           #    self.mac_deny_list.update()
-            self.qsys.update_reliability_level('10.0.0.1', 1)
+                        self.mac_deny_list.update({eth:ip})#拒否済に追加
+            self.qsys.update_reliability_level('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
             hub.sleep(1)
 
 
