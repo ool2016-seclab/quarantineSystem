@@ -24,6 +24,8 @@ TCP = tcp.tcp
 UDP = udp.udp
 
 class Dp_obj:
+    """datapathのオブジェクトをまとめるためのクラス
+    """
     def __init__(self, msg):
         self.datapath = msg.datapath
         self.dpid = self.datapath.id
@@ -33,6 +35,8 @@ class Dp_obj:
         self.in_port = msg.match['in_port']
 
 class SystemActionModei(enum.Enum):
+    """学習モード(正常時のデータを記録するためのモード)と
+    異常検知モード"""
    # あとでモード実装するはず？
     learn = 0
     quarantine = 1
@@ -44,13 +48,13 @@ class QsysTest(SimpleSwitch13):
 
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
-        self.datapathes = []#[[dp,parser],]
-        self.qsys = Qsys()
-        self.mac_to_port = {}#{[dpid][addr] = in_port
-        self.mac_to_ipv4 = {}#[addr] = ipv4
-        self.mac_deny_list = {}#List deny arrival(qsys eval is low)
-        self.monitor_thread = hub.spawn(self.update_mac_deny_list)
-       # self.update_mac_deny_list()
+        self.datapathes = []    #[[dp,parser],]
+        self.qsys = Qsys()      #Qsys object
+        self.mac_to_port = {}   #{dpid:{addr:in_port}}
+        self.mac_to_ipv4 = {}   #{mac:ipv4}
+        self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
+                                #到達拒否のClientで、swに拒否フローを流し込み終わったもの
+        self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
         
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
@@ -75,7 +79,7 @@ class QsysTest(SimpleSwitch13):
     #Packet_inのハンドラが呼ばれる
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-        #パケットから送信元のIP・MAC・宛先のIP・MAC・dataを取得
+        """パケットから送信元のIP・MAC・宛先のIP・MAC・dataを取得"""
         msg = ev.msg
         dp = Dp_obj(msg)
         datapath = dp.datapath
@@ -100,11 +104,10 @@ class QsysTest(SimpleSwitch13):
             if self.__DEBUG_MODE__:
                 self.logger.info("Not Ether type")
             return
-        qsys_pkt.set_eth(eth)
+        qsys_pkt.set_eth(eth)#qsys_pktにethを登録
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
         self.mac_to_port[dpid][eth.src] = in_port
             
-        
         #arpパケット
         arp = pkt.get_protocol(ARP)
         ipv4 = pkt.get_protocol(IPV4)
@@ -119,6 +122,7 @@ class QsysTest(SimpleSwitch13):
             self.mac_to_ipv4[eth.src] = ipv4.src
             self.qsys.regist_client(qsys_pkt)
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
+            return
         else:
             #IPV6 or others?
             return
@@ -132,16 +136,13 @@ class QsysTest(SimpleSwitch13):
         src_ip = qsys_pkt.arp.src_ip
         dst_ip = qsys_pkt.arp.dst_ip
 
-
-
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
             #TODO
             #output = ofproto.OFPP_NORMAL
-         
-            self.logger.info('Receive GARP from [%s].', src_ip,
-                             extra=dpid)
-            self.logger.info('Send GARP (normal).', dpid)
+            #self.logger.info('Receive GARP from [%s].', src_ip, extra=dpid)
+            #self.logger.info('Send GARP (normal).', dpid)
+            return
         self._packet_out(msg, qsys_pkt, dp)
 
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
@@ -150,7 +151,7 @@ class QsysTest(SimpleSwitch13):
    
     def send_qsys(self, msg, qsys_pkt,  dp):
         if self.__DEBUG_MODE__:
-            self.logger.info("Qsys_in{}".format(qsys_pkt))
+            self.logger.info("send_qsys{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
         if True == result:
             self._packet_out(msg, qsys_pkt, dp)
@@ -182,6 +183,9 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
 
     def update_mac_deny_list(self):
+        """低信頼度のClientをpacket_inしないようswitchにflowを流し込む。
+        スレッドとして立ち上げ定期的に実行する"""
+        #TODO:そのうちqsysからのイベントで呼び出せるようにしたい
         while True:
             ip_to_mac = {v:k for k, v in self.mac_to_ipv4.items()}
             self.logger.info("ip_to_mac{}".format(ip_to_mac))
