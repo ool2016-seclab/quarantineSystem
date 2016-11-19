@@ -75,11 +75,12 @@ class QsysDataStruct:
         self.ipv4_dst = ipv4.dst
         self.ipv4 = ipv4
     def set_data(self,data):
-        assert isinstance(data, str)
         """
         dataに値をsetする。
         data -- bytes
         """
+        self.logger.info("bytes:{}".format(type(data)))
+        assert isinstance(data, bytes)
         self.data = data
     def ready(self):
         """hasAttr? eth & ipv4Address
