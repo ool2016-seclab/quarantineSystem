@@ -33,8 +33,7 @@ ARP = arp.arp
 ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
-#TODO:QsysPktをQsysDataStructに変更
-class QsysPkt:
+class QsysDataStruct:
     def __init__(self):
        pass 
     def set_eth(self, eth):

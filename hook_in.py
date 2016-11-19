@@ -13,7 +13,7 @@ import netaddr
 from builtins import dict
 from ryu.lib import hub
 #import time
-from qsys import Qsys, QsysPkt, QsysRelEval
+from qsys import Qsys, QsysDataStruct, QsysRelEval
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
@@ -98,7 +98,7 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-        qsys_pkt = QsysPkt()
+        qsys_pkt = QsysDataStruct()
         eth = pkt.get_protocol(ETHERNET)
         if not eth:
             if self.__DEBUG_MODE__:
