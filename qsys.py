@@ -152,8 +152,8 @@ class Qsys:
             #TODO:Clientの登録処理
     def get_reliability_level(self,ipv4):
         """Clientの信頼度レベルを返す。"""
-        level = self.reliability_level[ipv4]
-        if level:
+        if ipv4 in self.reliability_level:
+            level = self.reliability_level[ipv4]
             return level
         else:
             return QsysRelLevel.UNKNOWN
