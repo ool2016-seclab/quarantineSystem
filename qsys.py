@@ -146,6 +146,9 @@ class Qsys:
         if srcip:
             if not srcip in self.reliability_level:#Not exist
                 self.reliability_level.update({srcip:QsysRelLevel.DEFAULT})#regist client
+                return True
+        else:
+            return False
             #TODO:Clientの登録処理
     def get_reliability_level(self,ipv4):
         """Clientの信頼度レベルを返す。"""
