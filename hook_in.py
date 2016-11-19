@@ -113,14 +113,18 @@ class QsysTest(SimpleSwitch13):
         ipv4 = pkt.get_protocol(IPV4)
         if arp:
             qsys_pkt.set_arp(arp)
-            self.mac_to_ipv4[eth.src] = arp.src_ip
-            self.qsys.regist_client(qsys_pkt)
+            ipv4_src = qsys_pkt.get_ipv4Addr_src()
+            self.mac_to_ipv4[eth.src] = ipv4_src
+            if QsysRelEval.UNKNOWN == self.qsys.get_reliability_eval(ipv4_src):
+                self.qsys.regist_client(qsys_pkt)
             self._packet_in_arp(msg, pkt, qsys_pkt, dp)
             return
         elif ipv4:
             qsys_pkt.set_ipv4(ipv4)
-            self.mac_to_ipv4[eth.src] = ipv4.src
-            self.qsys.regist_client(qsys_pkt)
+            ipv4_src = qsys_pkt.get_ipv4Addr_src()
+            self.mac_to_ipv4[eth.src] = ipv4_src
+            if QsysRelEval.UNKNOWN == self.qsys.get_reliability_eval(ipv4_src):
+                self.qsys.regist_client(qsys_pkt)
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
             return
         else:
@@ -128,13 +132,13 @@ class QsysTest(SimpleSwitch13):
             return
     def _packet_in_arp(self, msg, pkt, qsys_pkt, dp):
         # ARP packet handling.
-        src_ip = qsys_pkt.arp.src_ip
-        dst_ip = qsys_pkt.arp.dst_ip
         #datapath = dp.datapath
         #dpid = dp.dpid
         #ofproto = dp.ofproto
         #parser = dp.parser
         #in_port = dp.in_port
+        src_ip = qsys_pkt.get_ipv4Addr_src()
+        dst_ip = qsys_pkt.get_ipv4Addr_dst()
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
