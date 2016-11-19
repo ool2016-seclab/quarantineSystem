@@ -192,13 +192,17 @@ class QsysTest(SimpleSwitch13):
             for ip, eth in ip_to_mac.items():
                 self.logger.info("IP:{}".format(ip))
                 self.logger.info("Eval:{}".format(self.qsys.get_reliability_eval(ip)))
-                if QsysRelEval.LOW == self.qsys.get_reliability_eval(ip):
+                eval = self.qsys.get_reliability_eval(ip)
+                if QsysRelEval.LOW == eval:
                     if not eth in self.mac_deny_list:
                         for dp in self.datapathes:#dp[0]:dp,dp[1]:parser
                             match = dp[1].OFPMatch(eth_src=eth)
                             actions = []#Drop
                             self.add_flow(dp[0], 10,match, actions)
                         self.mac_deny_list.update({eth:ip})#拒否済に追加
+                elif QsysRelEval.UNKNOWN == eval:
+                    #TODO:登録されていないClientを参照した際の例外処理
+                    pass
             self.qsys.update_reliability_level('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
             hub.sleep(1)
 
