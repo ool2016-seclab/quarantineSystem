@@ -24,8 +24,8 @@ def myNetwork():
                       port=6633)
 
     info( '*** Add switches\n')
-    s1 = net.addSwitch('s1', cls=OVSKernelSwitch, dpid='1')
-    s2 = net.addSwitch('s2', cls=OVSKernelSwitch, dpid='2')
+    s1 = net.addSwitch('s1', cls=OVSKernelSwitch, dpid='1', protocols='OpenFlow13')
+    s2 = net.addSwitch('s2', cls=OVSKernelSwitch, dpid='2', protocols='OpenFlow13')
 
     info( '*** Add hosts\n')
     h1 = net.addHost('h1', cls=Host, ip='192.168.1.1/24', defaultRoute=None)
