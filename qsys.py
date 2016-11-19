@@ -45,8 +45,8 @@ class QsysDataStruct:
     ipv4_dst       送信先IPv4アドレス   '10.0.0.2'
     ============== ==================== =====================
     """
-    def __init__(self):
-       pass 
+    def __init__(self, logger):
+        self.logger = logger
     def set_eth(self, eth):
         """
         eth_src/dstに値をsetする。
@@ -163,7 +163,8 @@ class QsysRelEval:
     UNKNOWN = -1
     
 class Qsys:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, logger, *args, **kwargs):
+        self.logger = logger
         #print(DbAccess().get_list())
         self.reliability_level = {}#信頼度レベル{ip:level}
     def send(self, qsys_pkt):

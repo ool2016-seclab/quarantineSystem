@@ -49,7 +49,7 @@ class QsysTest(SimpleSwitch13):
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
         self.datapathes = []    #[[dp,parser],]
-        self.qsys = Qsys()      #Qsys object
+        self.qsys = Qsys(logger)      #Qsys object
         self.mac_to_port = {}   #{dpid:{addr:in_port}}
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
@@ -98,7 +98,7 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-        qsys_pkt = QsysDataStruct()
+        qsys_pkt = QsysDataStruct(logger)
         eth = pkt.get_protocol(ETHERNET)
         if not eth:
             if self.__DEBUG_MODE__:
