@@ -162,6 +162,13 @@ class QsysRelEval:
     UNKNOWN = -1
     
 class Qsys:
+    """評価システム。
+    =================  ==================== =====================
+    Attribute           Description          Example
+    =================  ==================== =====================
+    reliability_level  Clientの信頼度レベル {'10.0.0.1' : 5}
+    =================  ==================== =====================
+"""
     def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         #print(DbAccess().get_list())
