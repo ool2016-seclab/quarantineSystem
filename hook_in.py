@@ -152,7 +152,7 @@ class QsysTest(SimpleSwitch13):
         self._packet_out(msg, qsys_pkt, dp)
 
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
-        qsys_pkt.data =msg.data
+        qsys_pkt.set_data(msg.data)
         self.send_qsys(msg, qsys_pkt, dp)
    
     def send_qsys(self, msg, qsys_pkt,  dp):
