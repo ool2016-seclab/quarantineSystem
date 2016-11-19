@@ -34,28 +34,56 @@ ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
 class QsysDataStruct:
+    """
+    Qsysで使用するデータ構造を定義するクラス。
+    ============== ==================== =====================
+    Attribute      Description          Example
+    ============== ==================== =====================
+    eth_src        送信元MACアドレス    '08:60:6e:7f:74:e7'
+    eth_dst        送信先MACアドレス    'ff:ff:ff:ff:ff:ff'
+    ipv4_src       送信元IPv4アドレス   '10.0.0.1'
+    ipv4_dst       送信先IPv4アドレス   '10.0.0.2'
+    ============== ==================== =====================
+    """
     def __init__(self):
        pass 
     def set_eth(self, eth):
+        """
+        eth_src/dstに値をsetする。
+        eth -- ryu.lib.packet.ethernetオブジェクト
+        """
         assert isinstance(eth, ETHERNET)
         self.eth_src = eth.src
         self.eth_dst = eth.dst
         self.eth = eth
     def set_arp(self, arp):
+        """
+        ipv4_src/dstに値をsetする。
+        arp -- ryu.lib.packet.arpオブジェクト
+        """
         assert isinstance(arp, ARP)
         self.ipv4_src = arp.src_ip
         self.ipv4_dst = arp.dst_ip
         self.arp = arp
     def set_ipv4(self,ipv4):
+        """
+        ipv4_src/dstに値をsetする。
+        ipv4 -- ryu.lib.packet.ipv4オブジェクト
+        """
         assert isinstance(ipv4, IPV4)
         self.ipv4_src = ipv4.src
         self.ipv4_dst = ipv4.dst
         self.ipv4 = ipv4
     def set_data(self,data):
         assert isinstance(data, str)
+        """
+        dataに値をsetする。
+        data -- bytes
+        """
         self.data = data
     def ready(self):
-        """hasAttr? eth & ipv4Address"""
+        """hasAttr? eth & ipv4Address
+        return bool"""
         if self.get_ethObj() and self.get_ipv4Addr_src() and self.get_ipv4Addr_dst():
             return True
         else:
