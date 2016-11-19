@@ -17,9 +17,10 @@ if __name__ == '__main__':
             'h3':'10.0.0.3',
             }
     for h, ip in host:
-        _host = topo.addHost(h,{'ip':ip})
+        _host = topo.addHost(h,{'setIp':ip})
         topo.addLink(s1, _host)
     net = Mininet(switch=OVSSwitch, topo=topo)
+        
     net.addController('c0',controller=RemoteController)
     net.build()
     net.start()
