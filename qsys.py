@@ -68,11 +68,11 @@ class QsysDataStruct:
         """return [src(str),dst(str)]"""
         return [self.get_ethAddr_src(), self.get_ethAddr_dst()]
     def get_ethAddr_src(self):
-        if hasattr(srlf,"src_eth"):
+        if hasattr(srlf,"eth_dst"):
             return self.eth_src
         return None
     def get_ethAddr_dst(self):
-        if hasattr(srlf,"dst_eth"):
+        if hasattr(srlf,"eth_dst"):
             return self.eth_dst
         return None
     def get_arpObj(self):
@@ -91,12 +91,12 @@ class QsysDataStruct:
         """return [src(str), dst(str)]"""
         return [self.get_ipv4Addr_src(), self.get_ipv4Addr_dst()]
     def get_ipv4Addr_src(self):
-        if hasattr(self,"src_ipv4"):
+        if hasattr(self,"ipv4_src"):
             return self.ipv4_src
         else:
             return None
     def get_ipv4Addr_dst(self):
-        if hasattr(self,"dst_ipv4"):
+        if hasattr(self,"ipv4_dst"):
             return self.ipv4_dst
         else:
             return None
