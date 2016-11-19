@@ -4,7 +4,7 @@ import six
 from mininet.net import Mininet
 from mininet.cli import CLI
 from mininet.link import Link
-from mininet.node import RemoteController, OVSSwitch
+from mininet.node import RemoteController, OVSSwitch, Host
 from mininet.topo import Topo
 
 
@@ -19,8 +19,8 @@ if __name__ == '__main__':
         'h3':'10.0.0.3',
         }
     for h, ip in host:
-        _host = net.addHost(h)
-        _host.setIP(ip, 24)
+        _host = Host(h)
+        _host.setIP(ip,24)
         net.addLink(s1, h)
     net.start()
     
