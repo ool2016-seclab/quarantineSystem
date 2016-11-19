@@ -38,33 +38,68 @@ class QsysDataStruct:
        pass 
     def set_eth(self, eth):
         assert isinstance(eth, ETHERNET)
+        self.eth_src = eth.src
+        self.eth_dst = eth.dst
         self.eth = eth
     def set_arp(self, arp):
         assert isinstance(arp, ARP)
+        self.ipv4_src = arp.src_ip
+        self.ipv4_dst = arp.dst_ip
         self.arp = arp
     def set_ipv4(self,ipv4):
         assert isinstance(ipv4, IPV4)
+        self.ipv4_src = ipv4.src
+        self.ipv4_dst = ipv4.dst
         self.ipv4 = ipv4
     def set_data(self,data):
         assert isinstance(data, str)
         self.data = data
     def ready(self):
-        if self.eth and (self.arp or self.ipv4):
+        """hasAttr? eth & ipv4Address"""
+        if self.get_ethObj() and self.get_ipv4Addr_src() and self.get_ipv4Addr_dst():
             return True
         else:
             return False
-    def get_eth(self):
-        if self.eth:
+    def get_ethObj(self):
+        if hasattr(srlf,"eth"):
             return self.eth
         return None
-    def get_ipv4_src(self):
-        if hasattr(self,"arp"):
-            return self.arp.src_ip
-        elif hasattr(self, "ipv4"):
-            return self.ipv4.src
+    def get_ethAddr(self):
+        """return [src(str),dst(str)]"""
+        return [self.get_ethAddr_src(), self.get_ethAddr_dst()]
+    def get_ethAddr_src(self):
+        if hasattr(srlf,"src_eth"):
+            return self.eth_src
+        return None
+    def get_ethAddr_dst(self):
+        if hasattr(srlf,"dst_eth"):
+            return self.eth_dst
+        return None
+    def get_arpObj(self):
+        """return object(ryu.lib.packet.arp.arp)"""
+        if hasattr(self, "arp"):
+            return self.arp
         else:
             return None
-
+    def get_ipv4Obj(self):
+        """return object(ryu.lib.packet.ipv4.ipv4)"""
+        if hasattr(self,"ipv4"):
+            return self.ipv4
+        else:
+            return None
+    def get_ipv4Addr(self):
+        """return [src(str), dst(str)]"""
+        return [self.get_ipv4Addr_src(), self.get_ipv4Addr_dst()]
+    def get_ipv4Addr_src(self):
+        if hasattr(self,"src_ipv4"):
+            return self.ipv4_src
+        else:
+            return None
+    def get_ipv4Addr_dst(self):
+        if hasattr(self,"dst_ipv4"):
+            return self.ipv4_dst
+        else:
+            return None
 class DbAccess:
     def __init__(self):
         dbname = 'black_client.sqlite3'
@@ -107,7 +142,7 @@ class Qsys:
         """Clientの登録
         はじめて通信を行ったClientを登録する。
         """
-        srcip = qsys_pkt.get_ipv4_src()
+        srcip = qsys_pkt.get_ipv4Addr_src()
         if srcip:
             if not srcip in self.reliability_level:#Not exist
                 self.reliability_level.update({srcip:QsysRelLevel.DEFAULT})#regist client
