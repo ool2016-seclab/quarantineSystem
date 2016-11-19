@@ -197,7 +197,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("ip_to_mac{}".format(ip_to_mac))
             for ip, eth in ip_to_mac.items():
                 self.logger.info("IP:{}".format(ip))
-                self.logger.info("Eval:{}".format(self.qsys.get_reliability_eval(ip)))
+                self.logger.info("Level:{}".format(self.qsys.get_reliability_level(ip)))
                 eval = self.qsys.get_reliability_eval(ip)
                 if QsysRelEval.LOW == eval:
                     if not eth in self.mac_deny_list:
