@@ -79,7 +79,6 @@ class QsysDataStruct:
         dataに値をsetする。
         data -- bytes
         """
-        self.logger.info("bytes:{}".format(type(data)))
         assert isinstance(data, bytes)
         self.data = data
     def ready(self):
