@@ -13,11 +13,11 @@ if __name__ == '__main__':
     s1 = net.addSwitch('s1')
     c0 = net.addController( 'c0', controller=RemoteController)
     net = Mininet()             
-        host = {
-            'h1':'10.0.0.1',
-            'h2':'10.0.0.2',
-            'h3':'10.0.0.3',
-            }
+    host = {
+        'h1':'10.0.0.1',
+        'h2':'10.0.0.2',
+        'h3':'10.0.0.3',
+        }
     for h, ip in host:
         _host = net.addHost(h)
         _host.setIP(ip, 24)
