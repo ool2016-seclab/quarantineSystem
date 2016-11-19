@@ -10,19 +10,23 @@ from mininet.topo import Topo
 
 
 if __name__ == '__main__':
-    topo = Topo()
-    s1 = topo.addSwitch('s1')
-    host = {'h1':'10.0.0.1',
+    s1 = net.addSwitch('s1')
+    c0 = net.addController( 'c0', controller=RemoteController)
+    net = Mininet()             
+        host = {
+            'h1':'10.0.0.1',
             'h2':'10.0.0.2',
             'h3':'10.0.0.3',
             }
     for h, ip in host:
-        _host = topo.addHost(h,{'setIp':ip})
-        topo.addLink(s1, _host)
-    net = Mininet(switch=OVSSwitch, topo=topo)
-        
-    net.addController('c0',controller=RemoteController)
-    net.build()
+        _host = net.addHost(h)
+        _host.setIP(ip, 24)
+        net.addLink(s1, h)
     net.start()
+    
     command = 'ovs-vsctl set Bridge %s protocols=%s' % (s1, ['OpenFlow13'])
-    switch.cmd(command.split(' '))
+    print(s1.cmd(command.split(' ')))
+    
+    CLI( net )                                                                                                            
+    net.stop()  
+    
