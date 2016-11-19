@@ -128,13 +128,13 @@ class QsysTest(SimpleSwitch13):
             return
     def _packet_in_arp(self, msg, pkt, qsys_pkt, dp):
         # ARP packet handling.
-        datapath = dp.datapath
-        dpid = dp.dpid
-        ofproto = dp.ofproto
-        parser = dp.parser
-        in_port = dp.in_port
         src_ip = qsys_pkt.arp.src_ip
         dst_ip = qsys_pkt.arp.dst_ip
+        #datapath = dp.datapath
+        #dpid = dp.dpid
+        #ofproto = dp.ofproto
+        #parser = dp.parser
+        #in_port = dp.in_port
 
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
