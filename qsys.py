@@ -68,7 +68,7 @@ class QsysDataStruct:
         """return [src(str),dst(str)]"""
         return [self.get_ethAddr_src(), self.get_ethAddr_dst()]
     def get_ethAddr_src(self):
-        if hasattr(srlf,"eth_dst"):
+        if hasattr(srlf,"eth_src"):
             return self.eth_src
         return None
     def get_ethAddr_dst(self):
