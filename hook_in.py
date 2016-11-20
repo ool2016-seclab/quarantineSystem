@@ -129,6 +129,7 @@ class QsysTest(SimpleSwitch13):
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
             return
         else:
+            self.logger.info("Others Pkt:{}".format(msg))
             #IPV6 or others?
             return
     def _packet_in_arp(self, msg, pkt, qsys_pkt, dp):
@@ -210,6 +211,7 @@ class QsysTest(SimpleSwitch13):
                     #TODO:登録されていないClientを参照した際の例外処理
                     pass
             self.qsys.update_reliability_level('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
-            hub.sleep(1)
+            self.logger.info("mac_to_port:{}".format( self.mac_to_port ))
+            hub.sleep(5)
 
 
