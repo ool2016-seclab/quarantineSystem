@@ -24,8 +24,6 @@ def myNetwork():
                       port=6633)
 
     info( '*** Add switches\n')
-    r0 = net.addHost('r0', cls=Node, ip='0.0.0.0')
-    r0.cmd('sysctl -w net.ipv4.ip_forward=1')
     s1 = net.addSwitch('s1', cls=OVSKernelSwitch, dpid='1', protocols='OpenFlow13')
     s2 = net.addSwitch('s2', cls=OVSKernelSwitch, dpid='2', protocols='OpenFlow13')
 
@@ -43,9 +41,7 @@ def myNetwork():
     net.addLink(s2, h5)
     net.addLink(s2, h6)
 
-    #net.addLink(s2, s1)
-    net.addLink(s1, r0)
-    net.addLink(s2, r0)
+    net.addLink(s2, s1)
 
     net.addLink(h1, s1)
     net.addLink(h2, s1)
