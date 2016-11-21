@@ -222,7 +222,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("mac_to_port:{}".format( self.mac_to_port ))
             hub.sleep(5)
 
-import dpkt.pcap
+from dpkt.pcap import *
 class DpktPcapFromBytes(dpkt.pcap.Reader):
     def __init__(self, buf):
         #self.name = getattr(fileobj, 'name', '<%s>' % fileobj.__class__.__name__)
