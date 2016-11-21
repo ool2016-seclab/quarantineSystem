@@ -80,7 +80,30 @@ class QsysTest(SimpleSwitch13):
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
-
+    def set_mac_to_port(self, dpid, eth_src, in_port):
+        #送信元MACと送信元SWのポートの対応関係を記録
+        self.mac_to_port.setdefault(dpid, {})
+        self.mac_to_port[dpid][eth_src] = in_port
+    def get_port_from_mac(self, dpid, eth):
+        if eth in self.mac_to_port[dpid]:
+            return self.mac_to_port[dpid][eth]
+        else:
+            return None
+    def set_mac_to_ipv4(self, eth_src, ipv4_src):
+        ipaddr = self.mac_to_ipv4.setdefault(eth_src,ipv4_src)
+        if ipaddr in self.gateway:
+            self.mac_to_ipv4.setdefault(eth_src,ipv4_src)
+        else:
+            if ipaddr != ipv4_src:
+                self.logger.info("The correspondence between MAC and IP has changed\n\
+                {mac_old}:{ip_old}→{ip_new}".format(mac_old=eth_src,ip_old=ipaddr, ip_new=ipv4_src))
+                #TODO:Qsys上のClientのMACアドレスとIPの対応関係変更
+            self.mac_to_ipv4[eth_src] = ipv4_src
+    def get_ipv4_from_mac(self, eth):
+        if eth in self.mac_to_ipv4:
+            return self.mac_to_ipv4[eth]
+        else:
+            return None
     #Packet_inのハンドラが呼ばれる
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
