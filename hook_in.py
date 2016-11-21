@@ -155,8 +155,8 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            payload = dpkt.pcap.Reader(msg.data)
-            eth = dpkt.ethernet.Ethernet(payload[0])
+            payload = DpktPcapFromBytes(msg.data)
+            eth = dpkt.ethernet.Ethernet(msg.data)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
             self.logger.info("payload:{}".formay(__tcp))
@@ -223,3 +223,22 @@ class QsysTest(SimpleSwitch13):
             hub.sleep(5)
 
 
+class DpktPcapFromBytes(dpkt.pcap.Reader):
+    def __init__(self, buf):
+        #self.name = getattr(fileobj, 'name', '<%s>' % fileobj.__class__.__name__)
+        #self.__f = fileobj
+        #buf = self.__f.read(FileHdr.__hdr_len__)
+        self.__fh = FileHdr(buf)
+        self.__ph = PktHdr
+        if self.__fh.magic == PMUDPCT_MAGIC:
+            self.__fh = LEFileHdr(buf)
+            self.__ph = LEPktHdr
+        elif self.__fh.magic != TCPDUMP_MAGIC:
+            raise ValueError('invalid tcpdump header')
+        if self.__fh.linktype in dltoff:
+            self.dloff = dltoff[self.__fh.linktype]
+        else:
+            self.dloff = 0
+        self.snaplen = self.__fh.snaplen
+        self.filter = b''
+        self.__iter = iter(self)
