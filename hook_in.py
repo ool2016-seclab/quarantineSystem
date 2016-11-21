@@ -173,7 +173,7 @@ class QsysTest(SimpleSwitch13):
                     self.logger.info("http:{}".format(url))
                 except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
                     pass
-                except():
+                except:
                     pass
             f.close()
             self.logger.info("data:{}".format(msg.data))
