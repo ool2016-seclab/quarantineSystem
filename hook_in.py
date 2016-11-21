@@ -56,9 +56,6 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
-        self.f = tempfile.TemporaryFile()
-        self.pcap = pcaplib.Writer(self.f)
-        self.pcapint = 0
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
         
     #コントローラにSWが接続される
@@ -160,11 +157,12 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            self.pcap.write_pkt(msg.data)
-            self.pcapint += 1
-            self.f.flush()
+            f = open('tmp','wb')
+            self.pcap = pcaplib.Writer(self.f).write_pkt(msg.data).__del__()
+            f = open('tmp', 'rb')
             payload = dpkt.pcap.Reader(self.f)
-            eth = dpkt.ethernet.Ethernet(payload[self.pcapint-1])
+            
+            eth = dpkt.ethernet.Ethernet(payload)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
             self.logger.info("payload:{}".formay(__tcp))
