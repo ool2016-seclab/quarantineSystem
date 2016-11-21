@@ -157,10 +157,10 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            fh = b''
-            pcap = self.pcap.write_pkt(msg.data,fh)
+            pcap = self.pcap.write_pkt(msg.data)
+            fobj = io.BytesIO(pcap)
             self.logger.info("pcap:{}".format(pcap))
-            payload = DpktPcapFromBytes(fh,pcap)
+            payload = dpkt.pcap.Reader(fobj)
             eth = dpkt.ethernet.Ethernet(payload)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
@@ -248,8 +248,7 @@ class RyuPcapToBytes(pcaplib.Writer):
         return (pc_pkt_hdr.serialize())
 
     def write_pkt(self, buf, fh, ts=None):
-        fh = self.fh
-        res = b''
+        res = self.fh
         ts = time.time() if ts is None else ts
 
         # Check the max length of captured packets
@@ -275,7 +274,7 @@ class DpktPcapFromBytes(dpkt.pcap.Reader):
         #self.__f = fileobj
         #buf = self.__f.read(FileHdr.__hdr_len__)
         buf = ph
-        self.__fh = FileHdr(fh)
+        #self.__fh = FileHdr(fh.FileHdr.__hdr_len__))
         self.__ph = PktHdr
         if self.__fh.magic == PMUDPCT_MAGIC:
             self.__fh = LEFileHdr(buf)
