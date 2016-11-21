@@ -167,8 +167,8 @@ class QsysTest(SimpleSwitch13):
                 ip = eth.data
                 __tcp = ip.data
                 self.logger.info("payload:{}".format(__tcp))
-                if tcp.dport == 80 and len(tcp.data) > 0:
-                    http = dpkt.http.Request(tcp.data)
+                if __tcp.dport == 80 and len(__tcp.data) > 0:
+                    http = dpkt.http.Request(__tcp.data)
                     url = http.headers['host'] + http.uri
                     self.logger.info("http:{}".format(url))
             f.close()
