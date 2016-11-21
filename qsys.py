@@ -33,6 +33,44 @@ ARP = arp.arp
 ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
+"""
+class subnetList:
+    def __init__(self, **kwargs):
+        self.netlist = {}#{nwAddr/mask:ClientList}
+    def setSubnet(self,nwAddr, mask=32, clientList=ClientList()):
+        subnet = self.makeSubnetKey(nwAddr,mask)
+        self.netlist.setdefault(subnet,clientList)
+    def delSubnet(self, netAddr, mask=32):
+        subnet = self.makeSubnetKey(nwAddr,mask)
+        if subnet in self.netlist:
+            self.netlist.pop(subnet)
+    def getClientListObject(self, nwAddr, mask=32):
+        subnet = makeSubnetKey(nwAddr, mask)
+        if subnet in self.netlist:
+            return self.netlist[subnet]
+    def makeSubnetKey(self, nwAddr, mask=32):
+        return nwAddr+'/'+mask
+class ClientList:
+    def __init(self):
+        self.cList = []#[Client_object,]
+    def addClient(self, client):
+        assert isinstance(client, Client)
+        self.cList.append(client)
+    def changeClient(self, client):
+        assert isinstance(client, Client)
+        for i, c in cList:
+            if c.eth == client.eth:
+                self.cList[i] = client
+class Client:
+    def __init__(self, eth, ip_addr, mask=24 , default_route=None):
+        self.neme = name
+        self.eth = eth
+        self.nw_addr = netaddr.IPNetwork(ip_addr+'/'+mask).network
+        self.ip_addr = ip_addr
+        self.mask = mask
+        self.default_route = default_route
+        self.level = QsysRelLevel().DEFAULT
+"""
 class QsysDataStruct:
     """
     Qsysで使用するデータ構造を定義するクラス。
