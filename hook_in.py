@@ -247,7 +247,7 @@ class RyuPcapToBytes(pcaplib.Writer):
 
         return (pc_pkt_hdr.serialize())
 
-    def write_pkt(self, buf, fh, ts=None):
+    def write_pkt(self, buf, ts=None):
         res = self.fh
         ts = time.time() if ts is None else ts
 
