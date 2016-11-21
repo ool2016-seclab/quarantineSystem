@@ -157,10 +157,10 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            pcap = self.pcap.write_pkt(msg.data)
-            self.logger.info("pcap:{}".format(pcap.encode()))
-            payload = DpktPcapFromBytes(pcap.encode())
-            eth = dpkt.ethernet.Ethernet(msg.data)
+            pcap = self.pcap.write_pkt(msg.data,fh)
+            self.logger.info("pcap:{}".format(pcap))
+            payload = DpktPcapFromBytes(fh,pcap)
+            eth = dpkt.ethernet.Ethernet(payload)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
             self.logger.info("payload:{}".formay(__tcp))
@@ -235,7 +235,7 @@ class RyuPcapToBytes(pcaplib.Writer):
     def _write_pcap_file_hdr(self):
         pcap_file_hdr = PcapFileHdr(snaplen=self.snaplen,
                                     network=self.network)
-        self.buf = (pcap_file_hdr.serialize())
+        self.fh = (pcap_file_hdr.serialize())
 
     def _write_pkt_hdr(self, ts, buf_len):
         sec = int(ts)
@@ -246,8 +246,9 @@ class RyuPcapToBytes(pcaplib.Writer):
 
         return (pc_pkt_hdr.serialize())
 
-    def write_pkt(self, buf, ts=None):
-        res = self.buf
+    def write_pkt(self, buf, fh, ts=None):
+        fh = self.fh
+        res = b''
         ts = time.time() if ts is None else ts
 
         # Check the max length of captured packets
@@ -268,11 +269,12 @@ class RyuPcapToBytes(pcaplib.Writer):
 
 from dpkt.pcap import *
 class DpktPcapFromBytes(dpkt.pcap.Reader):
-    def __init__(self, buf):
+    def __init__(self, fh, ph):
         #self.name = getattr(fileobj, 'name', '<%s>' % fileobj.__class__.__name__)
         #self.__f = fileobj
         #buf = self.__f.read(FileHdr.__hdr_len__)
-        self.__fh = FileHdr(buf)
+        buf = ph
+        self.__fh = FileHdr(fh)
         self.__ph = PktHdr
         if self.__fh.magic == PMUDPCT_MAGIC:
             self.__fh = LEFileHdr(buf)
