@@ -160,7 +160,7 @@ class QsysTest(SimpleSwitch13):
             pcap = self.pcap.write_pkt(msg.data)
             fobj = io.BytesIO(pcap)
             self.logger.info("pcap:{}".format(pcap))
-            payload = dpkt.pcap.Reader(fobj)
+            payload = dpkt.pcap.Reader(fobj.readable())
             eth = dpkt.ethernet.Ethernet(payload)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
