@@ -135,12 +135,12 @@ class QsysDataStruct:
         return [self.get_ethAddr_src(), self.get_ethAddr_dst()]
     def get_ethAddr_src(self):
         """return eth_src"""
-        if hasattr(srlf,"eth_src"):
+        if hasattr(self,"eth_src"):
             return self.eth_src
         return None
     def get_ethAddr_dst(self):
         """return eth_src"""
-        if hasattr(srlf,"eth_dst"):
+        if hasattr(self,"eth_dst"):
             return self.eth_dst
         return None
     def get_arpObj(self):
