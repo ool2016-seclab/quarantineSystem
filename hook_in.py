@@ -115,6 +115,8 @@ class QsysTest(SimpleSwitch13):
         ofproto = dp.ofproto
         parser = dp.parser
         in_port = dp.in_port#スイッチのポート
+        qsys_pkt = QsysDataStruct(self.logger)
+
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
@@ -123,7 +125,6 @@ class QsysTest(SimpleSwitch13):
         except:
             self.logger.debug("malformed packet")
             return
-        qsys_pkt = QsysDataStruct(self.logger)
         eth = pkt.get_protocol(ETHERNET)
         if not eth:
             if self.__DEBUG_MODE__:
