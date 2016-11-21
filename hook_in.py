@@ -114,10 +114,7 @@ class QsysTest(SimpleSwitch13):
         dpid = dp.dpid
         ofproto = dp.ofproto
         parser = dp.parser
-        #スイッチのポート
-        in_port = dp.in_port
-        #送信元MACと送信元SWのポートの対応関係を記録
-        self.mac_to_port.setdefault(dpid, {})
+        in_port = dp.in_port#スイッチのポート
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
@@ -133,9 +130,9 @@ class QsysTest(SimpleSwitch13):
                 self.logger.info("Not Ether type")
             return
         qsys_pkt.set_eth(eth)#qsys_pktにethを登録
+        eth_src = eth.src
         #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
-        self.mac_to_port[dpid][eth.src] = in_port
-            
+        self.set_mac_to_port(dpid, eth_src, in_port) 
         #arpパケット
         arp = pkt.get_protocol(ARP)
         ipv4 = pkt.get_protocol(IPV4)
