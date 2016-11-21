@@ -157,7 +157,7 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            fh = ''
+            fh = b''
             pcap = self.pcap.write_pkt(msg.data,fh)
             self.logger.info("pcap:{}".format(pcap))
             payload = DpktPcapFromBytes(fh,pcap)
