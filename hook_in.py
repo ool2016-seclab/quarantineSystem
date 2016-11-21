@@ -172,7 +172,7 @@ class QsysTest(SimpleSwitch13):
                     url = http.headers['host'] + http.uri
                     self.logger.info("http:{}".format(url))
                 except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
-                    continue
+                    pass
             f.close()
             self.logger.info("data:{}".format(msg.data))
         qsys_pkt.set_data(msg.data)
