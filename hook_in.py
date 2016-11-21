@@ -166,7 +166,7 @@ class QsysTest(SimpleSwitch13):
                 eth = dpkt.ethernet.Ethernet(k)
                 ip = eth.data
                 __tcp = ip.data
-                self.logger.info("payload:{}".formay(__tcp))
+                self.logger.info("payload:{}".format(__tcp))
             f.close()
         self.logger.info("data:{}".format(msg.data))
         qsys_pkt.set_data(msg.data)
