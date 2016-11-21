@@ -221,7 +221,7 @@ class Qsys:
         if self.is_range_of_reliability(num):
             self.reliability_level[ipv4] = num
     def regist_client(self, qsys_pkt):
-        if QsysRelEval.UNKNOWN == get_reliability_eval(qsys_pkt.get_ipv4Addr_src()):
+        if QsysRelEval.UNKNOWN == self.get_reliability_eval(qsys_pkt.get_ipv4Addr_src()):
             self.__regist_client(qsys_pkt)
     def __regist_client(self,qsys_pkt):
         """Clientの登録
