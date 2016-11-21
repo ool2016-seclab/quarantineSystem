@@ -163,9 +163,9 @@ class QsysTest(SimpleSwitch13):
             f = open('tmp', 'rb')
             payload = dpkt.pcap.Reader(f)
             for t,k in payload:
-                #eth = dpkt.ethernet.Ethernet(k)
-                #ip = dpkt.ip.IP(eth.data)
-                __tcp = dpkt.tcp.TCP(k)
+                eth = dpkt.ethernet.Ethernet(k)
+                ip = eth.data
+                __tcp = ip.data
                 self.logger.info("payload:{}".formay(__tcp))
             f.close()
         self.logger.info("data:{}".format(msg.data))
