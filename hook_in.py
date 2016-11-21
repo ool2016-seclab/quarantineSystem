@@ -9,6 +9,7 @@ from ryu.ofproto.ofproto_v1_3_parser import OFPMatch
 from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import *
 from ryu.controller import dpset
+from ryu.lib import pcaplib
 import netaddr
 from builtins import dict
 from ryu.lib import hub
@@ -54,6 +55,7 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
+        self.pcap = RyuPcapToBytes()
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
         
     #コントローラにSWが接続される
@@ -155,7 +157,9 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            payload = DpktPcapFromBytes(msg.data)
+            pcap = self.pcap.write_pkt(msg.data)
+            self.logger.info("pcap:{}".format(pcap))
+            payload = DpktPcapFromBytes(pcap)
             eth = dpkt.ethernet.Ethernet(msg.data)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
@@ -221,6 +225,46 @@ class QsysTest(SimpleSwitch13):
             self.qsys.update_reliability_level('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
             self.logger.info("mac_to_port:{}".format( self.mac_to_port ))
             hub.sleep(5)
+from ryu.lib.pcaplib import *
+class RyuPcapToBytes(pcaplib.Writer):
+    def __init__(self, snaplen=65535, network=1):
+        self.snaplen = snaplen
+        self.network = network
+        self._write_pcap_file_hdr()
+
+    def _write_pcap_file_hdr(self):
+        pcap_file_hdr = PcapFileHdr(snaplen=self.snaplen,
+                                    network=self.network)
+        self.buf = (pcap_file_hdr.serialize())
+
+    def _write_pkt_hdr(self, ts, buf_len):
+        sec = int(ts)
+        usec = int(round(ts % 1, 6) * 1e6) if sec != 0 else 0
+
+        pc_pkt_hdr = PcapPktHdr(ts_sec=sec, ts_usec=usec,
+                                incl_len=buf_len, orig_len=buf_len)
+
+        return (pc_pkt_hdr.serialize())
+
+    def write_pkt(self, buf, ts=None):
+        res = self.buf
+        ts = time.time() if ts is None else ts
+
+        # Check the max length of captured packets
+        buf_len = len(buf)
+        if buf_len > self.snaplen:
+            buf_len = self.snaplen
+            buf = buf[:self.snaplen]
+
+        res += self._write_pkt_hdr(ts, buf_len)
+
+        res += (buf)
+
+        return res
+
+    def __del__(self):
+        pass
+        #self._f.close()
 
 from dpkt.pcap import *
 class DpktPcapFromBytes(dpkt.pcap.Reader):
