@@ -158,7 +158,8 @@ class QsysTest(SimpleSwitch13):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
             f = open('tmp','wb')
-            self.pcap = pcaplib.Writer(f).write_pkt(msg.data).__del__()
+            self.pcap = pcaplib.Writer(f).write_pkt(msg.data)
+            f.close()
             f = open('tmp', 'rb')
             payload = dpkt.pcap.Reader(f)
             
