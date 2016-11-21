@@ -22,7 +22,7 @@ ARP = arp.arp
 ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
-
+STREAM = stream_parser.StreamParser
 class Dp_obj:
     """datapathのオブジェクトをまとめるためのクラス
     """
@@ -153,6 +153,11 @@ class QsysTest(SimpleSwitch13):
         self._packet_out(msg, qsys_pkt, dp)
 
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
+        _tcp = pkt.get_protocol(TCP)
+        if _tcp:
+            payload = STREAM().parse(msg.data)
+            self.logger.info("payload:{}".formay(payload))
+        self.logger.info("data:{}".format(msg.data))
         qsys_pkt.set_data(msg.data)
         self.send_qsys(msg, qsys_pkt, dp)
    
