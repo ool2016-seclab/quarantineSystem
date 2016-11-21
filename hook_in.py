@@ -56,6 +56,9 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
+        self.gateway = {}#デフォルトゲートウェイ(ハード－コード){ipv4:eth}
+        self.gateway['192.168.1.254'] = '00:00:00:00:00:01'
+        self.gateway['192.168.2.254'] = '00:00:00:00:00:02'
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
         
     #コントローラにSWが接続される
