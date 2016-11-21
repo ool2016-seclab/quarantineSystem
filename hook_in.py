@@ -14,7 +14,7 @@ from builtins import dict
 from ryu.lib import hub
 #import time
 from qsys import Qsys, QsysDataStruct, QsysRelEval
-
+import dpkt
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
 IPV4 = ipv4.ipv4
@@ -155,8 +155,11 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            payload = STREAM().parse(msg.data)
-            self.logger.info("payload:{}".formay(payload))
+            payload = dpkt.pcap.Reader(msg.data)
+            eth = dpkt.ethernet.Ethernet(payload[0])
+            ip = dpkt.ip.IP(eth.data)
+            __tcp = dpkt.tcp.TCP(ip.data)
+            self.logger.info("payload:{}".formay(__tcp))
         self.logger.info("data:{}".format(msg.data))
         qsys_pkt.set_data(msg.data)
         self.send_qsys(msg, qsys_pkt, dp)
