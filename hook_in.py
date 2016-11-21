@@ -158,8 +158,8 @@ class QsysTest(SimpleSwitch13):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
             pcap = self.pcap.write_pkt(msg.data)
-            self.logger.info("pcap:{}".format(pcap.decode('utf-8')))
-            payload = DpktPcapFromBytes(pcap.decode('utf-8'))
+            self.logger.info("pcap:{}".format(pcap.decode()))
+            payload = DpktPcapFromBytes(pcap.decode())
             eth = dpkt.ethernet.Ethernet(msg.data)
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
