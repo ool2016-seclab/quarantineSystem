@@ -110,10 +110,7 @@ class QsysTest(SimpleSwitch13):
         """パケットから送信元のIP・MAC・宛先のIP・MAC・dataを取得"""
         msg = ev.msg
         dp = Dp_obj(msg)
-        datapath = dp.datapath
         dpid = dp.dpid
-        ofproto = dp.ofproto
-        parser = dp.parser
         in_port = dp.in_port#スイッチのポート
         qsys_pkt = QsysDataStruct(self.logger)
 
