@@ -170,9 +170,9 @@ class QsysTest(SimpleSwitch13):
                 if tcp.dport == 80 and len(tcp.data) > 0:
                     http = dpkt.http.Request(tcp.data)
                     url = http.headers['host'] + http.uri
-                    self.logger.info("http:{}".format(url)
+                    self.logger.info("http:{}".format(url))
             f.close()
-        self.logger.info("data:{}".format(msg.data))
+            self.logger.info("data:{}".format(msg.data))
         qsys_pkt.set_data(msg.data)
         self.send_qsys(msg, qsys_pkt, dp)
    
