@@ -8,9 +8,15 @@ https://github.com/mininet/mininet
 v2.21
 ab8c4e91984fd4881bb4fc80ef1b600de03dc55e
 
+本プロジェクト内にはdpktを使用しています
+https://github.com/kbandla/dpkt.g
+73c59453c2b58b436f5f3a75b358ce44f12cd151
+
 本プロジェクト内には以下のソースコードを
 参考にしているものがあります。
 ・Ryubook 1.0 ドキュメント
 https://osrg.github.io/ryu-book/ja/html/index.html
 ・CUBE SUGAR STORAGE
 http://momijiame.tumblr.com/
+・ttsubo/simpleRouter
+https://github.com/ttsubo/simpleRouter
