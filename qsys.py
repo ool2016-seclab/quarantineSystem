@@ -174,11 +174,18 @@ class Qsys:
         #print(DbAccess().get_list())
         self.reliability_level = {}#信頼度レベル{ip:level}
     def send(self, qsys_pkt):
-        return True
+        self.regist_client(qsys_pkt)
+        if QsysRelEval.LOW == self.get_reliability_eval(qsys_pkt.get_ipv4Addr_src):
+            return False
+        else:
+            return True
     def update_reliability_level(self, ipv4, num):
         if self.is_range_of_reliability(num):
             self.reliability_level[ipv4] = num
-    def regist_client(self,qsys_pkt):
+    def regist_client(self, qsys_pkt):
+        if QsysRelEval.UNKNOWN == get_reliability_eval(qsys_pkt.get_ipv4Addr_src()):
+            self.__regist_client(qsys_pkt)
+    def __regist_client(self,qsys_pkt):
         """Clientの登録
         はじめて通信を行ったClientを登録する。
         """

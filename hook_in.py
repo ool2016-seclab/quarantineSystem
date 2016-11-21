@@ -141,8 +141,6 @@ class QsysTest(SimpleSwitch13):
             qsys_pkt.set_arp(arp)
             ipv4_src = qsys_pkt.get_ipv4Addr_src()
             self.mac_to_ipv4[eth.src] = ipv4_src
-            if QsysRelEval.UNKNOWN == self.qsys.get_reliability_eval(ipv4_src):
-                self.qsys.regist_client(qsys_pkt)
             if self.__DEBUG_MODE__:
                 self.logger.info("ipv4_src:{}".format(ipv4_src))
             self._packet_in_arp(msg, pkt, qsys_pkt, dp)
@@ -151,8 +149,6 @@ class QsysTest(SimpleSwitch13):
             qsys_pkt.set_ipv4(ipv4)
             ipv4_src = qsys_pkt.get_ipv4Addr_src()
             self.mac_to_ipv4[eth.src] = ipv4_src
-            if QsysRelEval.UNKNOWN == self.qsys.get_reliability_eval(ipv4_src):
-                self.qsys.regist_client(qsys_pkt)
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
             return
         else:
