@@ -162,6 +162,8 @@ class QsysTest(SimpleSwitch13):
         #ofproto = dp.ofproto
         #parser = dp.parser
         #in_port = dp.in_port
+        src_eth = qsys_pkt.get_ethAddr_src()
+        dst_eth = qsys_pkt.get_ethAddr_dst()
         src_ip = qsys_pkt.get_ipv4Addr_src()
         dst_ip = qsys_pkt.get_ipv4Addr_dst()
 
@@ -172,9 +174,44 @@ class QsysTest(SimpleSwitch13):
             #self.logger.info('Receive GARP from [%s].', src_ip, extra=dpid)
             #self.logger.info('Send GARP (normal).', dpid)
             return
-        #arpはそのまま流す
-        self._packet_out(msg, qsys_pkt, dp)
+        #gatewayへのarp
+        if dst_ip in self.gateway:
+            gw_eth = gateway[dst_ip]
+            opcode = qsys_pkt.get_arpObj().opcode
+            if opcode == 1:#ARP Request
+                self.send_arp(dp.datapath, 2, gw_eth, src_ip, dst_eth, dst_ip, dp.in_port)
+                return
+            elif opcode == 2:#ARP_Reply
+                pass#TODO
+        else:
+            #arpはそのまま流す
+            self._packet_out(msg, qsys_pkt, dp)
+    def send_arp(self, datapath, opcode, srcMac, srcIp, dstMac, dstIp, outPort, RouteDist=None):
+        if opcode == 1:
+            self.portInfo[outPort] = PortTable(outPort, srcIp, srcMac, RouteDist)
 
+            targetMac = "00:00:00:00:00:00"
+            targetIp = dstIp
+        elif opcode == 2:
+            targetMac = dstMac
+            targetIp = dstIp
+
+        e = ethernet(dstMac, srcMac, ether.ETH_TYPE_ARP)
+        a = arp(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
+        p = Packet()
+        p.add_protocol(e)
+        p.add_protocol(a)
+        p.serialize()
+
+        actions = [datapath.ofproto_parser.OFPActionOutput(outPort, 0)]
+        out = datapath.ofproto_parser.OFPPacketOut(
+            datapath=datapath,
+            buffer_id=0xffffffff,
+            in_port=datapath.ofproto.OFPP_CONTROLLER,
+            actions=actions,
+            data=p.data)
+        datapath.send_msg(out)
+        return 0
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
