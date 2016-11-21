@@ -16,6 +16,7 @@ from ryu.lib import hub
 #import time
 from qsys import Qsys, QsysDataStruct, QsysRelEval
 import dpkt
+import tempfile
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
 IPV4 = ipv4.ipv4
@@ -55,7 +56,8 @@ class QsysTest(SimpleSwitch13):
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
-        self.pcap = RyuPcapToBytes()
+        self.pcap = pcaplib.Writer(tempfile.TemporaryFile())
+        self.pcapint = 0
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
         
     #コントローラにSWが接続される
@@ -157,14 +159,10 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
-            f = open()
-            p = pcaplib.Writer(f)
-            pcap = p.write_pkt(msg.data)
-            f.flush()
-            fobj = io.BytesIO(p)
-            self.logger.info("pcap:{}".format(pcap))
-            payload = dpkt.pcap.Reader(fobj)
-            eth = dpkt.ethernet.Ethernet(payload)
+            self.pcap.write_pkt(msg.data)
+            self.pcapint += 1
+            payload = dpkt.pcap.Reader(self.pcap._f)
+            eth = dpkt.ethernet.Ethernet(payload[self.pcapint-1])
             ip = dpkt.ip.IP(eth.data)
             __tcp = dpkt.tcp.TCP(ip.data)
             self.logger.info("payload:{}".formay(__tcp))
