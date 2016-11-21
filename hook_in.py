@@ -16,7 +16,7 @@ from ryu.lib import hub
 #import time
 from qsys import Qsys, QsysDataStruct, QsysRelEval
 import dpkt
-import tempfile
+
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
 IPV4 = ipv4.ipv4
@@ -24,7 +24,7 @@ ARP = arp.arp
 ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
-STREAM = stream_parser.StreamParser
+
 class Dp_obj:
     """datapathのオブジェクトをまとめるためのクラス
     """
