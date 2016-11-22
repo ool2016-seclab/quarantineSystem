@@ -214,7 +214,7 @@ class QsysTest(SimpleSwitch13):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
             self.logger.info("tcp:{}".format(_tcp))
-            _f = StringIO()
+            _f = BytesIO()
             f = open('tmp','wb')
             pcap = pcaplib.Writer(f).write_pkt(msg.data)
             _pcap = pcaplib.Writer(_f).write_pkt(msg.data)
