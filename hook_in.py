@@ -299,5 +299,5 @@ class QsysTest(SimpleSwitch13):
             hub.sleep(5)
 
 class RyuLibPcapWriter(pcaplib.Writer):
-    def __del__():
+    def __del__(self):
         pass
