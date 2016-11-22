@@ -221,7 +221,7 @@ class QsysTest(SimpleSwitch13):
             _pcap = pcaplib.Writer(_f).write_pkt(msg.data)
             f.close()
             f = open('tmp', 'rb')
-            payload = dpkt.pcap.Reader(BytesIO(_f.getbuffer()))
+            payload = dpkt.pcap.Reader(BytesIO(_f.read()))
             for t,k in payload:
                 eth = dpkt.ethernet.Ethernet(k)
                 ip = eth.data
