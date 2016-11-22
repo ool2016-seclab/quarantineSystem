@@ -16,7 +16,8 @@ from ryu.lib import hub
 #import time
 from qsys import Qsys, QsysDataStruct, QsysRelEval
 import dpkt
-from _io import StringIO
+from ryu.controller.event import EventBase
+from io import BytesIO
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
