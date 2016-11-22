@@ -183,12 +183,11 @@ class QsysRelLevel:
     """信頼度レベルと信頼度評価閾値の定義
     """
     #信頼度レベル
-    L_MAX = 10    #信頼度レベル上限
+    MAX = 10    #信頼度レベル上限
     HIGH = 8  #信頼度評価:HIGH　     この値以上が高信頼
     DEFAULT = 5#Clientの初期信頼度。 この値の間が注意
     LOW = 2   #信頼度評価:LOW        この値以下が低信頼
     MIN = 0     #信頼度レベル下限
-    
     UNKNOWN = -1
 class QsysRelEval:
     """Qsysで使用する信頼度評価の定義。
@@ -259,7 +258,7 @@ class Qsys:
                 return QsysRelEval.LOW
             return QsysRelEval.MID
     def is_range_of_reliability(self, level):
-        if level <= QsysRelLevel.L_MAX and\
+        if level <= QsysRelLevel.MAX and\
            level >= QsysRelLevel.MIN:
             return True
         else:
