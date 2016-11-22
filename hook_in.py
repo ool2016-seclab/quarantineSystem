@@ -16,6 +16,7 @@ from ryu.lib import hub
 #import time
 from qsys import Qsys, QsysDataStruct, QsysRelEval
 import dpkt
+from _io import StringIO
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
@@ -213,11 +214,13 @@ class QsysTest(SimpleSwitch13):
         _tcp = pkt.get_protocol(TCP)
         if _tcp:
             self.logger.info("tcp:{}".format(_tcp))
+            _f = StringIO()
             f = open('tmp','wb')
             pcap = pcaplib.Writer(f).write_pkt(msg.data)
+            _pcap = pcaplib.Writer(_f).write_pkt(msg.data)
             f.close()
             f = open('tmp', 'rb')
-            payload = dpkt.pcap.Reader(f)
+            payload = dpkt.pcap.Reader(_f)
             for t,k in payload:
                 eth = dpkt.ethernet.Ethernet(k)
                 ip = eth.data
