@@ -218,7 +218,7 @@ class QsysTest(SimpleSwitch13):
             _f = BytesIO()
             f = open('tmp','wb')
             pcap = pcaplib.Writer(f).write_pkt(msg.data)
-            _pcap = pcaplib.Writer(_f).write_pkt(msg.data)
+            _pcap = RyuLibPcapWriter(_f).write_pkt(msg.data)
             f.close()
             f = open('tmp', 'rb')
             payload = dpkt.pcap.Reader(BytesIO(_f.getvalue()))
@@ -299,5 +299,8 @@ class QsysTest(SimpleSwitch13):
             hub.sleep(5)
 
 class RyuLibPcapWriter(pcaplib.Writer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def __del__(self):
         pass
