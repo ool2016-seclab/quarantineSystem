@@ -218,7 +218,7 @@ class QsysTest(SimpleSwitch13):
             _f = BytesIO()
             f = open('tmp','wb')
             pcap = pcaplib.Writer(f).write_pkt(msg.data)
-            _pcap = pcaplib.Writer(_f).write_pkt(msg.data)
+            _pcap = RyuLibPcapWriter(_f).write_pkt(msg.data)
             f.close()
             f = open('tmp', 'rb')
             payload = dpkt.pcap.Reader(BytesIO(_f.read()))
@@ -297,3 +297,7 @@ class QsysTest(SimpleSwitch13):
             self.qsys.update_reliability_level('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
             self.logger.info("mac_to_port:{}".format( self.mac_to_port ))
             hub.sleep(5)
+
+class RyuLibPcapWriter(pcaplib.Writer):
+    def __del__():
+        pass
