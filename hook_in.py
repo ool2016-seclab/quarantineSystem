@@ -248,6 +248,10 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("http(header):{}".format(http.headers))
             self.logger.info("http(method):{}".format(http.method))
             self.logger.info("http(data):{}".format(http.data))
+        elif tcp.sport == 80 and len(payload) > 0:
+            http = dpkt.http.Response(payload.decode('utf-8'))
+            self.logger.info("http(method):{}".format(http.method))
+            self.logger.info("http(data):{}".format(http.data))
         self.send_qsys(msg, qsys_pkt, dp)
         return
     
