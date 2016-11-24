@@ -212,7 +212,7 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
         return 0
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
-        self.logger.info("pkt_in_ipv4")
+        #self.logger.info("pkt_in_ipv4")
         #以下dpktで処理
         f = BytesIO()
         pcap = RyuLibPcapWriter(f).write_pkt(msg.data)#pcaplib.Writer
@@ -239,13 +239,13 @@ class QsysTest(SimpleSwitch13):
         return
 
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, tcp):
-        self.logger.info("tcp")
+        #self.logger.info("tcp")
         payload = tcp.data
         qsys_pkt.set_data(msg.data)
         #self.logger.info("payload:{}".format(payload
         if tcp.dport == 80 and len(payload) > 0:
             http = dpkt.http.Request(payload.decode('utf-8'))
-            self.logger.info("uri:{}".format(http.uri))
+            self.logger.info("http:{}".format(http.data))
         self.send_qsys(msg, qsys_pkt, dp)
         return
     
