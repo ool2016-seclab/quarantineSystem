@@ -258,8 +258,7 @@ class QsysTest(SimpleSwitch13):
         pass
 
     def send_qsys(self, msg, qsys_pkt,  dp):
-        if self.__DEBUG_MODE__:
-            self.logger.info("send_qsys{}".format(qsys_pkt))
+        self.logger.info("send_qsys{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
         if True == result:
             self._packet_out(msg, qsys_pkt, dp)
