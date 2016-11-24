@@ -244,8 +244,8 @@ class QsysTest(SimpleSwitch13):
         qsys_pkt.set_data(msg.data)
         #self.logger.info("payload:{}".format(payload
         if tcp.dport == 80 and len(payload) > 0:
-            http = dpkt.http.Request(payload)
-            self.logger.info("http:{}".format(http))
+            _http = dpkt.http.Request(payload)
+            self.logger.info("http:{}".format(_http))
         self.send_qsys(msg, qsys_pkt, dp)
     
     def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
