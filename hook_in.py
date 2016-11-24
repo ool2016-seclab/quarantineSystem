@@ -246,7 +246,8 @@ class QsysTest(SimpleSwitch13):
         if tcp.dport == 80 and len(payload) > 0:
             http = dpkt.http.Request(payload.decode('utf-8'))
             self.logger.info("http(header):{}".format(http.headers))
-            self.logger.info("http(body):{}".format(http.body))
+            self.logger.info("http(method):{}".format(http.method))
+            self.logger.info("http(data):{}".format(http.data))
         self.send_qsys(msg, qsys_pkt, dp)
         return
     
