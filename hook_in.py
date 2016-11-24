@@ -222,13 +222,13 @@ class QsysTest(SimpleSwitch13):
                 eth = dpkt.ethernet.Ethernet(k)
                 ip = eth.data
                 l4 = ip.data
-                if l4 == type(dpkt.icmp.ICMP):
+                if type(l4) == dpkt.icmp.ICMP:
                     self._packet_in_icmp(self, msg, pkt, qsys_pkt, dp, l4.data)
                     return
-                elif l4 == type(dpkt.tcp.TCP):
+                elif type(l4) == dpkt.tcp.TCP:
                     self._packet_in_tcp(self, msg, pkt, qsys_pkt, dp, l4.data)
                     return
-                elif l4 == type(dpkt.udp.UDP):
+                elif type(l4) == dpkt.udp.UDP:
                     self._packet_in_udp(self, msg, pkt, qsys_pkt, dp, l4.data)
                     return
                 else:
