@@ -212,7 +212,6 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
         return 0
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
-        _tcp = pkt.get_protocol(TCP)
         if _tcp:
             self.logger.info("tcp:{}".format(_tcp))
             f = BytesIO()
