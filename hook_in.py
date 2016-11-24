@@ -236,7 +236,7 @@ class QsysTest(SimpleSwitch13):
         
     def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, icmp):
         self.send_qsys(msg, qsys_pkt, dp)
-        pass
+        return
 
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, tcp):
         self.logger.info("tcp")
@@ -247,6 +247,7 @@ class QsysTest(SimpleSwitch13):
             http = dpkt.http.Request(payload.decode('utf-8'))
             self.logger.info("uri:{}".format(http.uri))
         self.send_qsys(msg, qsys_pkt, dp)
+        return
     
     def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
         self.send_qsys(msg, qsys_pkt, dp)
