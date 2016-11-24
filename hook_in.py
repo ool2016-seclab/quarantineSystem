@@ -246,7 +246,7 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("tcp:{}".format(tcp))
         self.logger.info("payload:{}".format(payload))
         try:#getHTTP
-            request = dpkt.http.Request(payload)
+            http = dpkt.http.Request(payload)
             url = http.headers['host'] + http.uri
             self.logger.info("http:{}".format(url))
         except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
