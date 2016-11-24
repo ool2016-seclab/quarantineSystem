@@ -242,13 +242,11 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("tcp")
         payload = tcp.data
         qsys_pkt.set_data(msg.data)
-        self.logger.info("payload:{}".format(payload))
+        #self.logger.info("payload:{}".format(payload))
         try:#getHTTP
-            http = dpkt.http.Request(payload)
-            url = http.headers['host'] + http.uri
-            self.logger.info("http:{}".format(url))
-        except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
-            self.logger.info("NOhttp:{}".format(payload))
+            if len(payload) > 0:
+                http = dpkt.http.Request(payload)
+                self.logger.info("http:{}".format(http))
         except:
             self.logger.info("NOhttp:{}".format(payload))
         finally:
