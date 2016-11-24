@@ -212,29 +212,49 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
         return 0
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
-        if _tcp:
-            self.logger.info("tcp:{}".format(_tcp))
-            f = BytesIO()
-            pcap = RyuLibPcapWriter(f).write_pkt(msg.data)
-            payload = dpkt.pcap.Reader(BytesIO(f.getvalue()))
-            for t,k in payload:
+        #以下dpktで処理
+        f = BytesIO()
+        pcap = RyuLibPcapWriter(f).write_pkt(msg.data)#pcaplib.Writer
+        payload = dpkt.pcap.Reader(BytesIO(f.getvalue()))
+        f.close()
+        for t,k in payload:
                 eth = dpkt.ethernet.Ethernet(k)
                 ip = eth.data
-                __tcp = ip.data
-                self.logger.info("payload:{}".format(__tcp))
-                try:
-                    request = dpkt.http.Request(__tcp.data)
-                    url = http.headers['host'] + http.uri
-                    self.logger.info("http:{}".format(url))
-                except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
-                    pass
-                except:
-                    pass
-            f.close()
-            self.logger.info("data:{}".format(msg.data))
-        qsys_pkt.set_data(msg.data)
+                l4 = ip.data
+                if l4 == type(dpkt.icmp.ICMP):
+                    self._packet_in_icmp(self, msg, pkt, qsys_pkt, dp, l4.data)
+                    return
+                elif l4 == type(dpkt.tcp.TCP):
+                    self._packet_in_tcp(self, msg, pkt, qsys_pkt, dp, l4.data)
+                    return
+                elif l4 == type(dpkt.udp.UDP):
+                    self._packet_in_udp(self, msg, pkt, qsys_pkt, dp, l4.data)
+                    return
+                else:
+                    return
+        
+    def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, payload):
         self.send_qsys(msg, qsys_pkt, dp)
-   
+        pass
+
+    def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, payload):
+        qsys_pkt.set_data(msg.data)
+        self.logger.info("payload:{}".format(payload))
+        try:#getHTTP
+            request = dpkt.http.Request(__tcp.data)
+            url = http.headers['host'] + http.uri
+            self.logger.info("http:{}".format(url))
+        except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
+            self.logger.info("NOhttp:{}".format(payload))
+            pass
+        except:
+            pass
+        self.send_qsys(msg, qsys_pkt, dp)
+    
+    def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, payload):
+        self.send_qsys(msg, qsys_pkt, dp)
+        pass
+
     def send_qsys(self, msg, qsys_pkt,  dp):
         if self.__DEBUG_MODE__:
             self.logger.info("send_qsys{}".format(qsys_pkt))
