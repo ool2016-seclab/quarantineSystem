@@ -239,6 +239,7 @@ class QsysTest(SimpleSwitch13):
         pass
 
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, payload):
+        self.logger.info("tcp")
         qsys_pkt.set_data(msg.data)
         self.logger.info("payload:{}".format(payload))
         try:#getHTTP
