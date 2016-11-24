@@ -223,19 +223,18 @@ class QsysTest(SimpleSwitch13):
                 ip = eth.data
                 l4 = ip.data
                 if type(l4) == dpkt.icmp.ICMP:
-                    self._packet_in_icmp(msg, pkt, qsys_pkt, d-p, l4.data)
+                    self._packet_in_icmp(msg, pkt, qsys_pkt, dp, l4)
                     return
                 elif type(l4) == dpkt.tcp.TCP:
-                    self.logger.info("TCP*{}".format(l4.data))
                     self._packet_in_tcp(msg, pkt, qsys_pkt, dp, l4)
                     return
                 elif type(l4) == dpkt.udp.UDP:
-                    self._packet_in_udp(msg, pkt, qsys_pkt, dp, l4.data)
+                    self._packet_in_udp(msg, pkt, qsys_pkt, dp, l4)
                     return
                 else:
                     return
         
-    def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, payload):
+    def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, icmp):
         self.send_qsys(msg, qsys_pkt, dp)
         pass
 
@@ -243,7 +242,6 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("tcp")
         payload = tcp.data
         qsys_pkt.set_data(msg.data)
-        self.logger.info("tcp:{}".format(tcp))
         self.logger.info("payload:{}".format(payload))
         try:#getHTTP
             http = dpkt.http.Request(payload)
@@ -251,13 +249,12 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("http:{}".format(url))
         except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
             self.logger.info("NOhttp:{}".format(payload))
-            pass
         except:
-            pass
+            self.logger.info("NOhttp:{}".format(payload))
         finally:
             self.send_qsys(msg, qsys_pkt, dp)
     
-    def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, payload):
+    def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
         self.send_qsys(msg, qsys_pkt, dp)
         pass
 
