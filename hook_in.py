@@ -44,11 +44,11 @@ class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
     learn = 0
     quarantine = 1
-
 class QsysTest(SimpleSwitch13):
     __DEBUG_MODE__ = False #:on,F:off
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
+   
 
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
@@ -226,7 +226,7 @@ class QsysTest(SimpleSwitch13):
                     self._packet_in_icmp(msg, pkt, qsys_pkt, d-p, l4.data)
                     return
                 elif type(l4) == dpkt.tcp.TCP:
-                    self.logger.info("TCP*{}".format(dpkt.tcp.TCP(l4).data))
+                    self.logger.info("TCP*{}".format(l4.data))
                     self._packet_in_tcp(msg, pkt, qsys_pkt, dp, l4.data)
                     return
                 elif type(l4) == dpkt.udp.UDP:
