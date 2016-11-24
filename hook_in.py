@@ -223,13 +223,13 @@ class QsysTest(SimpleSwitch13):
                 ip = eth.data
                 l4 = ip.data
                 if type(l4) == dpkt.icmp.ICMP:
-                    self._packet_in_icmp(self, msg, pkt, qsys_pkt, dp, l4.data)
+                    self._packet_in_icmp(msg, pkt, qsys_pkt, dp, l4.data)
                     return
                 elif type(l4) == dpkt.tcp.TCP:
-                    self._packet_in_tcp(self, msg, pkt, qsys_pkt, dp, l4.data)
+                    self._packet_in_tcp(msg, pkt, qsys_pkt, dp, l4.data)
                     return
                 elif type(l4) == dpkt.udp.UDP:
-                    self._packet_in_udp(self, msg, pkt, qsys_pkt, dp, l4.data)
+                    self._packet_in_udp(msg, pkt, qsys_pkt, dp, l4.data)
                     return
                 else:
                     return
