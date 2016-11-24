@@ -212,6 +212,7 @@ class QsysTest(SimpleSwitch13):
         datapath.send_msg(out)
         return 0
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
+        self.logger.info("pkt_in_ipv4")
         #以下dpktで処理
         f = BytesIO()
         pcap = RyuLibPcapWriter(f).write_pkt(msg.data)#pcaplib.Writer
