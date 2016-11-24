@@ -243,16 +243,18 @@ class QsysTest(SimpleSwitch13):
         self.logger.info("tcp")
         qsys_pkt.set_data(msg.data)
         self.logger.info("payload:{}".format(payload))
-        try:#getHTTP
-            request = dpkt.http.Request(__tcp.data)
-            url = http.headers['host'] + http.uri
-            self.logger.info("http:{}".format(url))
-        except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
-            self.logger.info("NOhttp:{}".format(payload))
-            pass
-        except:
-            pass
-        self.send_qsys(msg, qsys_pkt, dp)
+        if tcp.dport == 80 and len(tcp.data) > 0:
+            try:#getHTTP
+                request = dpkt.http.Request(__tcp.data)
+                url = http.headers['host'] + http.uri
+                self.logger.info("http:{}".format(url))
+            except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
+                self.logger.info("NOhttp:{}".format(payload))
+                pass
+            except:
+                pass
+            finally:
+                self.send_qsys(msg, qsys_pkt, dp)
     
     def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, payload):
         self.send_qsys(msg, qsys_pkt, dp)
