@@ -226,7 +226,7 @@ class QsysTest(SimpleSwitch13):
                     self._packet_in_icmp(msg, pkt, qsys_pkt, dp, l4.data)
                     return
                 elif type(l4) == dpkt.tcp.TCP:
-                    self._packet_in_tcp(msg, pkt, qsys_pkt, dp, l4.data)
+                    self._packet_in_tcp(msg, pkt, qsys_pkt, dp, l4)
                     return
                 elif type(l4) == dpkt.udp.UDP:
                     self._packet_in_udp(msg, pkt, qsys_pkt, dp, l4.data)
@@ -241,7 +241,7 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, payload):
         self.logger.info("tcp")
         qsys_pkt.set_data(msg.data)
-        self.logger.info("payload:{}".format(payload))
+        self.logger.info("payload:{}".format(payload.data))
         try:#getHTTP
             request = dpkt.http.Request(__tcp.data)
             url = http.headers['host'] + http.uri
