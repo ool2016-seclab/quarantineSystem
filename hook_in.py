@@ -194,7 +194,7 @@ class QsysTest(SimpleSwitch13):
             targetIp = dstIp
 
         e = ETHERNET(dstMac, srcMac, ether_types.ETH_TYPE_ARP)
-        a = arp(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
+        a = ARP(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
         p = packet.Packet()
         p.add_protocol(e)
         p.add_protocol(a)
