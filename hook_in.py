@@ -156,11 +156,6 @@ class QsysTest(SimpleSwitch13):
             return
     def _packet_in_arp(self, msg, pkt, qsys_pkt, dp):
         # ARP packet handling.
-        #datapath = dp.datapath
-        #dpid = dp.dpid
-        #ofproto = dp.ofproto
-        #parser = dp.parser
-        #in_port = dp.in_port
         src_eth = qsys_pkt.get_ethAddr_src()
         dst_eth = qsys_pkt.get_ethAddr_dst()
         src_ip = qsys_pkt.get_ipv4Addr_src()
@@ -174,6 +169,8 @@ class QsysTest(SimpleSwitch13):
             #self.logger.info('Send GARP (normal).', dpid)
             return
         #gatewayへのarp
+        self.logger.info(dst_ip)
+        self.logger.info(self.gateway)
         if dst_ip in self.gateway:
             gw_eth = gateway[dst_ip]
             opcode = qsys_pkt.get_arpObj().opcode
