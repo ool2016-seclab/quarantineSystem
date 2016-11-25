@@ -12,6 +12,10 @@ ab8c4e91984fd4881bb4fc80ef1b600de03dc55e
 https://github.com/kbandla/dpkt.g
 73c59453c2b58b436f5f3a75b358ce44f12cd151
 
+本プロジェクト内にはnetaddrを使用しています
+https://pypi.python.org/pypi/netaddr#downloads
+netaddr-0.7.18
+
 本プロジェクト内には以下のソースコードを
 参考にしているものがあります。
 ・Ryubook 1.0 ドキュメント
