@@ -172,7 +172,7 @@ class QsysTest(SimpleSwitch13):
         self.logger.info(dst_ip)
         self.logger.info(self.gateway)
         if dst_ip in self.gateway:
-            gw_eth = gateway[dst_ip]
+            gw_eth = self.gateway[dst_ip]
             opcode = qsys_pkt.get_arpObj().opcode
             if opcode == 1:#ARP Request
                 self.send_arp(dp.datapath, 2, gw_eth, src_ip, dst_eth, dst_ip, dp.in_port)
