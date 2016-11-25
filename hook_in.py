@@ -184,21 +184,21 @@ class QsysTest(SimpleSwitch13):
             self._packet_out(msg, qsys_pkt, dp)
     def send_arp(self, datapath, opcode, srcMac, srcIp, dstMac, dstIp, outPort, RouteDist=None):
         if opcode == 1:
-            self.portInfo[outPort] = PortTable(outPort, srcIp, srcMac, RouteDist)
+            pass
+            """self.portInfo[outPort] = PortTable(outPort, srcIp, srcMac, RouteDist)
 
             targetMac = "00:00:00:00:00:00"
-            targetIp = dstIp
+            targetIp = dstIp"""
         elif opcode == 2:
             targetMac = dstMac
             targetIp = dstIp
 
-        e = ethernet(dstMac, srcMac, ether.ETH_TYPE_ARP)
+        e = ETHERNET(dstMac, srcMac, ether.ETH_TYPE_ARP)
         a = arp(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
-        p = Packet()
+        p = packet.Packet()
         p.add_protocol(e)
         p.add_protocol(a)
         p.serialize()
-
         actions = [datapath.ofproto_parser.OFPActionOutput(outPort, 0)]
         out = datapath.ofproto_parser.OFPPacketOut(
             datapath=datapath,
