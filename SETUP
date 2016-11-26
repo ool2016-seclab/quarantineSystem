@@ -1,0 +1,42 @@
+#Ubuntu 14.04.4 amd64
+
+#準備
+cd ~
+sudo -s
+apt-get -y install git
+#Mininetインストール
+python -V
+#Python 2.7.x
+apt-get install python-setuptools
+git clone git://github.com/mininet/mininet
+cd mininet/
+git checkout -b 2.2.1
+cd util
+./install.sh -nfv
+#ryuインストール
+cd ~
+update-alternatives --install /usr/bin/python python /usr/bin/python3 0
+python -V
+#Python 3.x.x
+apt-get -y install python3-setuptools python3-pip apt-get in
+git clone https://github.com/osrg/ryu.git
+cd ryu/
+git checkout -b v4.7
+python setup.py install
+pip3 install eventlet>=0.15
+pip3 install msgpack-python>=0.3.0  # RPC library, BGP speaker(net_cntl)
+pip3 install netaddr
+pip3 install oslo.config>=1.15.0
+pip3 install routes  # wsgi
+pip3 install six>=1.4.0
+pip3 install webob>=1.2  # wsgi
+pip3 install ovs>=2.6.0  # OVSDB
+pip3 install tinyrpc
+
+#Qsys
+cd ~
+git clone https://github.com/ool2016-seclab/quarantineSystem.git
+cd quarantineSystem/
+ryu-manager hook_in.py
+python2 mn.py
+git pull test_koike
