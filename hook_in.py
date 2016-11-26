@@ -175,7 +175,7 @@ class QsysTest(SimpleSwitch13):
             gw_eth = self.gateway[dst_ip]
             opcode = qsys_pkt.get_arpObj().opcode
             if opcode == 1:#ARP Request
-                self.send_arp(dp.datapath, 2, gw_eth, src_ip, dst_eth, dst_ip, dp.in_port)
+                self.send_arp(dp.datapath, 2, gw_eth, dst_ip, src_eth, src_ip, dp.in_port)
                 return
             elif opcode == 2:#ARP_Reply
                 pass#TODO
