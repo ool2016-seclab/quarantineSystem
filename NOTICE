@@ -1,26 +1,26 @@
-–{ƒvƒƒWƒFƒNƒg“à‚ÉRyu SDN Framework‚ğg—p‚µ‚Ä‚¢‚Ü‚·B
+æœ¬ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆå†…ã«Ryu SDN Frameworkã‚’ä½¿ç”¨ã—ã¦ã„ã¾ã™ã€‚
 https://github.com/osrg/ryu
 v4.6
 c09cd3dc683715b53953ca1cbcd57ff91b971ffd
 
-–{ƒvƒƒWƒFƒNƒg“à‚É‚ÍMininet‚ğg—p‚µ‚Ä‚¢‚Ü‚·
+æœ¬ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆå†…ã«ã¯Mininetã‚’ä½¿ç”¨ã—ã¦ã„ã¾ã™
 https://github.com/mininet/mininet
 v2.21
 ab8c4e91984fd4881bb4fc80ef1b600de03dc55e
 
-–{ƒvƒƒWƒFƒNƒg“à‚É‚Ídpkt‚ğg—p‚µ‚Ä‚¢‚Ü‚·
+æœ¬ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆå†…ã«ã¯dpktã‚’ä½¿ç”¨ã—ã¦ã„ã¾ã™
 https://github.com/kbandla/dpkt.g
 73c59453c2b58b436f5f3a75b358ce44f12cd151
 
-–{ƒvƒƒWƒFƒNƒg“à‚É‚Ínetaddr‚ğg—p‚µ‚Ä‚¢‚Ü‚·
+æœ¬ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆå†…ã«ã¯netaddrã‚’ä½¿ç”¨ã—ã¦ã„ã¾ã™
 https://pypi.python.org/pypi/netaddr#downloads
 netaddr-0.7.18
 
-–{ƒvƒƒWƒFƒNƒg“à‚É‚ÍˆÈ‰º‚Ìƒ\[ƒXƒR[ƒh‚ğ
-Ql‚É‚µ‚Ä‚¢‚é‚à‚Ì‚ª‚ ‚è‚Ü‚·B
-ERyubook 1.0 ƒhƒLƒ…ƒƒ“ƒg
+æœ¬ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆå†…ã«ã¯ä»¥ä¸‹ã®ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ã‚’
+å‚è€ƒã«ã—ã¦ã„ã‚‹ã‚‚ã®ãŒã‚ã‚Šã¾ã™ã€‚
+ãƒ»Ryubook 1.0 ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆ
 https://osrg.github.io/ryu-book/ja/html/index.html
-ECUBE SUGAR STORAGE
+ãƒ»CUBE SUGAR STORAGE
 http://momijiame.tumblr.com/
-Ettsubo/simpleRouter
+ãƒ»ttsubo/simpleRouter
 https://github.com/ttsubo/simpleRouter
