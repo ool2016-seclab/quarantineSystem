@@ -37,6 +37,6 @@ pip3 install tinyrpc
 cd ~
 git clone https://github.com/ool2016-seclab/quarantineSystem.git
 cd quarantineSystem/
+git pull origin test_koike #暫定
 ryu-manager hook_in.py
 python2 mn.py
-git pull test_koike
