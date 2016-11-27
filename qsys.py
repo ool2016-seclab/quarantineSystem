@@ -112,6 +112,14 @@ class QsysDataStruct:
         self.ipv4_src = ipv4.src
         self.ipv4_dst = ipv4.dst
         self.ipv4 = ipv4
+    def set_tcp(self, tcp):
+        self.tcp = tcp
+    def set_upd(self, udp):
+        self.udp = udp
+    def set_icmp(self, _icmp):
+        self.icmp = _icmp
+        self.icmp_code = _icmp.code
+        self.icmp_data = _icmp.data
     def set_data(self,data):
         """
         dataに値をsetする。
@@ -170,6 +178,14 @@ class QsysDataStruct:
             return self.ipv4_dst
         else:
             return None
+    def get_tcpObj(self):
+        return self.tcp
+    def get_udpObj(self):
+        return self.udp
+    def get_icmpObj(self):
+        return self.icmp
+    def get_icmpData(self):
+        return self.icmp_data
 class DbAccess:
     def __init__(self):
         dbname = 'black_client.sqlite3'

@@ -19,6 +19,7 @@ import dpkt
 from ryu.controller.event import EventBase
 from io import BytesIO
 
+
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
 IPV4 = ipv4.ipv4
@@ -59,8 +60,11 @@ class QsysTest(SimpleSwitch13):
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
         self.gateway = {}#デフォルトゲートウェイ(ハード－コード){ipv4:eth}
+        self.rev_gateway = {}#{eth:ipv4}
         self.gateway['192.168.1.254'] = '00:00:00:00:00:01'
+        self.rev_gateway['00:00:00:00:00:01'] = '192.168.1.254'
         self.gateway['192.168.2.254'] = '00:00:00:00:00:02'
+        self.rev_gateway['00:00:00:00:00:02'] = '192.168.2.254'
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
         
     #コントローラにSWが接続される
@@ -172,10 +176,11 @@ class QsysTest(SimpleSwitch13):
         self.logger.info(dst_ip)
         self.logger.info(self.gateway)
         if dst_ip in self.gateway:
+            gw_ip = dst_ip
             gw_eth = self.gateway[dst_ip]
             opcode = qsys_pkt.get_arpObj().opcode
             if opcode == 1:#ARP Request
-                self.send_arp(dp.datapath, 2, gw_eth, dst_ip, src_eth, src_ip, dp.in_port)
+                self.send_arp(dp.datapath, 2, gw_eth, gw_ip, src_eth, src_ip, dp.in_port)
                 return
             elif opcode == 2:#ARP_Reply
                 pass#TODO
@@ -232,9 +237,48 @@ class QsysTest(SimpleSwitch13):
                     return
         
     def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, icmp):
-        self.send_qsys(msg, qsys_pkt, dp)
+        dst_eth = qsys_pkt.get_ethAddr_dst()
+        src_ip = qsys_pkt.get_ipv4Addr_src()
+        dst_ip = qsys_pkt.get_ipv4Addr_dst()
+        if dst_ip in self.gateway:#gwへのping
+            self.send_icmp(msg, pkt, qsys_pkt, dp, icmp)
+        elif dst_eth in self.rev_gateway:#別セグメントへのping
+            self.foward_icmp(msg, pkt, qsys_pkt, dp, icmp)
+        else:
+            self.send_qsys(msg, qsys_pkt, dp)
         return
 
+    def send_icmp(self, msg, pkt, qsys_pkt, dp, _icmp):
+        if pkt_icmp.type != icmp.ICMP_ECHO_REQUEST:
+            return
+        src_eth = qsys_pkt.get_ethAddr_src()
+        src_ip = qsys_pkt.get_ipv4Addr_src()
+        gw_ip = qsys_pkt.get_ipv4Addr_dst()
+        gw_eth = qsys_pkt.get_ipv4Addr_dst()
+        p = packet.Packet()
+        
+        p.add_protocol(ETHERNET(ethertype=ether_types.ETH_TYPE_IP,
+                                           dst=src_eth,
+                                           src=gw_eth))
+        p.add_protocol(IPV4(dst=src_ip,
+                                   src=gw_ip))
+        p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
+                                   code=icmp.ICMP_ECHO_REPLY_CODE,
+                                   csum=0,
+                                   data=qsys_pkt.get_icmpData()))
+        
+        p.serialize()
+        dp.ofproto
+        actions = [dp.parser.OFPActionOutput(outPort, 0)]
+        out = dp.parser.OFPPacketOut(
+            datapath=dp.datapath,
+            buffer_id=0xffffffff,
+            in_port=dp.ofroto.OFPP_CONTROLLER,
+            actions=actions,
+            data=p.data)
+        datapath.send_msg(out)
+    def foward_icmp(self,msg, pkt, qsys_pkt, dp, icmp):
+        pass
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, tcp):
         #self.logger.info("tcp")
         payload = tcp.data
