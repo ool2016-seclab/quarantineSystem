@@ -276,7 +276,7 @@ class QsysTest(SimpleSwitch13):
             in_port=dp.ofroto.OFPP_CONTROLLER,
             actions=actions,
             data=p.data)
-        datapath.send_msg(out)
+        dp.datapath.send_msg(out)
     def foward_icmp(self,msg, pkt, qsys_pkt, dp, icmp):
         pass
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, tcp):
