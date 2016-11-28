@@ -213,6 +213,36 @@ class QsysTest(SimpleSwitch13):
             data=p.data)
         datapath.send_msg(out)
         return 0
+    def packet_in_ipv4(self, src_eth, dst_eth, pkt, ipv4_pkt, qsys_pkt, dp):
+        assert isinstance(src_eth, str)
+        assert isinstance(dst_eth, str)
+        assert isinstance(pkt, packet.Packet)
+        assert isinstance(ipv4_pkt, IPV4)
+        assert isinstance(qsys_pkt, QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+        src_ip = ipv4_pkt.src
+        dst_ip = ipv4_pkt.dst
+        _icmp = pkt.get_protocol(ICMP)
+        _tcp = pkt.get_protocol(TCP)
+        _udp = pkt.get_protocol(UDP)
+        if _icmp:
+            assert isinstance(_icmp, ICMP)
+            self.packet_in_icmp(src_eth, dst_eth, src_ip, dst_ip, pkt, qsys_pkt, dp)
+            return
+        elif _tcp:
+            assert isinstance(_tcp, TCP)
+            #self._packet_in_tcp()
+            return
+            
+        
+        elif _udp:
+            assert isinstance(_udp, UDP)
+            #self.packet_in_udp()
+            return
+        else:
+            self.logger.warning("L3 Others:{}".format(pkt))
+            return
+        
     def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
         #self.logger.info("pkt_in_ipv4")
         #以下dpktで処理
@@ -235,7 +265,39 @@ class QsysTest(SimpleSwitch13):
                     return
                 else:
                     return
-        
+    def packet_in_icmp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, qsys_pkt, dp, ):
+        assert isinstance(src_eth, str)
+        assert isinstance(dst_eth, str)
+        assert isinstance(src_ip, str)
+        assert isinstance(dst_ip, str)
+        assert isinstance(pkt, packet.Packet)
+        assert isinstance(qsys_pkt, QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+
+        if self.is_gateway_ip(dst_ip):
+            self.gw_reply_icmp(src_eth, src_ip, 
+                               self.get_gw_eth_from_ip(dst_ip),dst_ip, 
+                               pkt.get_protocol(ICMP), dp)
+        elif self.is_gateway_eth(dst_eth):
+            self.gw_foward_icmp()
+    def is_gateway_ip(self, ip):
+        assert isinstance(ip, str)
+        if ip in self.gateway:
+            return True
+        else:
+            return False
+    def is_gateway_eth(self, eth):
+        assert isinstance(eth, str)
+        if eth in self.rev_gateway:
+            return self.rev_gateway[eth]
+        else:
+            return None
+    def get_gw_eth_from_ip(self, ip):
+        assert isinstance(ip, str)
+        if self.is_gateway(ip):
+            return self.gateway[ip]
+        else:
+            return None
     def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, icmp):
         dst_eth = qsys_pkt.get_ethAddr_dst()
         src_ip = qsys_pkt.get_ipv4Addr_src()
@@ -247,6 +309,28 @@ class QsysTest(SimpleSwitch13):
         else:
             self.send_qsys(msg, qsys_pkt, dp)
         return
+    def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, dp):
+        assert isinstance(src_eth, str)
+        assert isinstance(src_ip,  str)
+        assert isinstance(gw_eth, str)
+        assert isinstance(gw_ip, str)
+        assert isinstance(icmp_pkt, icmp.icmp)
+        assert isinstance(dp, Dp_obj)
+        if pkt.type != icmp.ICMP_ECHO_REQUEST:
+            return
+        p = packet.Packet()
+        p.add_protocol(ETHERNET(ethertype=ether_types.ETH_TYPE_IP,
+                                           dst=src_eth,
+                                           src=gw_eth))
+        p.add_protocol(IPV4(dst=src_ip, src=gw_ip))
+        p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
+                                   code=icmp.ICMP_ECHO_REPLY_CODE,
+                                   csum=0,
+                                   data=icmp_pkt.data))
+        p.serialize()
+        self._packet_out2(src_eth, p, dp)
+    def gw_foward_icmp(self):
+        pass
 
     def send_icmp(self, msg, pkt, qsys_pkt, dp, _icmp):
         if pkt_icmp.type != icmp.ICMP_ECHO_REQUEST:
@@ -279,6 +363,61 @@ class QsysTest(SimpleSwitch13):
         dp.datapath.send_msg(out)
     def foward_icmp(self,msg, pkt, qsys_pkt, dp, icmp):
         pass
+
+    def packet_in_tcp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, tcp_pkt, qsys_pkt, dp):
+        assert isinstance(src_eth, str)
+        assert isinstance(dst_eth, str)
+        assert isinstance(src_ip, str)
+        assert isinstance(dst_ip, str)
+        assert isinstance(pkt, packet.Packet)
+        assert isinstance(tcp_pkt, TCP)
+        assert isinstance(qsys_pkt, QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+
+        #以下dpktで処理
+        f = BytesIO()
+        pcap = RyuLibPcapWriter(f).write_pkt(pkt.data)#pcaplib.Writer
+        data = dpkt.pcap.Reader(BytesIO(f.getvalue()))
+        f.close()
+        for t,k in data:
+                eth = dpkt.ethernet.Ethernet(k)
+                assert isinstance(eth, dpkt.ethernet.Ethernet)
+                ip = eth.data
+                assert isinstance(ip, dpkt.ip.IP)
+                tcp = ip.data
+                if not type(tcp) == dpkt.tcp.TCP:
+                    #dpktで読み取れないTCPのpkt
+                    return
+                assert isinstance(tcp, dpkt.tcp.TCP)
+                sport = tcp.sport
+                assert isinstance(sport, int)
+                dport = tcp.dport
+                assert isinstance(dport, int)
+                if dport == 80 or sport == 80:
+                    self.packet_in_http(sport, dport, tcp.data)
+                else:
+                    return
+    def packet_in_http(self, sport, dport, tcp_payload):
+        assert isinstance(sport, int)
+        assert isinstance(dport, int)
+        assert isinstance(tcp_payload, bytes)
+        payload = tcp_payload
+        if len(payload) <= 0:
+            return
+        try:
+            http = dpkt.http.Request(payload.decode('utf-8'))
+            self.logger.info("http/req(header):{}".format(http.headers))
+            self.logger.info("http(method):{}".format(http.method))
+            self.logger.info("http(data):{}".format(http.data))
+            _http = dpkt.http.Response(payload.decode('utf-8'))
+            self.logger.info("http/res(header):{}".format(_http.headers))
+            self.logger.info("http(body):{}".format(_http.body))
+            self.logger.info("http(data):{}".format(_http.data))
+        except:
+            pass
+        self.send_qsys(msg, qsys_pkt, dp)
+        return
+
     def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, tcp):
         #self.logger.info("tcp")
         payload = tcp.data
@@ -300,16 +439,45 @@ class QsysTest(SimpleSwitch13):
     def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
         self.send_qsys(msg, qsys_pkt, dp)
         pass
-
-    def send_qsys(self, msg, qsys_pkt,  dp):
-        self.logger.info("send_qsys{}".format(qsys_pkt))
+    def _send_qsys(self,dst_eth, pkt, qsys_pkt, dp):
+        assert isinstance(dst_eth, str)
+        assert isinstance(pkt, packet.Packet)
+        assert isinstance(qsys_pkt, QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
         result = self.qsys.send(qsys_pkt)
         if True == result:
-            self._packet_out(msg, qsys_pkt, dp)
+            self.packet_out(dst_eth, pkt, dp)
             return
         else:#Drop Packet
             self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
+    def send_qsys(self, msg, qsys_pkt,  dp):
+        self.logger.info("send_qsys{}".format(qsys_pkt))
+        result = self.qsys.send(qsys_pkt)
+        if True == result:
+            self._packet_out2(msg, qsys_pkt, dp)
+            return
+        else:#Drop Packet
+            self.logger.info('Drop:{}'.format(qsys_pkt))
+            return 
+    def _packet_out2(self, dst_eth, pkt, dp):
+        datapath = dp.datapath
+        dpid = dp.dpid
+        ofproto = dp.ofproto
+        parser = dp.parser
+        in_port = dp.in_port
+        #Transport to dst
+        if dst_eth in self.mac_to_port[dpid]:
+            #Switch output portをテーブルから指定
+            out_port = self.mac_to_port[dpid][dst_eth]
+        else:
+            #フラッディング
+            out_port = ofproto.OFPP_FLOOD
+        actions = [parser.OFPActionOutput(out_port)]
+        out = parser.OFPPacketOut(
+            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
+            actions=actions, data=pkt.data)
+        datapath.send_msg(out)
 
     def _packet_out(self, msg, qsys_pkt, dp):
         datapath = dp.datapath
