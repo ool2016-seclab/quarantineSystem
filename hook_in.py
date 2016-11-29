@@ -136,6 +136,9 @@ class QsysTest(SimpleSwitch13):
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
     def client_regist_port(self, eth, dpid, in_port):
+        if eth and dpid and in_port:
+            self.logger.error("regist_port_error")
+            return
         if self.cList.check_registed_eth(eth):
             return 
         c = Client(eth=eth,dpid=dpid, port=in_port)
