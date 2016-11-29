@@ -456,7 +456,7 @@ class QsysTest(SimpleSwitch13):
         else:
             #フラッディング
             out_dpid = None
-            out_port = ofproto.OFPP_FLOOD
+            out_port = ofproto_v1_3.OFPP_FLOOD
         actions = None
         for obj in self.datapathes:
             assert isinstance(obj, Dp_obj)
