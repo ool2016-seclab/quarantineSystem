@@ -443,7 +443,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
     def send_qsys(self, msg, qsys_pkt,  dp):
-        self.logger.info("send_qsys{}".format(qsys_pkt))
+        self.logger.debug("send_qsys{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
         if True == result:
             self._packet_out2(msg, qsys_pkt, dp)
@@ -478,7 +478,7 @@ class QsysTest(SimpleSwitch13):
                     datapath=obj.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
                     actions=actions, data=pkt.data)
                 datapath.send_msg(out)
-                self.logger.info("send!:{}".format(pkt))
+                self.logger.debug("send!:{}".format(pkt))
                 return
         datapath = dp.datapath
         actions = [dp.parser.OFPActionOutput(out_port, 0)]
@@ -486,7 +486,7 @@ class QsysTest(SimpleSwitch13):
             datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
             actions=actions, data=pkt.data)
         datapath.send_msg(out)
-        self.logger.info("send!:{}".format(pkt))
+        self.logger.debug("send!:{}".format(pkt))
         return
     
     def update_mac_deny_list(self):
