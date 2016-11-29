@@ -71,11 +71,11 @@ class ClientList:
         return False
     def change(self, eth, client):
         assert isinstance(client, Client)
-        for c in self.list:
+        for i, c in enumerate(self.list):
             if c.eth == eth:
                 self.list[i] = client
     def delete(self, eth):
-        for c in self.list:
+        for i, c in enumerate(self.list):
             if c.eth == eth:
                 pop = self.list.pop(i)
                 self.logger.debug(pop)
