@@ -491,8 +491,8 @@ class QsysTest(SimpleSwitch13):
                 ip = c.get_ip()
                 level = c.get_level()
                 eval = c.get_eval()
-                self.logger.info("IP:{}".format(ip))
-                self.logger.info("Level:{}".format(level))
+                self.logger.debug("IP:{}".format(ip))
+                self.logger.debug("Level:{}".format(level))
                 if QsysRelEval.LOW == eval:
                     if not eth in self.mac_deny_list:
                         for dp in self.datapathes:#dp[0]:dp,dp[1]:parser
