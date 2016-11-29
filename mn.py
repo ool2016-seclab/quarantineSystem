@@ -29,7 +29,7 @@ def myNetwork():
 
     info( '*** Add hosts\n')
     h1 = net.addHost('h1', cls=Host, ip='192.168.1.1/24', defaultRoute='192.168.1.254')
-    h2 = net.addHost('h2', cls=Host, ip='192.168.1.2/24', defaultRoute='192.168.1.254')
+    h2 = net.addHost('h2', cls=Host, ip='192.168.1.2/24', defaultRoute='192.168.1.254/24')
     h3 = net.addHost('h3', cls=Host, ip='192.168.1.3/24', defaultRoute=None)
     
     h4 = net.addHost('h4', cls=Host, ip='192.168.1.4/24', defaultRoute=None)
