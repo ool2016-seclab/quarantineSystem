@@ -131,7 +131,7 @@ class Client:
         self.default_route = default_route
         self.touch()
     def set_dpid(self, dpid, port):
-        assert isinstance(dpid, str)
+        assert isinstance(dpid, int)
         assert isinstance(port, int)
         self.dpid = dpid
         self.port = port
