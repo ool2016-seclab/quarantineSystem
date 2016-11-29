@@ -469,8 +469,8 @@ class QsysTest(SimpleSwitch13):
         スレッドとして立ち上げ定期的に実行する"""
         #TODO:そのうちqsysからのイベントで呼び出せるようにしたい
         while True:
-            list = self.cList.get_all()
-            for c in list:
+            lst = self.cList.get_all()
+            for c in lst:
                 eth = c.get_eth()
                 ip = c.get_ip()
                 level = c.get_level()
