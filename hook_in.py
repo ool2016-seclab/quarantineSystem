@@ -233,7 +233,6 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(opcode, int)
         assert isinstance(qsys_pkt,QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-        self.logger.info("gw_arp:{}".format(arp_pkt))
         if opcode == arp.ARP_REQUEST:#ARP Request
             self.gw_send_arp(src_eth, src_ip, gw_eth, gw_ip, arp.ARP_REPLY,dp)
             return
@@ -275,6 +274,7 @@ class QsysTest(SimpleSwitch13):
             p.add_protocol(e)
             p.add_protocol(a)
             p.serialize()
+            self.logger.info("gw_arp:{}".format(p))
             self._packet_out2(src_eth, p, dp)
             return 
         elif opcode == arp.ARP_REV_REPLY:
