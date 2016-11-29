@@ -447,6 +447,8 @@ class QsysTest(SimpleSwitch13):
     def _packet_out2(self, dst_eth, pkt, dp):
         client = self.cList.get_from_eth(dst_eth)
         #Transport to dst
+        out_dpid = None
+        out_port = None
         if isinstance(client, Client):
             if client.dpid and client.port:
                 out_dpid = client.dpid
