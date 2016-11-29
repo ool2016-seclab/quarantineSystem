@@ -74,7 +74,7 @@ class Gateway:
         assert isinstance(ip_addr,str)
         assert isinstance(mask, int)
         self.eth = eth
-        self.__nw_addr = IPNetwork(ip_addr+'/'+mask).network
+        self.__nw_addr = IPNetwork(ip_addr+'/'+str(mask)).network
         self.__ip_addr = IPAddress(ip_addr)
         self.mask = mask
     def __str__(self):
