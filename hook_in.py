@@ -170,9 +170,10 @@ class QsysTest(SimpleSwitch13):
             self.logger.warning("Not Ether type")
             return
         qsys_pkt.set_eth(eth)#qsys_pktにethを登録
-        eth_src = eth.src
+        src_eth = eth.src
+        dst_eth = eth.dst
         #clientListにクライアントを登録
-        self.client_regist_port(eth_src, dpid, in_port)
+        self.client_regist_port(src_eth, dpid, in_port)
         #arpパケット
         arp_pkt = pkt.get_protocol(ARP)
         ipv4_pkt = pkt.get_protocol(IPV4)
@@ -187,8 +188,7 @@ class QsysTest(SimpleSwitch13):
             assert isinstance(ipv4_pkt, IPV4)
             qsys_pkt.set_ipv4(ipv4_pkt)
             ipv4_src = ipv4_pkt.src
-            self._
-            self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
+            self.packet_in_ipv4(src_eth, dst_eth, pkt, ipv4_pkt, qsys_pkt, dp)
             return
         else:
             self.logger.info("Others Pkt:{}".format(msg))
