@@ -45,8 +45,7 @@ class Dp_obj:
         #スイッチのポート
         self.in_port = None
         if not isinstance(msg, ofproto_v1_3_parser.OFPSwitchFeatures):
-            if hasattr(msg.match['in_port']):
-                self.in_port = msg.match['in_port']
+            self.in_port = msg.match['in_port']
                 
 
 class SystemActionModei(enum.Enum):
