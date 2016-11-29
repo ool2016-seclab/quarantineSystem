@@ -488,7 +488,8 @@ class QsysTest(SimpleSwitch13):
                 elif QsysRelEval.UNKNOWN == eval:
                     #TODO:登録されていないClientを参照した際の例外処理
                     pass
-            self.cList.get_from_eth()('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
+            c = self.cList.get_from_eth('10.0.0.1')#テストコード。10.0.0.1の信頼度を1(< LOW)に
+            c.update_reliability_level(1)
             hub.sleep(5)
 
 class RyuLibPcapWriter(pcaplib.Writer):
