@@ -367,7 +367,6 @@ class QsysTest(SimpleSwitch13):
         p.add_protocol(IPV4(dst=src_ip, src=gw_ip, proto=inet.IPPROTO_ICMP))
         p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
                                    code=icmp.ICMP_ECHO_REPLY_CODE,
-                                   csum=0,
                                    data=icmp_pkt.data))
         #p.serialize()
         datapath = dp.datapath
