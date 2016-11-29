@@ -446,7 +446,7 @@ class QsysTest(SimpleSwitch13):
             return 
 
     def _packet_out2(self, dst_eth, pkt, dp):
-        self.logger.debug("pkt:{}".format(pkt))
+        self.logger.info("pkt:{}".format(pkt))
         client = self.cList.get_from_eth(dst_eth)
         #Transport to dst
         out_dpid = None
