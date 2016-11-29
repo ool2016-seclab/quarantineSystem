@@ -66,7 +66,7 @@ class GatewayList:
         for v in self.list:
             assert isinstance(v, Gateway)
             if v.get_eth() == eth:
-                return v.ip_addr
+                return v.get_ip_addr()
         return None
     def get_eth(self, ip_addr):
         for v in self.list:
