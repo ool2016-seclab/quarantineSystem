@@ -61,7 +61,7 @@ class ClientList:
         assert isinstance(client, Client)
         eth = client.eth
         if self.check_registed_eth(eth):
-            self.change(eth, client)
+        #    self.change(eth, client)
         else:
             self.list.append(client)
     def check_registed_eth(self, eth):
@@ -71,6 +71,7 @@ class ClientList:
         return False
     def change(self, eth, client):
         assert isinstance(client, Client)
+        self.logger.info("client data changed")
         for i, c in enumerate(self.list):
             if c.eth == eth:
                 self.list[i] = client
