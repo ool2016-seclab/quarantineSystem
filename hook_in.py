@@ -342,7 +342,7 @@ class QsysTest(SimpleSwitch13):
                                pkt.get_protocol(ICMP), dp)
             return
         elif self.gateway.get_ip_addr(dst_eth):#別NWへのICMP
-            self.gw_foward_icmp()
+            self.gw_foward_icmp(dst_ip, pkt, dp)
             return
         else:#同一NWへのICMP or 不正なICMP？
             self.logger.debug("Same NW icmp")
@@ -369,8 +369,28 @@ class QsysTest(SimpleSwitch13):
         p.serialize()
         datapath = dp.datapath
         self._packet_out2(src_eth, p, dp)
-    def gw_foward_icmp(self):
-        pass
+    def gw_foward_icmp(self, dst_ip, pkt, dp):
+        mask = 24 #決め打ち
+        dst_nw_addr = IPNetwork(dst_ip+'/'+str(mask)).network
+        dst_eth = '00:00:00:00:00:00'
+        for obj in self.gateway.get_all():
+            if obj.get_nw_addr == dst_nw_addr:
+                dst_eth = obj.get_eth()
+        ipv4_pkt = pkt.get_protocol(IPV4)
+        assert isinstance(ipv4_pkt, IPV4)
+        e = pkt.get_protocol(ETHERNET)
+        i = IPV4(ipv4_pkt.version, ipv4_pkt.header_length, ipv4_pkt.tos,
+                      p_total_length, ipv4_pkt.identification, ipv4_pkt.flags,
+                      ipv4_pkt.offset, ipv4_pkt.ttl-1, ipv4_pkt,proto, ipv4_pkt.csum,
+                      ipv4_pkt.src, ipv4_pkt.dst)
+        ic = pkt.get_protocol(ICMP)
+        p = packet.Packet()
+        p.add_protocol(e)
+        p.add_protocol(i)
+        p.add_protocol(ic)
+        p.serialize()
+        self._packet_out2(dst_eth, p, dp)
+        return
 
     def packet_in_tcp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, tcp_pkt, qsys_pkt, dp):
         assert isinstance(src_eth, str)
