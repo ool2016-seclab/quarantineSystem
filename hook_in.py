@@ -308,7 +308,8 @@ class QsysTest(SimpleSwitch13):
         udp_pkt = pkt.get_protocol(UDP)
         if icmp_pkt:
             assert isinstance(icmp_pkt, ICMP)
-            self.packet_in_icmp(src_eth, dst_eth, src_ip, dst_ip, pkt, qsys_pkt, dp)
+            ttl = ipv4_pkt.ttl
+            self.packet_in_icmp(src_eth, dst_eth, src_ip, dst_ip, ttl, pkt, qsys_pkt, dp)
             return
         elif tcp_pkt:
             assert isinstance(tcp_pkt, TCP)
@@ -323,11 +324,12 @@ class QsysTest(SimpleSwitch13):
             self.logger.warning("L3 Others:{}".format(pkt))
             return
 
-    def packet_in_icmp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, qsys_pkt, dp, ):
+    def packet_in_icmp(self, src_eth, dst_eth, src_ip, dst_ip, ttl, pkt, qsys_pkt, dp, ):
         assert isinstance(src_eth, str)
         assert isinstance(dst_eth, str)
         assert isinstance(src_ip, str)
         assert isinstance(dst_ip, str)
+        assert isinstance(ttl, int)
         assert isinstance(pkt, packet.Packet)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
@@ -336,7 +338,7 @@ class QsysTest(SimpleSwitch13):
         if self.gateway.get_eth(dst_ip):#gwへのicmp
             self.gw_reply_icmp(src_eth, src_ip, 
                                self.gateway.get_eth(dst_ip), dst_ip, 
-                               pkt.get_protocol(ICMP), dp)
+                               pkt.get_protocol(ICMP),ttl, dp)
             return
         elif self.gateway.get_ip_addr(dst_eth):#別NWへのICMP
             self.gw_foward_icmp()
@@ -346,12 +348,13 @@ class QsysTest(SimpleSwitch13):
             self._packet_out2(dst_eth, pkt, dp)
             return
 
-    def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, dp):
+    def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, ttl, dp):
         assert isinstance(src_eth, str)
         assert isinstance(src_ip,  str)
         assert isinstance(gw_eth, str)
         assert isinstance(gw_ip, str)
         assert isinstance(icmp_pkt, ICMP)
+        assert isinstance(ttl, int)
         assert isinstance(dp, Dp_obj)
         self.logger.info("gw_icmp")
         if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
@@ -360,7 +363,7 @@ class QsysTest(SimpleSwitch13):
         p.add_protocol(ETHERNET(ethertype=ether_types.ETH_TYPE_IP,
                                            dst=src_eth,
                                            src=gw_eth))
-        p.add_protocol(IPV4(dst=src_ip, src=gw_ip))
+        p.add_protocol(IPV4(dst=src_ip, src=gw_ip, ttl=ttl-1))
         p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
                                    code=icmp.ICMP_ECHO_REPLY_CODE,
                                    csum=0,
