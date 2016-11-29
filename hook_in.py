@@ -42,7 +42,10 @@ class Dp_obj:
         self.ofproto = self.datapath.ofproto
         self.parser = self.datapath.ofproto_parser
         #スイッチのポート
-        self.in_port = msg.match['in_port']
+        if hasattr(msg.match['in_port']):
+            self.in_port = msg.match['in_port']
+        else:
+            self.in_port = None
 
 class SystemActionModei(enum.Enum):
     """学習モード(正常時のデータを記録するためのモード)と
