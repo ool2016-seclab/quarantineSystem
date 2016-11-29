@@ -275,7 +275,7 @@ class QsysTest(SimpleSwitch13):
             p.add_protocol(e)
             p.add_protocol(a)
             p.serialize()
-            self.logger.info("gw_arp:{}".format(p))
+            self.logger.debug("gw_arp:{}".format(p))
             self._packet_out2(src_eth, p, dp)
             return 
         elif opcode == arp.ARP_REV_REPLY:
@@ -335,7 +335,7 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
         self.logger.info("icmp")
-        self.logger.info(pkt)
+        self.logger.debug(pkt)
         if self.gateway.get_eth(dst_ip):#gwへのicmp
             self.gw_reply_icmp(src_eth, src_ip, 
                                self.gateway.get_eth(dst_ip), dst_ip, 
@@ -356,7 +356,6 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(gw_ip, str)
         assert isinstance(icmp_pkt, ICMP)
         assert isinstance(dp, Dp_obj)
-        self.logger.info("gw_icmp")
         if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
             return
         p = packet.Packet()
