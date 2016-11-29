@@ -338,6 +338,7 @@ class QsysTest(SimpleSwitch13):
             self.gw_foward_icmp()
             return
         else:#同一NWへのICMP or 不正なICMP？
+            self.logger.debug("Same NW icmp")
             self._packet_out2(dst_eth, pkt, dp)
             return
 
@@ -462,6 +463,7 @@ class QsysTest(SimpleSwitch13):
             assert isinstance(obj, Dp_obj)
             self.logger.info(obj.dpid)
             self.logger.info(out_dpid)
+
             if out_dpid == obj.dpid:
                 datapath = obj.datapath
                 actions = [obj.parser.OFPActionOutput(out_port)]
