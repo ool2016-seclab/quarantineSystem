@@ -64,7 +64,7 @@ class ClientList:
         else:
             self.list.append(client)
     def check_registed_eth(self, eth):
-        for i, c in cList:
+        for i, c in self.list:
             if c.eth == eth:
                 return True
         return False
