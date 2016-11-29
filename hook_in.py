@@ -300,6 +300,7 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(ipv4_pkt, IPV4)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
+        self.logger.info("ipv4")
         src_ip = ipv4_pkt.src
         dst_ip = ipv4_pkt.dst
         icmp_pkt = pkt.get_protocol(ICMP)
