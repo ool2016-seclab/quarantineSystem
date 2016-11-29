@@ -58,7 +58,7 @@ class SystemActionModei(enum.Enum):
 class GatewayList:
     def __init__(self):
         g1 = Gateway(eth='0a:e4:1c:d1:3e:44',ip_addr='192.168.1.254', mask=24)
-        g2 = Gateway(eth='00:00:5e:00:53:01',ip_addr='192.168.2.254', mask=24)
+        g2 = Gateway(eth='0a:e4:1c:d1:3e:45',ip_addr='192.168.2.254', mask=24)
         self.list = [g1, g2]
     def get_all(self):
         return self.list
@@ -339,7 +339,7 @@ class QsysTest(SimpleSwitch13):
         if self.gateway.get_eth(dst_ip):#gwへのicmp
             self.gw_reply_icmp(src_eth, src_ip, 
                                self.gateway.get_eth(dst_ip), dst_ip, 
-                               pkt.get_protocol(ICMP),ttl, dp, qsys_pkt)
+                               pkt.get_protocol(ICMP), dp)
             return
         elif self.gateway.get_ip_addr(dst_eth):#別NWへのICMP
             self.gw_foward_icmp()
@@ -349,29 +349,21 @@ class QsysTest(SimpleSwitch13):
             self._packet_out2(dst_eth, pkt, dp)
             return
 
-    def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, ttl, dp, qsys_pkt):
+    def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, dp):
         assert isinstance(src_eth, str)
         assert isinstance(src_ip,  str)
         assert isinstance(gw_eth, str)
         assert isinstance(gw_ip, str)
         assert isinstance(icmp_pkt, ICMP)
-        assert isinstance(ttl, int)
         assert isinstance(dp, Dp_obj)
         self.logger.info("gw_icmp")
         if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
             return
         p = packet.Packet()
-        eth_obj = qsys_pkt.get_ethObj()
-        ipv4_obj = qsys_pkt.get_ipv4Obj()
-        assert isinstance(eth_obj, ETHERNET)
-        assert isinstance(ipv4_obj, IPV4)
-        self.logger.info("TYPE:{}/{}".format(ether_types.ETH_TYPE_IP, eth_obj.ethertype))
-        self.logger.info("in_proto:{}/{}".format(inet.IPPROTO_ICMP, ipv4_obj.proto))
-
-        p.add_protocol(ETHERNET(ethertype=eth_obj.ethertype,
+        p.add_protocol(ETHERNET(ethertype=ther_types.ETH_TYPE_IP,,
                                            dst=src_eth,
                                            src=gw_eth))
-        p.add_protocol(IPV4(dst=src_ip, src=gw_ip, proto=ipv4_obj.proto))
+        p.add_protocol(IPV4(dst=src_ip, src=gw_ip, proto=inet.IPPROTO_ICMP))
         p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
                                    code=icmp.ICMP_ECHO_REPLY_CODE,
                                    data=icmp_pkt.data))
