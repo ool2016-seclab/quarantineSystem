@@ -489,7 +489,8 @@ class QsysTest(SimpleSwitch13):
                     #TODO:登録されていないClientを参照した際の例外処理
                     pass
             c = self.cList.get_from_eth('10.0.0.1')#テストコード。10.0.0.1の信頼度を1(< LOW)に
-            if c: c.update_reliability_level(1)
+            if c:
+                c.update_reliability_level(1)
             hub.sleep(5)
 
 class RyuLibPcapWriter(pcaplib.Writer):
