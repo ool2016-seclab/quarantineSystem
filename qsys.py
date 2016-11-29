@@ -118,8 +118,8 @@ class Client:
         self.touch()
     def set_ip_addr(self, ip_addr, mask, default_route=None):
         assert isinstance(ip_addr, str)
-        assert isinstance(masl, int)
-        self.nw_addr = IPNetwork(ip_addr+'/'+mask).network
+        assert isinstance(mask, int)
+        self.nw_addr = IPNetwork(ip_addr+'/'+str(mask)).network
         self.ip_addr = IPAddress(ip_addr)
         assert isinstance(self.nw_addr,IPNetwork)
         assert isinstance(self.ip_addr, IPAddress)
