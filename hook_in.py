@@ -360,7 +360,7 @@ class QsysTest(SimpleSwitch13):
         if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
             return
         p = packet.Packet()
-        p.add_protocol(ETHERNET(ethertype=ther_types.ETH_TYPE_IP,,
+        p.add_protocol(ETHERNET(ethertype=ther_types.ETH_TYPE_IP,
                                            dst=src_eth,
                                            src=gw_eth))
         p.add_protocol(IPV4(dst=src_ip, src=gw_ip, proto=inet.IPPROTO_ICMP))
