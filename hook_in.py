@@ -8,6 +8,7 @@ from ryu.controller.controller import Datapath
 from ryu.controller.handler import set_ev_cls,MAIN_DISPATCHER,CONFIG_DISPATCHER
 from ryu.ofproto.ofproto_v1_3 import *
 from ryu.ofproto.ofproto_v1_3_parser import OFPMatch
+from ryu.ofproto import ofproto_v1_3_parser
 from ryu.ofproto.ofproto_parser import *
 from ryu.lib.packet import *
 from ryu.controller import dpset
@@ -42,10 +43,11 @@ class Dp_obj:
         self.ofproto = self.datapath.ofproto
         self.parser = self.datapath.ofproto_parser
         #スイッチのポート
-        if hasattr(msg.match['in_port']):
-            self.in_port = msg.match['in_port']
-        else:
-            self.in_port = None
+        self.in_port = None
+        if not isinstance(msg, ofproto_v1_3_parser.OFPSwitchFeatures):
+            if hasattr(msg.match['in_port']):
+                self.in_port = msg.match['in_port']
+                
 
 class SystemActionModei(enum.Enum):
     """学習モード(正常時のデータを記録するためのモード)と
