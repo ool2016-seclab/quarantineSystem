@@ -137,7 +137,7 @@ class QsysTest(SimpleSwitch13):
         self.add_flow(datapath, 0, match, actions)
     def client_regist_port(self, eth, dpid, in_port):
         if eth and dpid and in_port:
-            self.logger.error("regist_port_error")
+            self.logger.error("regist_port_error:eth{} dpid:{} port:{}".format(eth,dpid,in_port))
             return
         if self.cList.check_registed_eth(eth):
             return 
