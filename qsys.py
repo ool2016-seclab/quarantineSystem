@@ -121,7 +121,7 @@ class Client:
         assert isinstance(mask, int)
         self.nw_addr = IPNetwork(ip_addr+'/'+str(mask)).network
         self.ip_addr = IPAddress(ip_addr)
-        assert isinstance(self.nw_addr,str)
+        assert isinstance(self.nw_addr,IPAddress)
         assert isinstance(self.ip_addr, IPAddress)
         self.mask = mask 
         if default_route:
