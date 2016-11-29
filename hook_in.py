@@ -372,7 +372,7 @@ class QsysTest(SimpleSwitch13):
         datapath = dp.datapath
         actions = [dp.parser.OFPActionOutput(dp.in_port, 0)]
         out = dp.parser.OFPPacketOut(
-            datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
+            datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=dp.in_port,
             actions=actions, data=p.data)
         datapath.send_msg(out)
         self.logger.info("send!:{}".format(p))
