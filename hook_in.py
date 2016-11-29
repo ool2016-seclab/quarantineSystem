@@ -330,7 +330,7 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(pkt, packet.Packet)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-
+        self.logger.info("icmp")
         if self.gateway.get_eth(dst_ip):#gwへのicmp
             self.gw_reply_icmp(src_eth, src_ip, 
                                self.gateway.get_eth(dst_ip), dst_ip, 
@@ -351,7 +351,7 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(gw_ip, str)
         assert isinstance(icmp_pkt, icmp.icmp)
         assert isinstance(dp, Dp_obj)
-
+        self.logger.info("gw_icmp")
         if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
             return
         p = packet.Packet()
