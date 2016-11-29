@@ -370,7 +370,7 @@ class QsysTest(SimpleSwitch13):
                                    data=icmp_pkt.data))
         p.serialize()
         datapath = dp.datapath
-        actions = [dp.parser.OFPActionOutput(dp.in_port, 0)]
+        actions = [dp.parser.OFPActionOutput(ofproto_v1_3.OFPP_FLOOD, 0)]
         out = dp.parser.OFPPacketOut(
             datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=dp.in_port,
             actions=actions, data=p.data)
