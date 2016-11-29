@@ -64,13 +64,13 @@ class GatewayList:
     def get_ip_addr(self, eth):
         for v in self.list:
             assert isinstance(v, Gateway)
-            if v.eth == eth:
+            if v.get_eth() == eth:
                 return v.ip_addr
         return None
     def get_eth(self, ip_addr):
         for v in self.list:
             assert isinstance(v, Gateway)
-            if v.ip_addr == ip_addr:
+            if v.get_ip_addr() == ip_addr:
                 return v.eth
         return None
 class Gateway:
