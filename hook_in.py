@@ -35,8 +35,8 @@ class Dp_obj:
     """datapathのオブジェクトをまとめるためのクラス
     """
     def __init__(self, msg):
-        self.datapath = Datapath()#inteliSense用
-        self.ofproto = ofproto_v1_3#inteliSense用
+        #self.datapath = Datapath()#inteliSense用
+        #self.ofproto = ofproto_v1_3#inteliSense用
         self.datapath = msg.datapath
         self.dpid = self.datapath.id
         self.ofproto = self.datapath.ofproto
@@ -488,7 +488,7 @@ class QsysTest(SimpleSwitch13):
                 elif QsysRelEval.UNKNOWN == eval:
                     #TODO:登録されていないClientを参照した際の例外処理
                     pass
-            c = self.cList.get_from_eth('10.0.0.1')#テストコード。10.0.0.1の信頼度を1(< LOW)に
+            c = self.cList.get_from_ipv4('10.0.0.1')#テストコード。10.0.0.1の信頼度を1(< LOW)に
             if c:
                 c.update_reliability_level(1)
             hub.sleep(5)
