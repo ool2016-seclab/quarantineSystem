@@ -21,10 +21,10 @@ from ryu.lib import dpid as dpid_lib
 from ryu.controller import dpset
 from ryu.topology import switches
 import sqlite3
-import netaddr
+from netaddr import *
 from ryu.lib.packet import *
 import types
-from builtins import hasattr
+from builtins import hasattr, staticmethod
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
@@ -50,27 +50,112 @@ class subnetList:
             return self.netlist[subnet]
     def makeSubnetKey(self, nwAddr, mask=32):
         return nwAddr+'/'+mask
+"""
 class ClientList:
-    def __init(self):
+    def __init(self, logger):
         self.cList = []#[Client_object,]
-    def addClient(self, client):
+        self.logger = logger
+        hub.spawn(self.check_client_expire())
+    def add(self, client):
         assert isinstance(client, Client)
-        self.cList.append(client)
-    def changeClient(self, client):
+        eth = client.eth
+        if self.check_registed_eth(eth):
+            self.change(eth, client)
+        else:
+            self.cList.append(client)
+    def check_registed_eth(self, eth):
+        for i, c in cList:
+            if c.eth == eth:
+                return True
+        return False
+    def change(self, eth, client):
         assert isinstance(client, Client)
         for i, c in cList:
-            if c.eth == client.eth:
+            if c.eth == eth:
                 self.cList[i] = client
+    def delete(self, eth):
+        for i, c in cList:
+            if c.eth == eth:
+                pop = self.cList.pop(i)
+                self.logger.debug(pop)
+        return
+    def get_all(self):
+        return self.cList
+    def get_from_eth(self, eth):
+        for i, c in self.cList:
+            if c.eth == eth:
+                return c
+        return None
+    def get_from_ipv4(self, ip_addr):
+        for i, c in cList:
+            if c.ip_addr == ip_addr:
+                return c
+        return None
+    def check_client_expire(self):
+    #Client.lastUpdateの情報を基に一定時間経過後に情報を削除
+        pass
+
+
 class Client:
-    def __init__(self, eth, ip_addr, mask=24 , default_route=None):
-        self.neme = name
+    def __init__(self, eth, ip_addr=None, mask=None , default_route=None, dpid=None, port=None):
+        assert isinstance(eth, str)
         self.eth = eth
-        self.nw_addr = netaddr.IPNetwork(ip_addr+'/'+mask).network
-        self.ip_addr = ip_addr
-        self.mask = mask
-        self.default_route = default_route
+        self.nw_addr = None
+        self.ip_addr = None
+        self.mask = None
+        self.default_route = None
+        self.dpid=None
+        self.port=None
+        self.lastUpdate = None
+        if ip_addr and mask:
+            self.set_ip_addr(ip_addr,mask)
+        if default_route:
+            self.set_default_route(default_route)
+        if dpid and port:
+            self.set_dpid(dpid, port)
         self.level = QsysRelLevel().DEFAULT
-"""
+        self.touch()
+    def set_ip_addr(self, ip_addr, mask, default_route=None):
+        assert isinstance(ip_addr, str)
+        assert isinstance(masl, int)
+        self.nw_addr = IPNetwork(ip_addr+'/'+mask).network
+        self.ip_addr = IPAddress(ip_addr)
+        assert isinstance(self.nw_addr,IPNetwork)
+        assert isinstance(self.ip_addr, IPAddress)
+        self.mask = mask 
+        if default_route:
+            self.set_default_route(default_route)
+        self.touch()
+    def set_default_route(self, default_route):
+        assert isinstance(default_route, str)
+        self.default_route = default_route
+        self.touch()
+    def set_dpid(self, dpid, port):
+        assert isinstance(dpid, str)
+        assert isinstance(port, int)
+        self.dpid = dpid
+        self.port = port
+        self.touch()
+    def touch(self):
+        self.lastUpdate = time.time()
+    def __str__(self):
+        return [self.eth, self.nw_addr, self.ip_addr, self.mask, self.default_route, self.level]
+    def get_eth(self):
+        return self.eth
+    def get_ip(self):
+        return self.ip_addr
+    def get_mask(self):
+        return self.mask
+    def get_nw_addr(self):
+        return self.nw_addr
+    def get_level(self):
+        return self.level
+    def get_eval(self):
+        return QsysRelEval.get_reliability_eval(self,level)
+    def update_reliability_level(self, level):
+        self.level = level
+        return
+
 class QsysDataStruct:
     """
     Qsysで使用するデータ構造を定義するクラス。
@@ -85,6 +170,19 @@ class QsysDataStruct:
     """
     def __init__(self, logger):
         self.logger = logger
+        self.eth = None
+        self.eth_src = None
+        self.eth_dst = None
+        self.ipv4 = None
+        self.ipv4_src = None
+        self.ipv4_dst = None
+        self.tcp = None
+        self.udp = None
+        self.icmp = None
+        self.icmp_code = None
+        self.icmp_data = None
+        self.http = None
+
     def set_eth(self, eth):
         """
         eth_src/dstに値をsetする。
@@ -112,72 +210,44 @@ class QsysDataStruct:
         self.ipv4_src = ipv4.src
         self.ipv4_dst = ipv4.dst
         self.ipv4 = ipv4
-    def set_tcp(self, tcp):
-        self.tcp = tcp
-    def set_upd(self, udp):
-        self.udp = udp
-    def set_icmp(self, _icmp):
-        self.icmp = _icmp
-        self.icmp_code = _icmp.code
-        self.icmp_data = _icmp.data
-    def set_data(self,data):
-        """
-        dataに値をsetする。
-        data -- bytes
-        """
-        assert isinstance(data, bytes)
-        self.data = data
-    def ready(self):
-        """hasAttr? eth & ipv4Address
-        return bool"""
-        if self.get_ethObj() and self.get_ipv4Addr_src() and self.get_ipv4Addr_dst():
-            return True
-        else:
-            return False
+    def set_tcp(self, tcp_pkt):
+        self.tcp = tcp_pkt
+    def set_upd(self, udp_pkt):
+        self.udp = udp_pkt
+    def set_icmp(self, icmp_pkt):
+        self.icmp = icmp_pkt
+        self.icmp_code = icmp_pkt.code
+        self.icmp_data = icmp_pkt.data
+    def set_http(self, http_pkt):
+        self.http = http_pkt
     def get_ethObj(self):
-        if hasattr(srlf,"eth"):
-            return self.eth
+        return self.eth
         return None
     def get_ethAddr(self):
         """return [src(str),dst(str)]"""
         return [self.get_ethAddr_src(), self.get_ethAddr_dst()]
     def get_ethAddr_src(self):
         """return eth_src"""
-        if hasattr(self,"eth_src"):
-            return self.eth_src
+        return self.eth_src
         return None
     def get_ethAddr_dst(self):
         """return eth_src"""
-        if hasattr(self,"eth_dst"):
-            return self.eth_dst
-        return None
+        return self.eth_dst
     def get_arpObj(self):
         """return object(ryu.lib.packet.arp.arp)"""
-        if hasattr(self, "arp"):
-            return self.arp
-        else:
-            return None
+        return self.arp
     def get_ipv4Obj(self):
         """return object(ryu.lib.packet.ipv4.ipv4)"""
-        if hasattr(self,"ipv4"):
-            return self.ipv4
-        else:
-            return None
+        return self.ipv4
     def get_ipv4Addr(self):
         """return [src(str), dst(str)]"""
         return [self.get_ipv4Addr_src(), self.get_ipv4Addr_dst()]
     def get_ipv4Addr_src(self):
         """return ipv4_src"""
-        if hasattr(self,"ipv4_src"):
-            return self.ipv4_src
-        else:
-            return None
+        return self.ipv4_src
     def get_ipv4Addr_dst(self):
         """return eth_dst"""
-        if hasattr(self,"ipv4_dst"):
-            return self.ipv4_dst
-        else:
-            return None
+        return self.ipv4_dst
     def get_tcpObj(self):
         return self.tcp
     def get_udpObj(self):
@@ -186,6 +256,9 @@ class QsysDataStruct:
         return self.icmp
     def get_icmpData(self):
         return self.icmp_data
+    def get_http(self):
+        return self.http
+
 class DbAccess:
     def __init__(self):
         dbname = 'black_client.sqlite3'
@@ -205,6 +278,14 @@ class QsysRelLevel:
     LOW = 2   #信頼度評価:LOW        この値以下が低信頼
     MIN = 0     #信頼度レベル下限
     UNKNOWN = -1
+
+    @staticmethod
+    def is_range_of_reliability(self, level):
+        if level <= QsysRelLevel.MAX and\
+            level >= QsysRelLevel.MIN:
+            return True
+        else:
+            return False
 class QsysRelEval:
     """Qsysで使用する信頼度評価の定義。
     識別用で中の値は関係ない。
@@ -213,58 +294,14 @@ class QsysRelEval:
     MID = 2
     LOW = 1
     UNKNOWN = -1
-    
-class Qsys:
-    """評価システム。
-    =================  ==================== =====================
-    Attribute           Description          Example
-    =================  ==================== =====================
-    reliability_level  Clientの信頼度レベル {'10.0.0.1' : 5}
-    =================  ==================== =====================
-"""
-    def __init__(self, logger, *args, **kwargs):
-        self.logger = logger
-        #print(DbAccess().get_list())
-        self.reliability_level = {}#信頼度レベル{ip:level}
-    def send(self, qsys_pkt):
-        self.regist_client(qsys_pkt)
-        if QsysRelEval.LOW == self.get_reliability_eval(qsys_pkt.get_ipv4Addr_src):
-            return False
-        else:
-            return True
-    def update_reliability_level(self, ipv4, num):
-        if self.is_range_of_reliability(num):
-            self.reliability_level[ipv4] = num
-    def regist_client(self, qsys_pkt):
-        if QsysRelEval.UNKNOWN == self.get_reliability_eval(qsys_pkt.get_ipv4Addr_src()):
-            self.__regist_client(qsys_pkt)
-    def __regist_client(self,qsys_pkt):
-        """Clientの登録
-        はじめて通信を行ったClientを登録する。
-        """
-        srcip = qsys_pkt.get_ipv4Addr_src()
-        if srcip:
-            if not srcip in self.reliability_level:#Not exist
-                self.reliability_level.update({srcip:QsysRelLevel.DEFAULT})#regist client
-                return True
-        else:
-            return False
-            #TODO:Clientの登録処理
-    def get_reliability_level(self,ipv4):
-        """Clientの信頼度レベルを返す。"""
-        if ipv4 in self.reliability_level:
-            level = self.reliability_level[ipv4]
-            return level
-        else:
-            return QsysRelLevel.UNKNOWN
-    def get_reliability_eval(self, ipv4):
+    @staticmethod
+    def get_reliability_eval(self, level):
         """Clientの信頼度評価を返す。
         HIGH:高信頼。チェックをスキップして到達可能。(学習のみ)
         MID:注意。毎回通信をチェックして到達可否を判断
         LOW:低信頼。到達を恒常的にブロック(学習するかは未定)
         UNKNOWN:登録されていない
         """
-        level = self.get_reliability_level(ipv4)
         if QsysRelLevel.UNKNOWN == level:
             return QsysRelEval.UNKNOWN
         else:
@@ -273,9 +310,23 @@ class Qsys:
             elif level <= QsysRelLevel.LOW:
                 return QsysRelEval.LOW
             return QsysRelEval.MID
-    def is_range_of_reliability(self, level):
-        if level <= QsysRelLevel.MAX and\
-           level >= QsysRelLevel.MIN:
-            return True
-        else:
-            return False
+class Qsys:
+    """評価システム。
+    =================  ==================== =====================
+    Attribute           Description          Example
+    =================  ==================== =====================
+    reliability_level  Clientの信頼度レベル {'10.0.0.1' : 5}
+    =================  ==================== =====================
+"""
+    def __init__(self, logger, clientList, *args, **kwargs):
+        self.logger = logger
+        self.cList = clientList
+        #print(DbAccess().get_list())
+        self.reliability_level = {}#信頼度レベル{ip:level}
+    def send(self, qsys_pkt):
+        #self.regist_client(qsys_pkt)
+        #if QsysRelEval.LOW == self.get_reliability_eval(qsys_pkt.get_ipv4Addr_src):
+        #    return False
+        #else:
+        #    return True
+        return True

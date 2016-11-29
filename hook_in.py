@@ -3,6 +3,7 @@ import json
 import enum 
 from ryu.app.simple_switch_13 import SimpleSwitch13
 from ryu.controller  import ofp_event, event
+from ryu.controller.controller import Datapath
 from ryu.controller.handler import set_ev_cls,MAIN_DISPATCHER,CONFIG_DISPATCHER
 from ryu.ofproto.ofproto_v1_3 import *
 from ryu.ofproto.ofproto_v1_3_parser import OFPMatch
@@ -11,14 +12,15 @@ from ryu.lib.packet import *
 from ryu.controller import dpset
 from ryu.lib import pcaplib
 import netaddr
-from builtins import dict
+from builtins import dict, isinstance
 from ryu.lib import hub
-#import time
-from qsys import Qsys, QsysDataStruct, QsysRelEval
+import time
+from datetime import datetime
+from qsys import *
 import dpkt
 from ryu.controller.event import EventBase
 from io import BytesIO
-
+from rainbow_logging_handler import RainbowLoggingHandler
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
@@ -32,6 +34,8 @@ class Dp_obj:
     """datapathのオブジェクトをまとめるためのクラス
     """
     def __init__(self, msg):
+        self.datapath = Datapath()#inteliSense用
+        self.ofproto = ofproto_v1_3#inteliSense用
         self.datapath = msg.datapath
         self.dpid = self.datapath.id
         self.ofproto = self.datapath.ofproto
@@ -45,35 +49,74 @@ class SystemActionModei(enum.Enum):
    # あとでモード実装するはず？
     learn = 0
     quarantine = 1
+class GatewayList:
+    def __init__(self):
+        self.g1 = Gateway(eth='00:00:00:00:00:01',ip_addr='192.168.1.254', mask=24)
+        self.g2 = Gateway(eth='00:00:00:00:00:02',ip_addr='192.168.2.254', mask=24)
+        self.list = [g1, g2]
+    def get_all(self):
+        return self.list
+    def get_ip_addr(self, eth):
+        for i, v in self.list:
+            assert isinstance(v, Gateway)
+            if v.eth == eth:
+                return v.ip_addr
+        return None
+    def get_eth(self, ip_addr):
+        for i, v in self.list:
+            assert isinstance(v, Gateway)
+            if v.ip_addr == ip_addr:
+                return v.eth
+        return None
+class Gateway:
+    def __init__(self, eth, ip_addr, mask):
+        assert isinstance(eth, str)
+        assert isinstance(ip_addr,str)
+        assert isinstance(mask, int)
+        self.eth = eth
+        self.__nw_addr = IPNetwork(ip_addr+'/'+mask).network
+        self.__ip_addr = IPAddress(ip_addr)
+        self.mask = mask
+    def __str__(self):
+        return dict({'eth':self.eth,'ip_addr':self.ip_addr})
+    def get_nw_addr(self):
+        return str(self.__nw_addr)
+    def get_ip_addr(self):
+        return str(self.__ip_addr)
+    def get_eth(self):
+        return self.eth
+
+
 class QsysTest(SimpleSwitch13):
-    __DEBUG_MODE__ = False #:on,F:off
 	#動作モード
     #ACTION_MODE = SystemActionMode.quarantine
    
-
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
         self.datapathes = []    #[[dp,parser],]
-        self.qsys = Qsys(self.logger)      #Qsys object
+        self.qsys = Qsys(self.logger,self.cList) #Qsys object
+        self.cList = ClientList()
         self.mac_to_port = {}   #{dpid:{addr:in_port}}
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
-        self.gateway = {}#デフォルトゲートウェイ(ハード－コード){ipv4:eth}
-        self.rev_gateway = {}#{eth:ipv4}
-        self.gateway['192.168.1.254'] = '00:00:00:00:00:01'
-        self.rev_gateway['00:00:00:00:00:01'] = '192.168.1.254'
-        self.gateway['192.168.2.254'] = '00:00:00:00:00:02'
-        self.rev_gateway['00:00:00:00:00:02'] = '192.168.2.254'
+        self.gateway = GatewayList()#デフォルトゲートウェイ(ハード－コード){ipv4:eth}
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+        handler = RainbowLoggingHandler(sys.stderr)
+        logger.addHandler(handler)
         
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
+        dp = Dp_obj(ev.msg)
+        self.datapathes.append(dp)
+        
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        self.datapathes.append([datapath,parser])
+        
         self.logger.info("Simple_Switch13_features")
         # install table-miss flow entry
         #
@@ -86,30 +129,19 @@ class QsysTest(SimpleSwitch13):
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
-    def set_mac_to_port(self, dpid, eth_src, in_port):
-        #送信元MACと送信元SWのポートの対応関係を記録
-        self.mac_to_port.setdefault(dpid, {})
-        self.mac_to_port[dpid][eth_src] = in_port
-    def get_port_from_mac(self, dpid, eth):
-        if eth in self.mac_to_port[dpid]:
-            return self.mac_to_port[dpid][eth]
+    def client_regist_port(self, eth, dpid, in_port):
+        if self.cList.check_registed_eth(eth_src):
+            return 
+        c = Client(eth=eth,dpid=dpid, port=in_port)
+        self.cList.add(c)
+    def client_regist_ipv4(self, eth, ipv4):
+        mask = 24#今回は決め打ち
+        default_route=str(IPNetwork(ipv4+'/'+mask)[254])#.254で決め打ち
+        if self.cList.get_from_eth(eth):
+            c = Client(eth=eth, ip_addr=ipv4, mask=mask,default_route=default_route)
+            self.cList.add(c)
         else:
-            return None
-    def set_mac_to_ipv4(self, eth_src, ipv4_src):
-        ipaddr = self.mac_to_ipv4.setdefault(eth_src,ipv4_src)
-        if ipaddr in self.gateway:
-            self.mac_to_ipv4.setdefault(eth_src,ipv4_src)
-        else:
-            if ipaddr != ipv4_src:
-                self.logger.info("The correspondence between MAC and IP has changed\n\
-                {mac_old}:{ip_old}→{ip_new}".format(mac_old=eth_src,ip_old=ipaddr, ip_new=ipv4_src))
-                #TODO:Qsys上のClientのMACアドレスとIPの対応関係変更
-            self.mac_to_ipv4[eth_src] = ipv4_src
-    def get_ipv4_from_mac(self, eth):
-        if eth in self.mac_to_ipv4:
-            return self.mac_to_ipv4[eth]
-        else:
-            return None
+            self.logger.warning("client_regist_ipv4 ERROR. eth NOT registed?")
     #Packet_inのハンドラが呼ばれる
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
@@ -123,48 +155,49 @@ class QsysTest(SimpleSwitch13):
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
-            if self.__DEBUG_MODE__:
-                self.logger.info("packet-in {}".format(pkt))
+            self.logger.debug("packet-in {}".format(pkt))
         except:
-            self.logger.debug("malformed packet")
+            self.logger.warning("malformed packet")
             return
         eth = pkt.get_protocol(ETHERNET)
         if not eth:
-            if self.__DEBUG_MODE__:
-                self.logger.info("Not Ether type")
+            self.logger.warning("Not Ether type")
             return
         qsys_pkt.set_eth(eth)#qsys_pktにethを登録
         eth_src = eth.src
-        #[swのid(dpid)][MACAddr]のテーブルにSwitch input portを登録
-        self.set_mac_to_port(dpid, eth_src, in_port) 
+        #clientListにクライアントを登録
+        self.client_regist_port(eth_src, dpid, in_port)
         #arpパケット
-        arp = pkt.get_protocol(ARP)
-        ipv4 = pkt.get_protocol(IPV4)
-        if arp:
-            qsys_pkt.set_arp(arp)
-            ipv4_src = qsys_pkt.get_ipv4Addr_src()
-            if self.__DEBUG_MODE__:
-                self.logger.info("ipv4_src:{}".format(ipv4_src))
-            self.set_mac_to_ipv4(eth_src, ipv4_src)
-            self._packet_in_arp(msg, pkt, qsys_pkt, dp)
+        arp_pkt = pkt.get_protocol(ARP)
+        ipv4_pkt = pkt.get_protocol(IPV4)
+        if arp_pkt:
+            assert isinstance(arp_pkt, ARP)
+            qsys_pkt.set_arp(arp_pkt)
+            ipv4_src = arp_pkt.src_ip
+            self.logger.debug("ipv4_src:{}".format(ipv4_src))
+            self.packet_in_arp(src_eth, dst_eth, pkt, arp_pkt,qsys_pkt, dp) 
             return
-        elif ipv4:
-            qsys_pkt.set_ipv4(ipv4)
-            ipv4_src = qsys_pkt.get_ipv4Addr_src()
-            self.mac_to_ipv4[eth.src] = ipv4_src
+        elif ipv4_pkt:
+            assert isinstance(ipv4_pkt, IPV4)
+            qsys_pkt.set_ipv4(ipv4_pkt)
+            ipv4_src = ipv4_pkt.src
+            self._
             self._packet_in_ipv4(msg, pkt, qsys_pkt, dp)
             return
         else:
             self.logger.info("Others Pkt:{}".format(msg))
             #IPV6 or others?
             return
-    def _packet_in_arp(self, msg, pkt, qsys_pkt, dp):
-        # ARP packet handling.
-        src_eth = qsys_pkt.get_ethAddr_src()
-        dst_eth = qsys_pkt.get_ethAddr_dst()
-        src_ip = qsys_pkt.get_ipv4Addr_src()
-        dst_ip = qsys_pkt.get_ipv4Addr_dst()
-
+    def packet_in_arp(self, src_eth, dst_eth, pkt, arp_pkt, qsys_pkt, dp):
+        assert isinstance(src_eth, str)
+        assert isinstance(dst_eth, str)
+        assert isinstance(pkt, packet.Packet)
+        assert isinstance(arp_pkt, ARP)
+        assert isinstance(qsys_pkt, QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+        src_ip = arp_pkt.src_ip
+        dst_ip = arp_pkt.dst_ip
+        self.client_regist_ipv4(src_eth,src_ip)
         if src_ip == dst_ip:
             # GARP -> packet forward (normal)
             #TODO
@@ -173,46 +206,85 @@ class QsysTest(SimpleSwitch13):
             #self.logger.info('Send GARP (normal).', dpid)
             return
         #gatewayへのarp
-        self.logger.info(dst_ip)
-        self.logger.info(self.gateway)
-        if dst_ip in self.gateway:
-            gw_ip = dst_ip
-            gw_eth = self.gateway[dst_ip]
-            opcode = qsys_pkt.get_arpObj().opcode
-            if opcode == 1:#ARP Request
-                self.send_arp(dp.datapath, 2, gw_eth, gw_ip, src_eth, src_ip, dp.in_port)
-                return
-            elif opcode == 2:#ARP_Reply
-                pass#TODO
+        self.logger.debug(dst_ip)
+        gw_eth = self.gateway.get_eth(dst_ip)
+        gw_ip = self.gateway.get_ip_addr(dst_eth)
+        opcode = arp_pkt.opcode
+        if gw_eth and (not gw_ip):#ARP
+            self.gw_receive_ARP(src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt,dp)
+            return
+        elif gw_ip and (not gw_eth):#RARP
+            self.gw_receive_RARP(src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt,dp)
         else:
-            #arpはそのまま流す
-            self._packet_out(msg, qsys_pkt, dp)
-    def send_arp(self, datapath, opcode, srcMac, srcIp, dstMac, dstIp, outPort, RouteDist=None):
-        if opcode == 1:
+            self._packet_out2(dst_eth, pkt, dp)
+            return
+    def gw_receive_ARP(self, src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt, dp):
+        assert isinstance(src_eth,str)
+        assert isinstance(src_ip,str)
+        assert isinstance(gw_eth,str)
+        assert isinstance(gw_ip,str)
+        assert isinstance(opcode, int)
+        assert isinstance(qsys_pkt,QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+        if opcode == arp.ARP_REQUEST:#ARP Request
+            self.gw_send_arp(src_eth, src_ip, gw_eth, gw_ip, arp.ARP_REPLY,dp)
+            return
+        elif opcode == arp.ARP_REPLY:#ARP_Reply
+            self.logger.warning("不正なARPパケット?:{}".format(arp_pkt))
+            return#TODO
+        else:
+            self.logger.warning("不正なarpのopcode?:{}".format(arp_pkt))
+            return
+    def gw_receive_RARP(self, src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt, dp):
+        assert isinstance(src_eth,str)
+        assert isinstance(src_ip,str)
+        assert isinstance(gw_eth,str)
+        assert isinstance(gw_ip,str)
+        assert isinstance(qsys_pkt,QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+        if opcode == arp.ARP_REV_REQUEST:#RARP_REQUEST
+            self.gw_send_arp(src_eth, src_ip, gw_eth, gw_ip, arp.ARP_REV_REPLY,dp)
+        elif opcode == arp.ARP_REV_REPLY:
+            self.logger.warning("不正なRARPパケット?:{}".format(arp_pkt))
+        else:
+            self.logger.warning("不正なarpのopcode?:{}".format(arp_pkt))
+            return
+    def gw_send_arp(self, src_eth, src_ip, gw_eth, gw_ip, opcode, dp):
+        assert isinstance(src_eth, str)
+        assert isinstance(src_ip, str)
+        assert isinstance(gw_eth, str)
+        assert isinstance(gw_ip, str)
+        assert isinstance(opcode, int)
+        assert isinstance(dp, Dp_obj)
+        if opcode == arp.ARP_REQUEST:#ARP Request
             pass
-            """self.portInfo[outPort] = PortTable(outPort, srcIp, srcMac, RouteDist)
+        elif opcode == arp.ARP_REPLY:#ARP/RARP Reply
+            target_eth = src_eth
+            target_ip = src_ip
+            e = ETHERNET(target_eth, gw_eth , ether_types.ETH_TYPE_ARP)
+            a = ARP(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
+            p = packet.Packet()
+            p.add_protocol(e)
+            p.add_protocol(a)
+            p.serialize()
+            self._packet_out2(src_eth, p, dp)
+            return 
+        elif opcode == arp.ARP_REV_REPLY:
+            target_eth = src_eth
+            target_ip = src_ip
+            e = ETHERNET(target_eth, gw_eth , ether_types.ETH_TYPE_ARP)
+            a = ARP(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
+            p = packet.Packet()
+            p.add_protocol(e)
+            p.add_protocol(a)
+            p.serialize()
+            self._packet_out2(src_eth, p, dp)
+            return 
+        elif opcode == arp.ARP_REV_REQUEST:
+            pass
+        else:
+            pass
 
-            targetMac = "00:00:00:00:00:00"
-            targetIp = dstIp"""
-        elif opcode == 2:
-            targetMac = dstMac
-            targetIp = dstIp
-
-        e = ETHERNET(dstMac, srcMac, ether_types.ETH_TYPE_ARP)
-        a = ARP(1, 0x0800, 6, 4, opcode, srcMac, srcIp, targetMac, targetIp)
-        p = packet.Packet()
-        p.add_protocol(e)
-        p.add_protocol(a)
-        p.serialize()
-        actions = [datapath.ofproto_parser.OFPActionOutput(outPort, 0)]
-        out = datapath.ofproto_parser.OFPPacketOut(
-            datapath=datapath,
-            buffer_id=0xffffffff,
-            in_port=datapath.ofproto.OFPP_CONTROLLER,
-            actions=actions,
-            data=p.data)
-        datapath.send_msg(out)
-        return 0
     def packet_in_ipv4(self, src_eth, dst_eth, pkt, ipv4_pkt, qsys_pkt, dp):
         assert isinstance(src_eth, str)
         assert isinstance(dst_eth, str)
@@ -222,49 +294,26 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(dp, Dp_obj)
         src_ip = ipv4_pkt.src
         dst_ip = ipv4_pkt.dst
-        _icmp = pkt.get_protocol(ICMP)
-        _tcp = pkt.get_protocol(TCP)
-        _udp = pkt.get_protocol(UDP)
-        if _icmp:
-            assert isinstance(_icmp, ICMP)
+        icmp_pkt = pkt.get_protocol(ICMP)
+        tcp_pkt = pkt.get_protocol(TCP)
+        udp_pkt = pkt.get_protocol(UDP)
+        if icmp_pkt:
+            assert isinstance(icmp_pkt, ICMP)
             self.packet_in_icmp(src_eth, dst_eth, src_ip, dst_ip, pkt, qsys_pkt, dp)
             return
-        elif _tcp:
-            assert isinstance(_tcp, TCP)
+        elif tcp_pkt:
+            assert isinstance(tcp_pkt, TCP)
             #self._packet_in_tcp()
             return
-            
         
-        elif _udp:
-            assert isinstance(_udp, UDP)
+        elif udp_pkt:
+            assert isinstance(udp_pkt, UDP)
             #self.packet_in_udp()
             return
         else:
             self.logger.warning("L3 Others:{}".format(pkt))
             return
-        
-    def _packet_in_ipv4(self, msg, pkt, qsys_pkt, dp):
-        #self.logger.info("pkt_in_ipv4")
-        #以下dpktで処理
-        f = BytesIO()
-        pcap = RyuLibPcapWriter(f).write_pkt(msg.data)#pcaplib.Writer
-        payload = dpkt.pcap.Reader(BytesIO(f.getvalue()))
-        f.close()
-        for t,k in payload:
-                eth = dpkt.ethernet.Ethernet(k)
-                ip = eth.data
-                l4 = ip.data
-                if type(l4) == dpkt.icmp.ICMP:
-                    self._packet_in_icmp(msg, pkt, qsys_pkt, dp, l4)
-                    return
-                elif type(l4) == dpkt.tcp.TCP:
-                    self._packet_in_tcp(msg, pkt, qsys_pkt, dp, l4)
-                    return
-                elif type(l4) == dpkt.udp.UDP:
-                    self._packet_in_udp(msg, pkt, qsys_pkt, dp, l4)
-                    return
-                else:
-                    return
+
     def packet_in_icmp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, qsys_pkt, dp, ):
         assert isinstance(src_eth, str)
         assert isinstance(dst_eth, str)
@@ -274,41 +323,18 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
 
-        if self.is_gateway_ip(dst_ip):
+        if self.gateway.get_eth(dst_ip):#gwへのicmp
             self.gw_reply_icmp(src_eth, src_ip, 
-                               self.get_gw_eth_from_ip(dst_ip),dst_ip, 
+                               self.gateway.get_eth(dst_ip), dst_ip, 
                                pkt.get_protocol(ICMP), dp)
-        elif self.is_gateway_eth(dst_eth):
+            return
+        elif self.gateway.get_ip_addr(dst_eth):#別NWへのICMP
             self.gw_foward_icmp()
-    def is_gateway_ip(self, ip):
-        assert isinstance(ip, str)
-        if ip in self.gateway:
-            return True
-        else:
-            return False
-    def is_gateway_eth(self, eth):
-        assert isinstance(eth, str)
-        if eth in self.rev_gateway:
-            return self.rev_gateway[eth]
-        else:
-            return None
-    def get_gw_eth_from_ip(self, ip):
-        assert isinstance(ip, str)
-        if self.is_gateway(ip):
-            return self.gateway[ip]
-        else:
-            return None
-    def _packet_in_icmp(self, msg, pkt, qsys_pkt, dp, icmp):
-        dst_eth = qsys_pkt.get_ethAddr_dst()
-        src_ip = qsys_pkt.get_ipv4Addr_src()
-        dst_ip = qsys_pkt.get_ipv4Addr_dst()
-        if dst_ip in self.gateway:#gwへのping
-            self.send_icmp(msg, pkt, qsys_pkt, dp, icmp)
-        elif dst_eth in self.rev_gateway:#別セグメントへのping
-            self.foward_icmp(msg, pkt, qsys_pkt, dp, icmp)
-        else:
-            self.send_qsys(msg, qsys_pkt, dp)
-        return
+            return
+        else:#同一NWへのICMP or 不正なICMP？
+            self._packet_out2(dst_eth, pkt, dp)
+            return
+
     def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, dp):
         assert isinstance(src_eth, str)
         assert isinstance(src_ip,  str)
@@ -316,7 +342,8 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(gw_ip, str)
         assert isinstance(icmp_pkt, icmp.icmp)
         assert isinstance(dp, Dp_obj)
-        if pkt.type != icmp.ICMP_ECHO_REQUEST:
+
+        if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
             return
         p = packet.Packet()
         p.add_protocol(ETHERNET(ethertype=ether_types.ETH_TYPE_IP,
@@ -330,38 +357,6 @@ class QsysTest(SimpleSwitch13):
         p.serialize()
         self._packet_out2(src_eth, p, dp)
     def gw_foward_icmp(self):
-        pass
-
-    def send_icmp(self, msg, pkt, qsys_pkt, dp, _icmp):
-        if pkt_icmp.type != icmp.ICMP_ECHO_REQUEST:
-            return
-        src_eth = qsys_pkt.get_ethAddr_src()
-        src_ip = qsys_pkt.get_ipv4Addr_src()
-        gw_ip = qsys_pkt.get_ipv4Addr_dst()
-        gw_eth = qsys_pkt.get_ipv4Addr_dst()
-        p = packet.Packet()
-        
-        p.add_protocol(ETHERNET(ethertype=ether_types.ETH_TYPE_IP,
-                                           dst=src_eth,
-                                           src=gw_eth))
-        p.add_protocol(IPV4(dst=src_ip,
-                                   src=gw_ip))
-        p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
-                                   code=icmp.ICMP_ECHO_REPLY_CODE,
-                                   csum=0,
-                                   data=qsys_pkt.get_icmpData()))
-        
-        p.serialize()
-        dp.ofproto
-        actions = [dp.parser.OFPActionOutput(outPort, 0)]
-        out = dp.parser.OFPPacketOut(
-            datapath=dp.datapath,
-            buffer_id=0xffffffff,
-            in_port=dp.ofroto.OFPP_CONTROLLER,
-            actions=actions,
-            data=p.data)
-        dp.datapath.send_msg(out)
-    def foward_icmp(self,msg, pkt, qsys_pkt, dp, icmp):
         pass
 
     def packet_in_tcp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, tcp_pkt, qsys_pkt, dp):
@@ -394,10 +389,10 @@ class QsysTest(SimpleSwitch13):
                 dport = tcp.dport
                 assert isinstance(dport, int)
                 if dport == 80 or sport == 80:
-                    self.packet_in_http(sport, dport, tcp.data)
+                    self.packet_in_http(src_eth, src_ip, dst_ip, sport, dport, tcp.data)
                 else:
                     return
-    def packet_in_http(self, sport, dport, tcp_payload):
+    def packet_in_http(self, src_eth, src_ip, dst_ip, sport, dport, tcp_payload):
         assert isinstance(sport, int)
         assert isinstance(dport, int)
         assert isinstance(tcp_payload, bytes)
@@ -415,27 +410,9 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("http(data):{}".format(_http.data))
         except:
             pass
-        self.send_qsys(msg, qsys_pkt, dp)
+        self._send_qsys(dst_eth, pkt, qsys_pkt, dp)
         return
 
-    def _packet_in_tcp(self, msg, pkt, qsys_pkt, dp, tcp):
-        #self.logger.info("tcp")
-        payload = tcp.data
-        qsys_pkt.set_data(msg.data)
-        #self.logger.info("payload:{}".format(payload
-        if tcp.dport == 80 and len(payload) > 0:
-            http = dpkt.http.Request(payload.decode('utf-8'))
-            self.logger.info("http/req(header):{}".format(http.headers))
-            self.logger.info("http(method):{}".format(http.method))
-            self.logger.info("http(data):{}".format(http.data))
-        elif tcp.sport == 80 and len(payload) > 0:
-            _http = dpkt.http.Response(payload.decode('utf-8'))
-            self.logger.info("http/res(header):{}".format(_http.headers))
-            self.logger.info("http(body):{}".format(_http.body))
-            self.logger.info("http(data):{}".format(_http.data))
-        self.send_qsys(msg, qsys_pkt, dp)
-        return
-    
     def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
         self.send_qsys(msg, qsys_pkt, dp)
         pass
@@ -460,70 +437,55 @@ class QsysTest(SimpleSwitch13):
         else:#Drop Packet
             self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
+
     def _packet_out2(self, dst_eth, pkt, dp):
-        datapath = dp.datapath
-        dpid = dp.dpid
-        ofproto = dp.ofproto
-        parser = dp.parser
-        in_port = dp.in_port
+        client = self.cList.get_from_eth(dst_eth)
         #Transport to dst
-        if dst_eth in self.mac_to_port[dpid]:
-            #Switch output portをテーブルから指定
-            out_port = self.mac_to_port[dpid][dst_eth]
+        if isinstance(client, Client):
+            if client.dpid and client.port:
+                out_dpid = client.dpid
+                out_port = client.port
         else:
             #フラッディング
+            out_dpid = None
             out_port = ofproto.OFPP_FLOOD
-        actions = [parser.OFPActionOutput(out_port)]
-        out = parser.OFPPacketOut(
-            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
-            actions=actions, data=pkt.data)
-        datapath.send_msg(out)
-
-    def _packet_out(self, msg, qsys_pkt, dp):
-        datapath = dp.datapath
-        dpid = dp.dpid
-        ofproto = dp.ofproto
-        parser = dp.parser
-        in_port = dp.in_port
-        #Transport to dst
-        src_eth = qsys_pkt.eth.src
-        dst_eth = qsys_pkt.eth.dst
-        #該当するSWの中にMacAddrがあるか？
-        if dst_eth in self.mac_to_port[dpid]:
-            #Switch output portをテーブルから指定
-            out_port = self.mac_to_port[dpid][dst_eth]
-        else:
-            #フラッディング
-            out_port = ofproto.OFPP_FLOOD
-        actions = [parser.OFPActionOutput(out_port)]
-        out = parser.OFPPacketOut(
-            datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port,
-            actions=actions, data=msg.data)
-        datapath.send_msg(out)
-
+        actions = None
+        for obj in self.datapathes:
+            assert isinstance(obj, Dp_obj)
+            if out_dpid == obj.dpid:
+                datapath = obj.datapath
+                actions = [obj.parser.OFPActionOutput(out_port)]
+                out = obj.parser.OFPPacketOut(
+                    datapath=obj.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
+                    actions=actions, data=pkt.data)
+                datapath.send_msg(out)
+                return
+        self.logger.warning("packet_out_ERROR:{}".format(pkt))
+        return
+    
     def update_mac_deny_list(self):
         """低信頼度のClientをpacket_inしないようswitchにflowを流し込む。
         スレッドとして立ち上げ定期的に実行する"""
         #TODO:そのうちqsysからのイベントで呼び出せるようにしたい
         while True:
-            ip_to_mac = {v:k for k, v in self.mac_to_ipv4.items()}
-            self.logger.info("ip_to_mac{}".format(ip_to_mac))
-            for ip, eth in ip_to_mac.items():
+            for c in self.cList.get_all():
+                eth = c.get_eth()
+                ip = c.get_ip()
+                level = c.get_level()
+                eval = c.get_eval()
                 self.logger.info("IP:{}".format(ip))
-                self.logger.info("Level:{}".format(self.qsys.get_reliability_level(ip)))
-                eval = self.qsys.get_reliability_eval(ip)
+                self.logger.info("Level:{}".format(level))
                 if QsysRelEval.LOW == eval:
                     if not eth in self.mac_deny_list:
                         for dp in self.datapathes:#dp[0]:dp,dp[1]:parser
-                            match = dp[1].OFPMatch(eth_src=eth)
+                            match = dp.parser.OFPMatch(eth_src=eth)
                             actions = []#Drop
-                            self.add_flow(dp[0], 10,match, actions)
+                            self.add_flow(dp.datapath, 10,match, actions)
                         self.mac_deny_list.update({eth:ip})#拒否済に追加
                 elif QsysRelEval.UNKNOWN == eval:
                     #TODO:登録されていないClientを参照した際の例外処理
                     pass
-            self.qsys.update_reliability_level('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
-            self.logger.info("mac_to_port:{}".format( self.mac_to_port ))
+            self.cList.get_from_eth()('10.0.0.1', 1)#テストコード。10.0.0.1の信頼度を1(< LOW)に
             hub.sleep(5)
 
 class RyuLibPcapWriter(pcaplib.Writer):
