@@ -375,7 +375,7 @@ class QsysTest(SimpleSwitch13):
         p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
                                    code=icmp.ICMP_ECHO_REPLY_CODE,
                                    data=icmp_pkt.data))
-        #p.serialize()
+        p.serialize()
         datapath = dp.datapath
         actions = [dp.parser.OFPActionOutput(ofproto_v1_3.OFPP_FLOOD)]
         out = dp.parser.OFPPacketOut(
