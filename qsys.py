@@ -152,7 +152,7 @@ class Client:
     def get_level(self):
         return self.level
     def get_eval(self):
-        return QsysRelEval.get_reliability_eval(self,level)
+        return QsysRelEval.get_reliability_eval(self.level)
     def update_reliability_level(self, level):
         self.level = level
         return
