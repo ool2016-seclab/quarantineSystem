@@ -460,6 +460,8 @@ class QsysTest(SimpleSwitch13):
         actions = None
         for obj in self.datapathes:
             assert isinstance(obj, Dp_obj)
+            self.logger.info(obj.dpid)
+            self.logger.info(out_dpid)
             if out_dpid == obj.dpid:
                 datapath = obj.datapath
                 actions = [obj.parser.OFPActionOutput(out_port)]
