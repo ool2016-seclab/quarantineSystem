@@ -25,6 +25,7 @@ from netaddr import *
 from ryu.lib.packet import *
 import types
 from builtins import hasattr, staticmethod
+import time
 
 ETHERNET = ethernet.ethernet
 VLAN = vlan.vlan
