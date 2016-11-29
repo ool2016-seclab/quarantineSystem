@@ -350,7 +350,7 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(src_ip,  str)
         assert isinstance(gw_eth, str)
         assert isinstance(gw_ip, str)
-        assert isinstance(icmp_pkt, icmp.icmp)
+        assert isinstance(icmp_pkt, ICMP)
         assert isinstance(dp, Dp_obj)
         self.logger.info("gw_icmp")
         if icmp_pkt.type != icmp.ICMP_ECHO_REQUEST:#ICMP ECHO REQUESTではない
