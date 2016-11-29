@@ -65,17 +65,17 @@ class ClientList:
         else:
             self.list.append(client)
     def check_registed_eth(self, eth):
-        for i, c in self.list:
+        for c in self.list:
             if c.eth == eth:
                 return True
         return False
     def change(self, eth, client):
         assert isinstance(client, Client)
-        for i, c in self.list:
+        for c in self.list:
             if c.eth == eth:
                 self.list[i] = client
     def delete(self, eth):
-        for i, c in self.list:
+        for c in self.list:
             if c.eth == eth:
                 pop = self.list.pop(i)
                 self.logger.debug(pop)
@@ -83,12 +83,12 @@ class ClientList:
     def get_all(self):
         return self.list
     def get_from_eth(self, eth):
-        for i, c in self.list:
+        for c in self.list:
             if c.eth == eth:
                 return c
         return None
     def get_from_ipv4(self, ip_addr):
-        for i, c in self.list:
+        for c in self.list:
             if c.ip_addr == ip_addr:
                 return c
         return None
