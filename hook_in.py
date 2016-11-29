@@ -217,10 +217,10 @@ class QsysTest(SimpleSwitch13):
         gw_ip = self.gateway.get_ip_addr(dst_eth)
         opcode = arp_pkt.opcode
         if gw_eth and (not gw_ip):#ARP
-            self.gw_receive_ARP(src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt,dp)
+            self.gw_receive_ARP(src_eth, src_ip, gw_eth, dst_ip, opcode, qsys_pkt,dp)
             return
         elif gw_ip and (not gw_eth):#RARP
-            self.gw_receive_RARP(src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt,dp)
+            self.gw_receive_RARP(src_eth, src_ip, dst_eth, gw_ip, opcode, qsys_pkt,dp)
         else:
             self._packet_out2(dst_eth, pkt, dp)
             return
