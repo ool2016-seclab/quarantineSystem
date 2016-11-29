@@ -106,7 +106,7 @@ class QsysTest(SimpleSwitch13):
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
         handler = RainbowLoggingHandler(sys.stderr)
-        logger.addHandler(handler)
+        self.logger.addHandler(handler)
         
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
