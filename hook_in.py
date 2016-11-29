@@ -94,8 +94,12 @@ class QsysTest(SimpleSwitch13):
    
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+        handler = RainbowLoggingHandler(sys.stderr)
+        self.logger.addHandler(handler)
         self.datapathes = []    #[[dp,parser],]
-        self.cList = ClientList()
+        self.cList = ClientList(self.logger)
         self.qsys = Qsys(self.logger, self.cList) #Qsys object
         self.mac_to_port = {}   #{dpid:{addr:in_port}}
         self.mac_to_ipv4 = {}   #{mac:ipv4}
@@ -103,10 +107,7 @@ class QsysTest(SimpleSwitch13):
                                 #到達拒否のClientで、swに拒否フローを流し込み終わったもの
         self.gateway = GatewayList()#デフォルトゲートウェイ(ハード－コード){ipv4:eth}
         self.monitor_thread = hub.spawn(self.update_mac_deny_list)#
-        self.logger = logging.getLogger()
-        self.logger.setLevel(logging.INFO)
-        handler = RainbowLoggingHandler(sys.stderr)
-        self.logger.addHandler(handler)
+        
         
     #コントローラにSWが接続される
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
