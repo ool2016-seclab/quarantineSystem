@@ -334,7 +334,6 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(pkt, packet.Packet)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-        self.logger.info("icmp")
         self.logger.debug(pkt)
         if self.gateway.get_eth(dst_ip):#gwへのicmp
             self.gw_reply_icmp(src_eth, src_ip, 
@@ -376,20 +375,7 @@ class QsysTest(SimpleSwitch13):
         for obj in self.gateway.get_all():
             if obj.get_nw_addr == dst_nw_addr:
                 dst_eth = obj.get_eth()
-        ipv4_pkt = pkt.get_protocol(IPV4)
-        assert isinstance(ipv4_pkt, IPV4)
-        e = pkt.get_protocol(ETHERNET)
-        i = IPV4(ipv4_pkt.version, ipv4_pkt.header_length, ipv4_pkt.tos,
-                      ipv4_pkt.total_length, ipv4_pkt.identification, ipv4_pkt.flags,
-                      ipv4_pkt.offset, ipv4_pkt.ttl-1, ipv4_pkt.proto, ipv4_pkt.csum,
-                      ipv4_pkt.src, ipv4_pkt.dst)
-        ic = pkt.get_protocol(ICMP)
-        p = packet.Packet()
-        p.add_protocol(e)
-        p.add_protocol(i)
-        p.add_protocol(ic)
-        p.serialize()
-        self._packet_out2(dst_eth, p, dp)
+        self._packet_out2(dst_eth, pkt, dp)
         return
 
     def packet_in_tcp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, tcp_pkt, qsys_pkt, dp):
