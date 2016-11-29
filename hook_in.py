@@ -224,7 +224,7 @@ class QsysTest(SimpleSwitch13):
         elif gw_ip and (not gw_eth):#RARP
             self.gw_receive_RARP(src_eth, src_ip, dst_eth, gw_ip, opcode, qsys_pkt,dp)
         else:
-            self._packet_out2(dst_eth, pkt, dp)
+            self.packet_out(dst_eth, pkt, dp)
             return
     def gw_receive_ARP(self, src_eth, src_ip, gw_eth, gw_ip, opcode, qsys_pkt, dp):
         assert isinstance(src_eth,str)
@@ -276,7 +276,7 @@ class QsysTest(SimpleSwitch13):
             p.add_protocol(a)
             p.serialize()
             self.logger.debug("gw_arp:{}".format(p))
-            self._packet_out2(src_eth, p, dp)
+            self.packet_out(src_eth, p, dp)
             return 
         elif opcode == arp.ARP_REV_REPLY:
             target_eth = src_eth
@@ -287,7 +287,7 @@ class QsysTest(SimpleSwitch13):
             p.add_protocol(e)
             p.add_protocol(a)
             p.serialize()
-            self._packet_out2(src_eth, p, dp)
+            self.packet_out(src_eth, p, dp)
             return 
         elif opcode == arp.ARP_REV_REQUEST:
             pass
@@ -345,7 +345,7 @@ class QsysTest(SimpleSwitch13):
             return
         else:#同一NWへのICMP or 不正なICMP？
             self.logger.debug("Same NW icmp")
-            self._packet_out2(dst_eth, pkt, dp)
+            self.packet_out(dst_eth, pkt, dp)
             return
 
     def gw_reply_icmp(self, src_eth, src_ip, gw_eth, gw_ip, icmp_pkt, dp):
@@ -367,7 +367,7 @@ class QsysTest(SimpleSwitch13):
                                    data=icmp_pkt.data))
         p.serialize()
         datapath = dp.datapath
-        self._packet_out2(src_eth, p, dp)
+        self.packet_out(src_eth, p, dp)
     def gw_foward_icmp(self, dst_ip, pkt, dp):
         mask = 24 #決め打ち
         dst_nw_addr = IPNetwork(dst_ip+'/'+str(mask)).network
@@ -375,7 +375,7 @@ class QsysTest(SimpleSwitch13):
         for obj in self.gateway.get_all():
             if obj.get_nw_addr == dst_nw_addr:
                 dst_eth = obj.get_eth()
-        self._packet_out2(dst_eth, pkt, dp)
+        self.packet_out(dst_eth, pkt, dp)
         return
 
     def packet_in_tcp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, tcp_pkt, qsys_pkt, dp):
@@ -451,13 +451,13 @@ class QsysTest(SimpleSwitch13):
         self.logger.debug("send_qsys{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
         if True == result:
-            self._packet_out2(msg, qsys_pkt, dp)
+            self.packet_out(msg, qsys_pkt, dp)
             return
         else:#Drop Packet
             self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
 
-    def _packet_out2(self, dst_eth, pkt, dp):
+    def packet_out(self, dst_eth, pkt, dp, actions=[]):
         self.logger.debug("pkt:{}".format(pkt))
         client = self.cList.get_from_eth(dst_eth)
         #Transport to dst
@@ -471,14 +471,14 @@ class QsysTest(SimpleSwitch13):
             #フラッディング
             out_dpid = None
             out_port = ofproto_v1_3.OFPP_FLOOD
-        actions = None
         for obj in self.datapathes:
             assert isinstance(obj, Dp_obj)
             self.logger.debug("obj.dpid:{}".format(obj.dpid))
             self.logger.debug("out_dpid:{}".format(out_dpid))
+            actions.append(obj.parser.OFPActionDecNwTtl())
             if out_dpid == obj.dpid:
                 datapath = obj.datapath
-                actions = [obj.parser.OFPActionOutput(out_port)]
+                actions.append(obj.parser.OFPActionOutput(out_port))
                 out = obj.parser.OFPPacketOut(
                     datapath=obj.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
                     actions=actions, data=pkt.data)
@@ -486,7 +486,7 @@ class QsysTest(SimpleSwitch13):
                 self.logger.debug("send!:{}".format(pkt))
                 return
         datapath = dp.datapath
-        actions = [dp.parser.OFPActionOutput(out_port, 0)]
+        actions.append(dp.parser.OFPActionOutput(out_port, 0))
         out = dp.parser.OFPPacketOut(
             datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
             actions=actions, data=pkt.data)
