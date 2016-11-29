@@ -447,7 +447,7 @@ class QsysTest(SimpleSwitch13):
             return 
 
     def _packet_out2(self, dst_eth, pkt, dp):
-        self.logger.info("pkt:{}".format(pkt))
+        self.logger.debug("pkt:{}".format(pkt))
         client = self.cList.get_from_eth(dst_eth)
         #Transport to dst
         out_dpid = None
@@ -479,7 +479,7 @@ class QsysTest(SimpleSwitch13):
             datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
             actions=actions, data=pkt.data)
         datapath.send_msg(out)
-        self.logger.info("send!:{}".format(pkt))
+        self.logger.debug("send!:{}".format(pkt))
         return
     
     def update_mac_deny_list(self):
