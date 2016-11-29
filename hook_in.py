@@ -375,7 +375,7 @@ class QsysTest(SimpleSwitch13):
             datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
             actions=actions, data=p.data)
         datapath.send_msg(out)
-        self.logger.info("send!:{}".format(pkt))
+        self.logger.info("send!:{}".format(p))
         return
         #self._packet_out2(src_eth, p, dp)
     def gw_foward_icmp(self):
