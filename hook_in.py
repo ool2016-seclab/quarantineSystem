@@ -94,8 +94,8 @@ class QsysTest(SimpleSwitch13):
     def __init__(self, *args, **kwargs):
         super(QsysTest, self).__init__(*args, **kwargs)
         self.datapathes = []    #[[dp,parser],]
-        self.qsys = Qsys(self.logger,self.cList) #Qsys object
         self.cList = ClientList()
+        self.qsys = Qsys(self.logger, self.cList) #Qsys object
         self.mac_to_port = {}   #{dpid:{addr:in_port}}
         self.mac_to_ipv4 = {}   #{mac:ipv4}
         self.mac_deny_list = {} #{mac:ipv4}到達拒否のClientのリスト
