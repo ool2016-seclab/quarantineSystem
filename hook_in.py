@@ -57,8 +57,8 @@ class SystemActionModei(enum.Enum):
     quarantine = 1
 class GatewayList:
     def __init__(self):
-        g1 = Gateway(eth='00:00:5E:00:53:00',ip_addr='192.168.1.254', mask=24)
-        g2 = Gateway(eth='00:00:5E:00:53:01',ip_addr='192.168.2.254', mask=24)
+        g1 = Gateway(eth='00:00:5e:00:53:00',ip_addr='192.168.1.254', mask=24)
+        g2 = Gateway(eth='00:00:5e:00:53:01',ip_addr='192.168.2.254', mask=24)
         self.list = [g1, g2]
     def get_all(self):
         return self.list
