@@ -468,7 +468,12 @@ class QsysTest(SimpleSwitch13):
                     actions=actions, data=pkt.data)
                 datapath.send_msg(out)
                 return
-        self.logger.warning("packet_out_ERROR:{}".format(pkt))
+        datapath = dp.datapath
+        actions = [dp.parser.OFPActionOutput(out_port)]
+        out = dp.parser.OFPPacketOut(
+            datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
+            actions=actions, data=pkt.data)
+        datapath.send_msg(out)
         return
     
     def update_mac_deny_list(self):
