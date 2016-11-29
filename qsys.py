@@ -53,7 +53,7 @@ class subnetList:
 """
 class ClientList:
     def __init(self, logger):
-        self.cList = []#[Client_object,]
+        self.list = []#[Client_object,]
         self.logger = logger
         hub.spawn(self.check_client_expire())
     def add(self, client):
@@ -62,7 +62,7 @@ class ClientList:
         if self.check_registed_eth(eth):
             self.change(eth, client)
         else:
-            self.cList.append(client)
+            self.list.append(client)
     def check_registed_eth(self, eth):
         for i, c in cList:
             if c.eth == eth:
@@ -72,17 +72,17 @@ class ClientList:
         assert isinstance(client, Client)
         for i, c in cList:
             if c.eth == eth:
-                self.cList[i] = client
+                self.list[i] = client
     def delete(self, eth):
         for i, c in cList:
             if c.eth == eth:
-                pop = self.cList.pop(i)
+                pop = self.list.pop(i)
                 self.logger.debug(pop)
         return
     def get_all(self):
-        return self.cList
+        return self.list
     def get_from_eth(self, eth):
-        for i, c in self.cList:
+        for i, c in self.list:
             if c.eth == eth:
                 return c
         return None
