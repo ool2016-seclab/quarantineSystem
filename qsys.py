@@ -55,7 +55,7 @@ class ClientList:
     def __init__(self, logger):
         self.list = []#[Client_object,]
         self.logger = logger
-        hub.spawn(self.check_client_expire())
+        #hub.spawn(self.check_client_expire())
     def add(self, client):
         assert isinstance(client, Client)
         eth = client.eth
