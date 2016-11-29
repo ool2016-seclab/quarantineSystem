@@ -369,14 +369,14 @@ class QsysTest(SimpleSwitch13):
                                    data=icmp_pkt.data))
         p.serialize()
         datapath = dp.datapath
-        actions = [dp.parser.OFPActionOutput(ofproto_v1_3.OFPP_FLOOD)]
+"""        actions = [dp.parser.OFPActionOutput(ofproto_v1_3.OFPP_FLOOD)]
         out = dp.parser.OFPPacketOut(
             datapath=dp.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=dp.in_port,
             actions=actions, data=p.data)
         datapath.send_msg(out)
         self.logger.info("send!:{}".format(p))
-        return
-        #self._packet_out2(src_eth, p, dp)
+        return"""
+        self._packet_out2(src_eth, p, dp)
     def gw_foward_icmp(self):
         pass
 
