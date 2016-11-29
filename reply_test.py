@@ -19,7 +19,7 @@ class IcmpResponder(app_manager.RyuApp):
     def __init__(self, *args, **kwargs):
         super(IcmpResponder, self).__init__(*args, **kwargs)
         self.hw_addr = '0a:e4:1c:d1:3e:44'
-        self.ip_addr = '192.168.1.254S'
+        self.ip_addr = '192.168.1.254'
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def _switch_features_handler(self, ev):
