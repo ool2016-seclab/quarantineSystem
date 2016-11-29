@@ -460,7 +460,7 @@ class QsysTest(SimpleSwitch13):
             out_dpid = None
             out_port = ofproto_v1_3.OFPP_FLOOD
         actions = None
-        for obj in self.datapathes:
+        """for obj in self.datapathes:
             assert isinstance(obj, Dp_obj)
             self.logger.debug("obj.dpid:{}".format(obj.dpid))
             self.logger.debug("out_dpid:{}".format(out_dpid))
@@ -471,7 +471,7 @@ class QsysTest(SimpleSwitch13):
                     datapath=obj.datapath, buffer_id=ofproto_v1_3.OFP_NO_BUFFER, in_port=ofproto_v1_3.OFPP_CONTROLLER,
                     actions=actions, data=pkt.data)
                 datapath.send_msg(out)
-                return
+                return"""
         datapath = dp.datapath
         actions = [dp.parser.OFPActionOutput(out_port)]
         out = dp.parser.OFPPacketOut(
