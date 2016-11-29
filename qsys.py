@@ -61,6 +61,7 @@ class ClientList:
         assert isinstance(client, Client)
         eth = client.eth
         if self.check_registed_eth(eth):
+            pass
         #    self.change(eth, client)
         else:
             self.list.append(client)
