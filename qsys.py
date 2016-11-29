@@ -52,7 +52,7 @@ class subnetList:
         return nwAddr+'/'+mask
 """
 class ClientList:
-    def __init(self, logger):
+    def __init__(self, logger):
         self.list = []#[Client_object,]
         self.logger = logger
         hub.spawn(self.check_client_expire())
