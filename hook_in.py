@@ -62,13 +62,13 @@ class GatewayList:
     def get_all(self):
         return self.list
     def get_ip_addr(self, eth):
-        for i, v in self.list:
+        for v in self.list:
             assert isinstance(v, Gateway)
             if v.eth == eth:
                 return v.ip_addr
         return None
     def get_eth(self, ip_addr):
-        for i, v in self.list:
+        for v in self.list:
             assert isinstance(v, Gateway)
             if v.ip_addr == ip_addr:
                 return v.eth
