@@ -363,7 +363,7 @@ class QsysTest(SimpleSwitch13):
         p.add_protocol(ETHERNET(ethertype=ether_types.ETH_TYPE_IP,
                                            dst=src_eth,
                                            src=gw_eth))
-        p.add_protocol(IPV4(dst=src_ip, src=gw_ip, flags=2))
+        p.add_protocol(IPV4(dst=src_ip, src=gw_ip))
         p.add_protocol(ICMP(type_=icmp.ICMP_ECHO_REPLY,
                                    code=icmp.ICMP_ECHO_REPLY_CODE,
                                    csum=0,
