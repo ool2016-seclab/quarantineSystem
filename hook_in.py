@@ -381,7 +381,7 @@ class QsysTest(SimpleSwitch13):
         e = pkt.get_protocol(ETHERNET)
         i = IPV4(ipv4_pkt.version, ipv4_pkt.header_length, ipv4_pkt.tos,
                       ipv4_pkt.total_length, ipv4_pkt.identification, ipv4_pkt.flags,
-                      ipv4_pkt.offset, ipv4_pkt.ttl-1, ipv4_pkt,proto, ipv4_pkt.csum,
+                      ipv4_pkt.offset, ipv4_pkt.ttl-1, ipv4_pkt.proto, ipv4_pkt.csum,
                       ipv4_pkt.src, ipv4_pkt.dst)
         ic = pkt.get_protocol(ICMP)
         p = packet.Packet()
