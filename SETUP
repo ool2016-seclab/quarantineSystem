@@ -13,6 +13,19 @@ cd mininet/
 git checkout -b 2.2.1
 cd util
 ./install.sh -nfv
+
+
+#次をdiff.patchとして保存し、patch -u <diff.patch を適用する
+--- /usr/local/bin/mn   2016-11-30 01:44:54.870291610 +0900
++++ /usr/local/bin/mn.bak       2016-11-30 01:43:27.122291610 +0900
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python2
++#!/usr/bin/python
+ # EASY-INSTALL-SCRIPT: 'mininet==2.3.0d1','mn'
+ __requires__ = 'mininet==2.3.0d1'
+ import pkg_resources
+#ここまで
+
 #ryuインストール
 cd ~
 update-alternatives --install /usr/bin/python python /usr/bin/python3 0
@@ -34,9 +47,11 @@ pip3 install ovs>=2.6.0  # OVSDB
 pip3 install tinyrpc
 
 #Qsys
+pip3 install rainbow_logging_handler
+pip3 install -U scikit-learn
 cd ~
 git clone https://github.com/ool2016-seclab/quarantineSystem.git
 cd quarantineSystem/
 git pull origin test_koike #暫定
-ryu-manager hook_in.py
 python2 mn.py
+ryu-manager hook_in.py
