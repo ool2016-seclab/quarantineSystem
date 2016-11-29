@@ -70,11 +70,11 @@ class ClientList:
         return False
     def change(self, eth, client):
         assert isinstance(client, Client)
-        for i, c in cList:
+        for i, c in self.list:
             if c.eth == eth:
                 self.list[i] = client
     def delete(self, eth):
-        for i, c in cList:
+        for i, c in self.list:
             if c.eth == eth:
                 pop = self.list.pop(i)
                 self.logger.debug(pop)
@@ -87,7 +87,7 @@ class ClientList:
                 return c
         return None
     def get_from_ipv4(self, ip_addr):
-        for i, c in cList:
+        for i, c in self.list:
             if c.ip_addr == ip_addr:
                 return c
         return None
