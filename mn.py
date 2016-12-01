@@ -28,13 +28,13 @@ def myNetwork():
     s2 = net.addSwitch('s2', cls=OVSKernelSwitch, dpid='2', protocols='OpenFlow13')
 
     info( '*** Add hosts\n')
-    h1 = net.addHost('h1', cls=Host, ip='192.168.1.1/24', defaultRoute='192.168.1.254')
-    h2 = net.addHost('h2', cls=Host, ip='192.168.1.2/24', defaultRoute='192.168.1.254')
-    h3 = net.addHost('h3', cls=Host, ip='192.168.1.3/24', defaultRoute='192.168.1.254')
+    h1 = net.addHost('h1', cls=Host, ip='192.168.1.1/24', defaultRoute='via 192.168.1.254')
+    h2 = net.addHost('h2', cls=Host, ip='192.168.1.2/24', defaultRoute='via 192.168.1.254')
+    h3 = net.addHost('h3', cls=Host, ip='192.168.1.3/24', defaultRoute='via 192.168.1.254')
     
-    h4 = net.addHost('h4', cls=Host, ip='192.168.1.4/24', defaultRoute='192.168.1.254')
-    h5 = net.addHost('h5', cls=Host, ip='192.168.1.5/24', defaultRoute='192.168.1.254')
-    h6 = net.addHost('h6', cls=Host, ip='192.168.1.6/24', defaultRoute='192.168.1.254')
+    h4 = net.addHost('h4', cls=Host, ip='192.168.1.4/24', defaultRoute='via 192.168.1.254')
+    h5 = net.addHost('h5', cls=Host, ip='192.168.1.5/24', defaultRoute='via 192.168.1.254')
+    h6 = net.addHost('h6', cls=Host, ip='192.168.1.6/24', defaultRoute='via 192.168.1.254')
 
     info( '*** Add links\n')
     net.addLink(s2, h4)
