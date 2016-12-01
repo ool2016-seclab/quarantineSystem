@@ -29,7 +29,7 @@ class NetworkTopo(Topo ):
 
  def build( self, **_opts ):
     info( '*** Add router\n')
-    defaultIP = '192.168.1.254/24'  # IP address for r0-eth1
+    defaultIP = '192.168.3.254/24'  # IP address for r0-eth1
     router = self.addNode( 'r0', cls=LinuxRouter, ip=defaultIP )
     info( '*** Add switches\n')
     s1 = self.addSwitch('s1', cls=OVSKernelSwitch, dpid='1', protocols='OpenFlow13')
@@ -48,13 +48,13 @@ class NetworkTopo(Topo ):
     self.addLink( s1, router, intfName2='r0-eth1',
                 params2={ 'ip' : defaultIP } )  # for clarity
     self.addLink( s2, router, intfName2='r0-eth2',
-                params2={ 'ip' : '192.168.2.254/24' } )
-    net.addLink(h1, s1)
-    net.addLink(h2, s1)
-    net.addLink(h3, s1)
-    net.addLink(s2, h4)
-    net.addLink(s2, h5)
-    net.addLink(s2, h6)
+                params2={ 'ip' : '192.168.4.254/24' } )
+    self.addLink(h1, s1)
+    self.addLink(h2, s1)
+    self.addLink(h3, s1)
+    self.addLink(s2, h4)
+    self.addLink(s2, h5)
+    self.addLink(s2, h6)
 
 
 def run():
