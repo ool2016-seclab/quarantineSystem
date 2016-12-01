@@ -34,7 +34,7 @@ def myNetwork():
                       protocol='tcp',
                       port=6633)
 
-    r0= net.addNode( 'r0', cls=LinuxRouter, ip="192.168.3.254/24" )
+    router = self.addNode( 'r0', cls=LinuxRouter, ip="192.168.3.254/24" )
     
     info( '*** Add switches\n')
     s1 = net.addSwitch('s1', cls=OVSKernelSwitch, dpid='1', protocols='OpenFlow13')
