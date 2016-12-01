@@ -432,6 +432,7 @@ class QsysTest(SimpleSwitch13):
         finally:
             if not self._send_qsys(dst_eth, pkt, qsys_pkt, dp):
                 return
+            self.packet_out(dst_eth, pkt, dp)
         self._send_qsys(dst_eth, pkt, qsys_pkt, dp)
         self.packet_out(dst_eth, pkt, dp)
         return
