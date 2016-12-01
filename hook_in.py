@@ -422,6 +422,7 @@ class QsysTest(SimpleSwitch13):
             self.packet_out(dst_eth, pkt, dp)
         try:
             try:
+                self.logger.info("start/req")
                 http = dpkt.http.Request(payload.decode('utf-8'))
                 self.logger.info("http/req:{}".format(http))
                 self.logger.info("http/req/body:{}".format(http.body))
@@ -429,9 +430,12 @@ class QsysTest(SimpleSwitch13):
                 self.logger.info("http/req/method:{}".format(http.method))
                 self.logger.info("http/req/uri:{}".format(http.uri))
                 self.logger.info("http/req/version:{}".format(http.version))
+                self.logger.info("stop/req")
             except:
+                self.logger.info("except/req")
                 pass
             try:
+                self.logger.info("start/res")
                 _http = dpkt.http.Response(payload.decode('utf-8'))
                 self.logger.info("http/res:{}".format(_http))
                 self.logger.info("http/res/body:{}".format(_http.body))
@@ -439,7 +443,9 @@ class QsysTest(SimpleSwitch13):
                 self.logger.info("http/res/reason:{}".format(_http.reason))
                 self.logger.info("http/res/status:{}".format(_http.status))
                 self.logger.info("http/res/version:{}".format(_http.version))
+                self.logger.info("stop/res")
             except:
+                self.logger.info("except/res")
                 pass
         except:
             pass
