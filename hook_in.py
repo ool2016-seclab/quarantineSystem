@@ -455,8 +455,8 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(pkt, packet.Packet)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-        for k, v in ALGORITHM:
-            if hasattr(kwargs, k):
+        for name in ALGORITHM:
+            if hasattr(kwargs, name):
             #if result == False:
             #    return False
                 self.logger.info('Drop:{}'.format(qsys_pkt))
