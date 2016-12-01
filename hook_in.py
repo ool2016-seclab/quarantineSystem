@@ -420,6 +420,9 @@ class QsysTest(SimpleSwitch13):
             self.packet_out(dst_eth, pkt, dp)
         try:
             http = payload.decode('utf-8')
+            if len(http)>0:
+                qsys_pkt.set_http(http)
+                self.logger.info(http)
         except:
             pass
         finally:
