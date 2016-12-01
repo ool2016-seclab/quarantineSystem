@@ -455,6 +455,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
 
+        self.logger.info("udp")
     def packet_out(self, dst_eth, pkt, dp):
         self.logger.debug("pkt:{}".format(pkt))
         client = self.cList.get_from_eth(dst_eth)
