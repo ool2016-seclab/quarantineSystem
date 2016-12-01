@@ -419,19 +419,11 @@ class QsysTest(SimpleSwitch13):
         if len(payload) <= 0:
             self.packet_out(dst_eth, pkt, dp)
         try:
-            try:
-                http = dpkt.http.Request(payload.decode('utf-8'))
-                self.logger.info("http/req:{}".format(http))
-            except:
-                pass
-            try:
-                _http = dpkt.http.Response(payload.decode('utf-8'))
-                self.logger.info("http/res:{}".format(_http))
-            except:
-                pass
+            http = payload.decode('utf-8')
         except:
             pass
         finally:
+
             if not self._send_qsys(dst_eth, pkt, qsys_pkt, dp):
                 return
             self.packet_out(dst_eth, pkt, dp)
