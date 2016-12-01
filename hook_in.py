@@ -159,7 +159,6 @@ class QsysTest(SimpleSwitch13):
         dpid = dp.dpid
         in_port = dp.in_port#スイッチのポート
         qsys_pkt = QsysDataStruct(self.logger)
-        self.logger.info("msg.reason:{}".format(msg.reason))
         #パケットのヘッダ情報を取得
         try:
             pkt = packet.Packet(msg.data)
