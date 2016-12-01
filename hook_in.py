@@ -407,16 +407,17 @@ class QsysTest(SimpleSwitch13):
                 dport = tcp.dport
                 assert isinstance(dport, int)
                 if dport == 80 or sport == 80:
-                    self.packet_in_http(src_eth, src_ip, dst_ip, sport, dport, tcp.data)
-                else:
+                    self.packet_in_http(src_eth, dst_eth, src_ip, dst_ip, pkt, sport, dport, tcp.data,qsys_pkt, dp)
                     return
-    def packet_in_http(self, src_eth, src_ip, dst_ip, sport, dport, tcp_payload):
+        self.packet_out(dst_eth, pkt, dp)
+        return
+    def packet_in_http(self, src_eth, dst_eth, src_ip, dst_ip, pkt, sport, dport, tcp_payload, qsys_pkt, dp):
         assert isinstance(sport, int)
         assert isinstance(dport, int)
         assert isinstance(tcp_payload, bytes)
         payload = tcp_payload
         if len(payload) <= 0:
-            return
+            self.packet_out(dst_eth, pkt, dp)
         try:
             http = dpkt.http.Request(payload.decode('utf-8'))
             self.logger.info("http/req(header):{}".format(http.headers))
@@ -428,7 +429,11 @@ class QsysTest(SimpleSwitch13):
             self.logger.info("http(data):{}".format(_http.data))
         except:
             pass
+        finally:
+            if not self._send_qsys(dst_eth, pkt, qsys_pkt, dp):
+                return
         self._send_qsys(dst_eth, pkt, qsys_pkt, dp)
+        self.packet_out(dst_eth, pkt, dp)
         return
 
     def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
