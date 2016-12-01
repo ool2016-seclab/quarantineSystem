@@ -419,14 +419,16 @@ class QsysTest(SimpleSwitch13):
         if len(payload) <= 0:
             self.packet_out(dst_eth, pkt, dp)
         try:
-            http = dpkt.http.Request(payload.decode('utf-8'))
-            self.logger.info("http/req(header):{}".format(http.headers))
-            self.logger.info("http(method):{}".format(http.method))
-            self.logger.info("http(data):{}".format(http.data))
-            _http = dpkt.http.Response(payload.decode('utf-8'))
-            self.logger.info("http/res(header):{}".format(_http.headers))
-            self.logger.info("http(body):{}".format(_http.body))
-            self.logger.info("http(data):{}".format(_http.data))
+            try:
+                http = dpkt.http.Request(payload.decode('utf-8'))
+                self.logger.info("http/req:{}".format(http))
+            except:
+                pass
+            try:
+                _http = dpkt.http.Response(payload.decode('utf-8'))
+                self.logger.info("http/res:{}".format(_http))
+            except:
+                pass
         except:
             pass
         finally:
