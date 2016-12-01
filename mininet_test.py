@@ -75,12 +75,12 @@ def run():
     info( '*** Starting network\n')
     
     info( '*** Starting controllers\n')
-    for controller in net.controllers:
-        controller.start()
+   # for controller in net.controllers:
+   #     controller.start()
 
     info( '*** Starting switches\n')
-    net.get('s1').start([c0])
-    net.get('s2').start([c0])
+    #net.get('s1').start([c0])
+    #net.get('s2').start([c0])
 
     net.start()
     info( '*** Routing Table on Router:\n' )
