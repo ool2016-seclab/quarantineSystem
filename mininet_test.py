@@ -28,12 +28,6 @@ class LinuxRouter( Node ):
 class NetworkTopo(Topo ):
 
  def build( self, **_opts ):
-    info( '*** Adding controller\n' )
-    c0= self.addController(name='c0',
-                      controller=RemoteController,
-                      ip='127.0.0.1',
-                      protocol='tcp',
-                      port=6633)
     info( '*** Add router\n')
     defaultIP = '192.168.1.254/24'  # IP address for r0-eth1
     router = self.addNode( 'r0', cls=LinuxRouter, ip=defaultIP )
@@ -42,13 +36,13 @@ class NetworkTopo(Topo ):
     s2 = self.addSwitch('s2', cls=OVSKernelSwitch, dpid='2', protocols='OpenFlow13')
 
     info( '*** Add hosts\n')
-    h1 = net.addHost('h1', cls=Host, ip='192.168.3.1/24', defaultRoute='via 192.168.3.254')
-    h2 = net.addHost('h2', cls=Host, ip='192.168.3.2/24', defaultRoute='via 192.168.3.254')
-    h3 = net.addHost('h3', cls=Host, ip='192.168.3.3/24', defaultRoute='via 192.168.3.254')
+    h1 = self.addHost('h1', cls=Host, ip='192.168.3.1/24', defaultRoute='via 192.168.3.254')
+    h2 = self.addHost('h2', cls=Host, ip='192.168.3.2/24', defaultRoute='via 192.168.3.254')
+    h3 = self.addHost('h3', cls=Host, ip='192.168.3.3/24', defaultRoute='via 192.168.3.254')
     
-    h4 = net.addHost('h4', cls=Host, ip='192.168.4.4/24', defaultRoute='via 192.168.4.254')
-    h5 = net.addHost('h5', cls=Host, ip='192.168.4.5/24', defaultRoute='via 192.168.4.254')
-    h6 = net.addHost('h6', cls=Host, ip='192.168.4.6/24', defaultRoute='via 192.168.4.254')
+    h4 = self.addHost('h4', cls=Host, ip='192.168.4.4/24', defaultRoute='via 192.168.4.254')
+    h5 = self.addHost('h5', cls=Host, ip='192.168.4.5/24', defaultRoute='via 192.168.4.254')
+    h6 = self.addHost('h6', cls=Host, ip='192.168.4.6/24', defaultRoute='via 192.168.4.254')
 
     info( '*** Add links\n')
     self.addLink( s1, router, intfName2='r0-eth1',
@@ -67,6 +61,13 @@ def run():
     "Test linux router"
     topo = NetworkTopo()
     net = Mininet( topo=topo )  # controller is used by s1-s3
+    info( '*** Adding controller\n' )
+    c0= net.addController(name='c0',
+                      controller=RemoteController,
+                      ip='127.0.0.1',
+                      protocol='tcp',
+                      port=6633)
+
     info( '*** Starting network\n')
     
     info( '*** Starting controllers\n')
