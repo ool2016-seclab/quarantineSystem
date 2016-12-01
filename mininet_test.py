@@ -60,14 +60,19 @@ class NetworkTopo(Topo ):
 def run():
     "Test linux router"
     topo = NetworkTopo()
-    net = Mininet( topo=topo )  # controller is used by s1-s3
-    info( '*** Adding controller\n' )
-    c0= net.addController(name='c0',
+    c = Controller(name='c0',
                       controller=RemoteController,
                       ip='127.0.0.1',
                       protocol='tcp',
                       port=6633)
-
+    net = Mininet( topo=topo , controller=c)  # controller is used by s1-s3
+    info( '*** Adding controller\n' )
+    """c0= net.addController(name='c0',
+                      controller=RemoteController,
+                      ip='127.0.0.1',
+                      protocol='tcp',
+                      port=6633)
+    """
     info( '*** Starting network\n')
     
     info( '*** Starting controllers\n')
