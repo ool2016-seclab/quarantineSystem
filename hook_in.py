@@ -422,11 +422,21 @@ class QsysTest(SimpleSwitch13):
             try:
                 http = dpkt.http.Request(payload.decode('utf-8'))
                 self.logger.info("http/req:{}".format(http))
+                self.logger.info("http/req/body:{}".format(http.body))
+                self.logger.info("http/req/headers:{}".format(http.headers))
+                self.logger.info("http/req/method:{}".format(http.method))
+                self.logger.info("http/req/uri:{}".format(http.uri))
+                self.logger.info("http/req/version:{}".format(http.version))
             except:
                 pass
             try:
                 _http = dpkt.http.Response(payload.decode('utf-8'))
-                self.logger.info("http/res:{}".format(_http.body))
+                self.logger.info("http/res:{}".format(_http))
+                self.logger.info("http/res/body:{}".format(_http.body))
+                self.logger.info("http/res/data:{}".format(_http.data))
+                self.logger.info("http/res/reason:{}".format(_http.reason))
+                self.logger.info("http/res/status:{}".format(_http.status))
+                self.logger.info("http/res/version:{}".format(_http.version))
             except:
                 pass
         except:
