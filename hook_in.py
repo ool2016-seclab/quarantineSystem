@@ -421,12 +421,12 @@ class QsysTest(SimpleSwitch13):
         try:
             try:
                 http = dpkt.http.Request(payload.decode('utf-8'))
-                self.logger.info("http/req:{}".format(http.data))
+                self.logger.info("http/req:{}".format(http))
             except:
                 pass
             try:
                 _http = dpkt.http.Response(payload.decode('utf-8'))
-                self.logger.info("http/res:{}".format(_http.data))
+                self.logger.info("http/res:{}".format(_http.body))
             except:
                 pass
         except:
