@@ -317,7 +317,6 @@ class QsysTest(SimpleSwitch13):
             return
         
         elif udp_pkt:
-            self.logger.info("udpP")
             assert isinstance(udp_pkt, UDP)
             self._packet_in_udp(src_eth, dst_eth, src_ip, dst_ip, pkt, udp_pkt, qsys_pkt, dp)
             return
@@ -446,17 +445,24 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(udp_pkt, UDP)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-    def send_qsys(self, msg, qsys_pkt,  dp):
-        self.logger.debug("send_qsys{}".format(qsys_pkt))
-        result = self.qsys.send(qsys_pkt)
-        if True == result:
-            self.packet_out(msg, qsys_pkt, dp)
-            return
-        else:#Drop Packet
-            self.logger.info('Drop:{}'.format(qsys_pkt))
-            return 
-
-        self.logger.info("udp")
+        self.logger.warning("udp")
+        #result = self._send_qsys(dst_eth, pkt, qsys_pkt, dp)
+        #if result == False:
+        #    return
+        self.packet_out(dst_eth, pkt, dp)
+        return
+    def _send_qsys(self,dst_eth, pkt, qsys_pkt, dp, **kwargs):
+        assert isinstance(dst_eth, str)
+        assert isinstance(pkt, packet.Packet)
+        assert isinstance(qsys_pkt, QsysDataStruct)
+        assert isinstance(dp, Dp_obj)
+        for k, v in ALGORITHM:
+            if hasattr(kwargs, k):
+            #if result == False:
+            #    return False
+                self.logger.info('Drop:{}'.format(qsys_pkt))
+                pass
+        return True
     def packet_out(self, dst_eth, pkt, dp):
         self.logger.debug("pkt:{}".format(pkt))
         client = self.cList.get_from_eth(dst_eth)
