@@ -318,7 +318,7 @@ class QsysTest(SimpleSwitch13):
         
         elif udp_pkt:
             assert isinstance(udp_pkt, UDP)
-            #self.packet_in_udp()
+            self._packet_in_udp(src_eth, dst_eth, src_ip, dst_ip, pkt, udp_pkt, qsys_pkt, dp)
             return
         else:
             self.logger.warning("L3 Others:{}".format(pkt))
@@ -436,21 +436,18 @@ class QsysTest(SimpleSwitch13):
         self.packet_out(dst_eth, pkt, dp)
         return
 
-    def _packet_in_udp(self, msg, pkt, qsys_pkt, dp, udp):
-        self.send_qsys(msg, qsys_pkt, dp)
-        pass
-    def _send_qsys(self,dst_eth, pkt, qsys_pkt, dp):
+    def _packet_in_udp(self, src_eth, dst_eth, src_ip, dst_ip, pkt, udp_pkt, qsys_pkt, dp):
+        assert isinstance(src_eth, str)
         assert isinstance(dst_eth, str)
+        assert isinstance(src_ip, str)
+        assert isinstance(dst_ip, str)
         assert isinstance(pkt, packet.Packet)
+        assert isinstance(udp_pkt, UDP)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-        result = self.qsys.send(qsys_pkt)
-        if True == result:
-            self.packet_out(dst_eth, pkt, dp)
+        result = self._send_qsys(dst_eth, pkt, qsys_pkt, dp)
+        if result == False:
             return
-        else:#Drop Packet
-            self.logger.info('Drop:{}'.format(qsys_pkt))
-            return 
     def send_qsys(self, msg, qsys_pkt,  dp):
         self.logger.debug("send_qsys{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
