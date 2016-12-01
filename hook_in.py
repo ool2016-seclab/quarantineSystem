@@ -306,8 +306,6 @@ class QsysTest(SimpleSwitch13):
         icmp_pkt = pkt.get_protocol(ICMP)
         tcp_pkt = pkt.get_protocol(TCP)
         udp_pkt = pkt.get_protocol(UDP)
-        self.logger.info("pkt:{}".format(pkt))
-        #self.logger.info("udp:{}".format(udp_pkt))
         if icmp_pkt:
             assert isinstance(icmp_pkt, ICMP)
             ttl = ipv4_pkt.ttl
@@ -319,6 +317,7 @@ class QsysTest(SimpleSwitch13):
             return
         
         elif udp_pkt:
+            self.logger.info("udpP")
             assert isinstance(udp_pkt, UDP)
             self._packet_in_udp(src_eth, dst_eth, src_ip, dst_ip, pkt, udp_pkt, qsys_pkt, dp)
             return
