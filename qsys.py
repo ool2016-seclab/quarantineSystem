@@ -81,11 +81,11 @@ class ClientList:
         for i, c in enumerate(self.list):
             assert isinstance(c, Client)
             if c.get_eth() == client.get_eth():
-                if ip_addr and mask:
+                if client.get_ip() and client.get_mask():
                     c.set_ip_addr(client.ip_addr, client.mask, client.default_route)
-                elif default_route:
-                    c.set_default_route(client.default_route)
-                elif dpif and port:
+                elif client.get_default_route():
+                    c.set_default_route(client.get_default_route())
+                elif client.get_dpid() and client.get_port():
                     c.set_dpid(client.dpid, client.port)
                 else:
                     pass
@@ -166,6 +166,12 @@ class Client:
         return self.mask
     def get_nw_addr(self):
         return self.nw_addr
+    def get_default_route(self):
+        return self.default_route
+    def get_dpid(self):
+        return self.dpid
+    def get_port(self):
+        return self.port
     def get_level(self):
         return self.level
     def get_eval(self):
