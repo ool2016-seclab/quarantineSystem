@@ -15,6 +15,9 @@ https://github.com/kbandla/dpkt.g
 本プロジェクト内にはnetaddrを使用しています
 https://pypi.python.org/pypi/netaddr#downloads
 netaddr-0.7.18
+本プロジェクト内にはrainbow_logging_handler を使用しています
+https://pypi.python.org/pypi/rainbow_logging_handler
+ainbow_logging_handler 2.2.2
 本プロジェクト内にはscikit-learnを使用しています
 https://pypi.python.org/pypi/scikit-learn/0.18.1
 scikit-learn 0.18.1
