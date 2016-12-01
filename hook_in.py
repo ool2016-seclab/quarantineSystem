@@ -407,6 +407,7 @@ class QsysTest(SimpleSwitch13):
                 dport = tcp.dport
                 assert isinstance(dport, int)
                 if dport == 80 or sport == 80:
+                    self.logger.info(tcp_pkt)
                     self.packet_in_http(src_eth, dst_eth, src_ip, dst_ip, pkt, sport, dport, tcp.data,qsys_pkt, dp)
                     return
         self.packet_out(dst_eth, pkt, dp)
