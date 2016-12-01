@@ -34,6 +34,10 @@ ARP = arp.arp
 ICMP = icmp.icmp
 TCP = tcp.tcp
 UDP = udp.udp
+ALGORITHM = {
+    "payload_aggregates":None,
+    "destination_aggregates":None
+    }
 """
 class subnetList:
     def __init__(self, **kwargs):
