@@ -82,7 +82,7 @@ class ClientList:
             assert isinstance(c, Client)
             if c.get_eth() == client.get_eth():
                 if client.get_ip() and client.get_mask():
-                    c.set_ip_addr(client.get_ip(), client.get_mask, client.get_default_route())
+                    c.set_ip_addr(client.get_ip(), client.get_mask(), client.get_default_route())
                 elif client.get_default_route():
                     c.set_default_route(client.get_default_route())
                 elif client.get_dpid() and client.get_port():
