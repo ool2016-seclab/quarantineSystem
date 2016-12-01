@@ -147,7 +147,7 @@ class QsysTest(SimpleSwitch13):
         default_route=str(IPNetwork(ipv4+'/'+str(mask))[254])#.254で決め打ち
         if self.cList.get_from_eth(eth):
             c = Client(eth=eth, ip_addr=ipv4, mask=mask,default_route=default_route)
-            self.cList.add(c)
+            self.cList.change(c)
         else:
             self.logger.warning("client_regist_ipv4 ERROR. eth NOT registed?")
     #Packet_inのハンドラが呼ばれる

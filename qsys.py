@@ -76,12 +76,21 @@ class ClientList:
             if c.eth == eth:
                 return True
         return False
-    def change(self, eth, client):
+    def change(client):
         assert isinstance(client, Client)
-        self.logger.info("client data changed")
         for i, c in enumerate(self.list):
-            if c.eth == eth:
-                self.list[i] = client
+            assert isinstance(c, Client)
+            if c.get_eth() == client.get_eth():
+                if ip_addr and mask:
+                    c.set_ip_addr(client.ip_addr, client.mask, client.default_route)
+                elif default_route:
+                    c.set_default_route(client.default_route)
+                elif dpif and port:
+                    c.set_dpid(client.dpid, client.port)
+                else:
+                    pass
+                return
+        self.logger.info("client data changed")
     def delete(self, eth):
         for i, c in enumerate(self.list):
             if c.eth == eth:
