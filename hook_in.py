@@ -457,7 +457,7 @@ class QsysTest(SimpleSwitch13):
             self.logger.info('Drop:{}'.format(qsys_pkt))
             return 
 
-    def packet_out(self, dst_eth, pkt, dp, actions=[]):
+    def packet_out(self, dst_eth, pkt, dp):
         self.logger.debug("pkt:{}".format(pkt))
         client = self.cList.get_from_eth(dst_eth)
         #Transport to dst
@@ -471,6 +471,7 @@ class QsysTest(SimpleSwitch13):
             #フラッディング
             out_dpid = None
             out_port = ofproto_v1_3.OFPP_FLOOD
+        actions = []
         for obj in self.datapathes:
             assert isinstance(obj, Dp_obj)
             self.logger.debug("obj.dpid:{}".format(obj.dpid))
