@@ -475,7 +475,7 @@ class QsysTest(SimpleSwitch13):
             assert isinstance(obj, Dp_obj)
             self.logger.debug("obj.dpid:{}".format(obj.dpid))
             self.logger.debug("out_dpid:{}".format(out_dpid))
-            actions.append(obj.parser.OFPActionDecNwTtl())
+            #actions.append(obj.parser.OFPActionDecNwTtl())
             if out_dpid == obj.dpid:
                 datapath = obj.datapath
                 actions.append(obj.parser.OFPActionOutput(out_port))
