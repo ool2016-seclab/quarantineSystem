@@ -161,7 +161,7 @@ class Client:
     def get_eth(self):
         return self.eth
     def get_ip(self):
-        return self.ip_addr
+        return str(self.ip_addr)
     def get_mask(self):
         return self.mask
     def get_nw_addr(self):
