@@ -148,7 +148,7 @@ class Client:
     def touch(self):
         self.lastUpdate = time.time()
     def __str__(self):
-        return [self.eth, self.nw_addr, self.ip_addr, self.mask, self.default_route, self.level]
+        return str([self.eth, self.nw_addr, self.ip_addr, self.mask, self.default_route, self.level])
     def get_eth(self):
         return self.eth
     def get_ip(self):
