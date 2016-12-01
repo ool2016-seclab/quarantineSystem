@@ -167,7 +167,7 @@ class Client:
     def get_nw_addr(self):
         return self.nw_addr
     def get_default_route(self):
-        return self.default_route
+        return str(self.default_route)
     def get_dpid(self):
         return self.dpid
     def get_port(self):
