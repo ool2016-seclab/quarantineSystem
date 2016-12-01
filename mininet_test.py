@@ -60,8 +60,7 @@ class NetworkTopo(Topo ):
 def run():
     "Test linux router"
     topo = NetworkTopo()
-    c0 = Controller(name='c0',
-                      controller=RemoteController,
+    c0 = RemoteController(name='c0',
                       ip='127.0.0.1',
                       protocol='tcp',
                       port=6633)
