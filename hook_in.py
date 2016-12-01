@@ -445,9 +445,6 @@ class QsysTest(SimpleSwitch13):
         assert isinstance(udp_pkt, UDP)
         assert isinstance(qsys_pkt, QsysDataStruct)
         assert isinstance(dp, Dp_obj)
-        result = self._send_qsys(dst_eth, pkt, qsys_pkt, dp)
-        if result == False:
-            return
     def send_qsys(self, msg, qsys_pkt,  dp):
         self.logger.debug("send_qsys{}".format(qsys_pkt))
         result = self.qsys.send(qsys_pkt)
