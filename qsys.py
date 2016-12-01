@@ -76,7 +76,7 @@ class ClientList:
             if c.eth == eth:
                 return True
         return False
-    def change(client):
+    def change(self, client):
         assert isinstance(client, Client)
         for i, c in enumerate(self.list):
             assert isinstance(c, Client)
