@@ -313,7 +313,7 @@ class QsysTest(SimpleSwitch13):
             return
         elif tcp_pkt:
             assert isinstance(tcp_pkt, TCP)
-            #self._packet_in_tcp()
+            self.packet_in_tcp(src_eth, dst_eth, src_ip, dst_ip, pkt, tcp_pkt, qsys_pkt, dp)
             return
         
         elif udp_pkt:
