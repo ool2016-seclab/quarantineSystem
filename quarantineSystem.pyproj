@@ -185,6 +185,7 @@
     <Compile Include="mininet\topolib.py" />
     <Compile Include="mininet\util.py" />
     <Compile Include="mininet\__init__.py" />
+    <Compile Include="mn_rt.py" />
     <Compile Include="mn.py" />
     <Compile Include="netaddr\compat.py" />
     <Compile Include="netaddr\core.py" />
