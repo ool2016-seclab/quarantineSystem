@@ -3,26 +3,27 @@
 #準備
 cd ~
 sudo -s
+apt-get update
 apt-get -y install git
 #Mininetインストール
 python -V
 #Python 2.7.x
-apt-get install python-setuptools
+apt-get -y install python-pip python-setuptools
+pip2 install --upgrade pip
 git clone git://github.com/mininet/mininet
 cd mininet/
-git checkout -b 2.2.1
+git checkout --force tags/2.2.1
 cd util
 ./install.sh -nfv
 
-
-#次をdiff.patchとして保存し、patch -u <diff.patch を適用する
---- /usr/local/bin/mn   2016-11-30 01:44:54.870291610 +0900
-+++ /usr/local/bin/mn.bak       2016-11-30 01:43:27.122291610 +0900
+#次をdiff.patchとして保存し、patch -u /usr/local/bin/mn diff.patch を適用する
+--- .b  2016-12-02 13:52:24.832011000 +0900
++++ mn  2016-12-02 13:52:40.984011000 +0900
 @@ -1,4 +1,4 @@
--#!/usr/bin/python2
-+#!/usr/bin/python
- # EASY-INSTALL-SCRIPT: 'mininet==2.3.0d1','mn'
- __requires__ = 'mininet==2.3.0d1'
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # EASY-INSTALL-SCRIPT: 'mininet==2.2.1','mn'
+ __requires__ = 'mininet==2.2.1'
  import pkg_resources
 #ここまで
 
@@ -32,9 +33,12 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3 0
 python -V
 #Python 3.x.x
 apt-get -y install python3-setuptools python3-pip
+pip install --upgrade pip
 git clone https://github.com/osrg/ryu.git
 cd ryu/
-git checkout -b v4.7
+git checkout --force v4.7
+python setup.py --version
+#4.7
 python setup.py install
 pip3 install eventlet>=0.15
 pip3 install msgpack-python>=0.3.0  # RPC library, BGP speaker(net_cntl)
@@ -47,8 +51,9 @@ pip3 install ovs>=2.6.0  # OVSDB
 pip3 install tinyrpc
 
 #Qsys
+apt-get install nmap traceroute
 pip3 install rainbow_logging_handler
-pip3 install -U scikit-learn
+pip3 install scikit-learn
 cd ~
 git clone https://github.com/ool2016-seclab/quarantineSystem.git
 cd quarantineSystem/
